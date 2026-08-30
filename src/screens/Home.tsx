@@ -18,7 +18,7 @@ export function Home() {
     <div className="flex-1 flex flex-col items-center px-4 py-8 max-w-2xl mx-auto w-full min-h-screen">
       <header className="w-full flex justify-between items-center mb-12">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-neutral-100">Calm Motion</h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-neutral-100">Panic Attack Club</h1>
           <p className="text-sm text-neutral-500 mt-1">Дыхание. Фокус. Движение.</p>
         </div>
         <div className="flex gap-4">
@@ -59,7 +59,7 @@ export function Home() {
             </div>
             <div>
               <h3 className="text-2xl font-medium text-neutral-100">Пройти курс</h3>
-              <p className="text-base text-neutral-500 mt-2">День {courseProgress.currentDay} из 10</p>
+              <p className="text-base text-neutral-500 mt-2">День {courseProgress.currentDay} из 14</p>
             </div>
           </div>
         </button>

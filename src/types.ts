@@ -49,6 +49,8 @@ export interface AppSettings {
 export interface CourseProgress {
   currentDay: number;
   completedDays: number[];
+  completedFocusDays?: number[];
+  lastCompletedDate?: string;
 }
 
 export interface AppState {

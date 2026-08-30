@@ -31,6 +31,7 @@ const initialState: AppState = {
   courseProgress: {
     currentDay: 1,
     completedDays: [],
+    completedFocusDays: [],
   },
 };
 
@@ -40,6 +41,8 @@ interface AppContextType extends AppState {
   addSession: (session: PracticeSession) => void;
   clearHistory: () => void;
   markCourseDayCompleted: (day: number) => void;
+  toggleCourseFocusDay: (day: number) => void;
+  skipWaitTime: () => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -95,8 +98,24 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setState((prev) => ({
       ...prev,
       sessions: [],
-      courseProgress: { currentDay: 1, completedDays: [] },
+      courseProgress: { currentDay: 1, completedDays: [], completedFocusDays: [] },
     }));
+  };
+
+  const toggleCourseFocusDay = (day: number) => {
+    setState((prev) => {
+      const focusDays = prev.courseProgress.completedFocusDays || [];
+      const newFocusDays = focusDays.includes(day)
+        ? focusDays.filter((d) => d !== day)
+        : [...focusDays, day];
+      return {
+        ...prev,
+        courseProgress: {
+          ...prev.courseProgress,
+          completedFocusDays: newFocusDays,
+        },
+      };
+    });
   };
 
   const markCourseDayCompleted = (day: number) => {
@@ -108,7 +127,23 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         courseProgress: {
           ...prev.courseProgress,
           completedDays: newCompleted,
-          currentDay: nextDay > 10 ? 10 : nextDay,
+          currentDay: nextDay > 14 ? 14 : nextDay,
+          lastCompletedDate: new Date().toISOString(),
+        },
+      };
+    });
+  };
+
+  const skipWaitTime = () => {
+    setState((prev) => {
+      // Set lastCompletedDate to yesterday to simulate a day passing
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      return {
+        ...prev,
+        courseProgress: {
+          ...prev.courseProgress,
+          lastCompletedDate: yesterday.toISOString(),
         },
       };
     });
@@ -123,6 +158,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         addSession,
         clearHistory,
         markCourseDayCompleted,
+        toggleCourseFocusDay,
+        skipWaitTime,
       }}
     >
       {children}

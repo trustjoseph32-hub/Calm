@@ -334,23 +334,28 @@ export function PracticeEngine() {
 function PracticeCanvas({ type, isActive, settings }: { type: string, isActive: boolean, settings: any }) {
   const [phase, setPhase] = useState<'in' | 'out'>('in');
   
+  const isSynchronized = type === 'synchronized';
+  const showBreathing = type === 'breathing' || type === 'combined' || type === 'course' || isSynchronized;
+  const showBilateral = type === 'bilateral' || type === 'combined' || type === 'course' || isSynchronized;
+
+  const currentDurationIn = isSynchronized ? (settings.syncInhaleDuration || settings.breathingIn) : settings.breathingIn;
+  const currentDurationOut = isSynchronized ? (settings.syncExhaleDuration || settings.breathingOut) : settings.breathingOut;
+  const phaseDuration = phase === 'in' ? currentDurationIn : currentDurationOut;
+
   // Breathing cycle
   useEffect(() => {
-    if (!isActive || (type !== 'breathing' && type !== 'combined' && type !== 'course')) return;
+    if (!isActive || !showBreathing) return;
     
     let timer: number;
     const cycle = () => {
       setPhase(p => p === 'in' ? 'out' : 'in');
     };
-
-    const duration = settings.breathingIn * 1000;
+    
+    const duration = (phase === 'in' ? currentDurationIn : currentDurationOut) * 1000;
     timer = window.setTimeout(cycle, duration);
     
     return () => clearTimeout(timer);
-  }, [isActive, phase, type, settings.breathingIn, settings.breathingOut]);
-
-  const showBreathing = type === 'breathing' || type === 'combined' || type === 'course';
-  const showBilateral = type === 'bilateral' || type === 'combined' || type === 'course';
+  }, [isActive, phase, showBreathing, currentDurationIn, currentDurationOut]);
 
   // Bilateral settings translation
   const getSpeedSeconds = () => {
@@ -380,7 +385,7 @@ function PracticeCanvas({ type, isActive, settings }: { type: string, isActive: 
             opacity: phase === 'in' ? 0.7 : 0.2,
           }}
           transition={{
-            duration: settings.breathingIn,
+            duration: phaseDuration,
             ease: "easeInOut"
           }}
           className="absolute w-[80vw] h-[80vw] max-w-[600px] max-h-[600px] rounded-full bg-white blur-2xl sm:blur-3xl mix-blend-screen"
@@ -414,13 +419,13 @@ function PracticeCanvas({ type, isActive, settings }: { type: string, isActive: 
           /* Reduced Motion: fading sides */
           <div className="absolute inset-0 flex justify-between">
             <motion.div 
-              animate={{ opacity: isActive ? [0.1, 0.4, 0.1] : 0.1 }}
-              transition={{ duration: getSpeedSeconds() * 2, repeat: Infinity, ease: "easeInOut" }}
+              animate={{ opacity: isActive ? (isSynchronized ? (phase === 'in' ? 0.4 : 0.1) : [0.1, 0.4, 0.1]) : 0.1 }}
+              transition={isSynchronized ? { duration: phaseDuration, ease: "easeInOut" } : { duration: getSpeedSeconds() * 2, repeat: Infinity, ease: "easeInOut" }}
               className="w-1/3 h-full bg-gradient-to-r from-white/20 to-transparent blur-2xl"
             />
             <motion.div 
-              animate={{ opacity: isActive ? [0.1, 0.1, 0.4, 0.1] : 0.1 }}
-              transition={{ duration: getSpeedSeconds() * 2, repeat: Infinity, ease: "easeInOut" }}
+              animate={{ opacity: isActive ? (isSynchronized ? (phase === 'out' ? 0.4 : 0.1) : [0.1, 0.1, 0.4, 0.1]) : 0.1 }}
+              transition={isSynchronized ? { duration: phaseDuration, ease: "easeInOut" } : { duration: getSpeedSeconds() * 2, repeat: Infinity, ease: "easeInOut" }}
               className="w-1/3 h-full bg-gradient-to-l from-white/20 to-transparent blur-2xl"
             />
           </div>
@@ -428,14 +433,17 @@ function PracticeCanvas({ type, isActive, settings }: { type: string, isActive: 
           /* Normal Motion: moving orb */
           <motion.div
             className="absolute w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-white shadow-[0_0_30px_10px_rgba(255,255,255,0.4)]"
+            initial={{ x: isSynchronized ? `-${parseInt(getAmplitudeWidth())/2}vw` : 0 }}
             animate={isActive ? {
-              x: [`-${parseInt(getAmplitudeWidth())/2}vw`, `${parseInt(getAmplitudeWidth())/2}vw`, `-${parseInt(getAmplitudeWidth())/2}vw`]
+              x: isSynchronized 
+                ? (phase === 'in' ? `${parseInt(getAmplitudeWidth())/2}vw` : `-${parseInt(getAmplitudeWidth())/2}vw`)
+                : [`-${parseInt(getAmplitudeWidth())/2}vw`, `${parseInt(getAmplitudeWidth())/2}vw`, `-${parseInt(getAmplitudeWidth())/2}vw`]
             } : { x: 0 }}
-            transition={isActive ? {
-              duration: getSpeedSeconds() * 2,
-              repeat: Infinity,
-              ease: "easeInOut"
-            } : { duration: 0.5 }}
+            transition={isActive ? (
+              isSynchronized 
+                ? { duration: phaseDuration, ease: "easeInOut" }
+                : { duration: getSpeedSeconds() * 2, repeat: Infinity, ease: "easeInOut" }
+            ) : { duration: 0.5 }}
           />
         )
       )}
