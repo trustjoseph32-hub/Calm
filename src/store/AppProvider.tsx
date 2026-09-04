@@ -33,6 +33,7 @@ const initialState: AppState = {
     completedDays: [],
     completedFocusDays: [],
   },
+  checkins: [],
 };
 
 interface AppContextType extends AppState {
@@ -43,6 +44,7 @@ interface AppContextType extends AppState {
   markCourseDayCompleted: (day: number) => void;
   toggleCourseFocusDay: (day: number) => void;
   skipWaitTime: () => void;
+  saveCheckin: (checkin: import('../types').DailyCheckin) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -149,6 +151,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
+  const saveCheckin = (checkin: import('../types').DailyCheckin) => {
+    setState((prev) => ({
+      ...prev,
+      checkins: [...(prev.checkins || []), checkin],
+    }));
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -160,6 +169,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         markCourseDayCompleted,
         toggleCourseFocusDay,
         skipWaitTime,
+        saveCheckin,
       }}
     >
       {children}

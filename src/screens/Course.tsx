@@ -1,19 +1,27 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Play, CheckCircle2, Lock } from 'lucide-react';
+import { ArrowLeft, Play, Moon, CheckCircle2, Lock, Activity, Mic, Eye, Headphones, Anchor, Smile, Octagon, Droplets, Coffee, BriefcaseMedical, PhoneOff, Pause, Circle, ShieldCheck, Search } from "lucide-react";
 import { useAppStore } from '../store/AppProvider';
+import { AudioPlayer } from '../components/AudioPlayer';
 
 const courseData = [
-  { 
-    day: 1, 
-    title: 'Заметить состояние', 
-    duration: '3 мин', 
-    session: '1. Наблюдайте за движущимся шариком, позволяя мыслям приходить и уходить.\n2. Раз в минуту делайте "двойной вдох" (два коротких вдоха носом) и один длинный выдох ртом.\n3. В остальное время дышите в своем естественном ритме.', 
-    focus: 'Три раза за сегодняшний день мысленно спросите себя:\n\n• «На сколько баллов от 0 до 10 я сейчас напряжен?»\n• Просто назовите цифру.\n• Не пытайтесь ничего изменить или расслабиться.', 
-    explanation: 'Сессия дает мозгу передышку (двойной вдох сбрасывает CO2), а шкала тревоги учит не убегать от страха, а легализовать его.' 
+  {
+    day: 1,
+    title: 'Стартовая точка.',
+    duration: '5 мин',
+    content: '1. Честно оцените свое состояние по 4 базовым критериям (Тревожность, Физическое напряжение, Эмоциональный фон, Мысли), чтобы мы могли отслеживать прогресс. Для этого нажмите кнопку Оценка состояния.\n\n2. Пройдите пробную сессию для того чтобы понять принцип работы этого упражнения. Все подсказки будут на экране во время упражнения.\nЧтобы начать упражнение нажмите кнопку Сессия\n\n3. Оцените свое состояние в конце дня по 4 базовым критериям. Для этого нажмите кнопку Вечерний итог.',
+    focus: 'Замечать свои ощущения безоценочно. Мы не пытаемся их изменить прямо сейчас, мы просто их фиксируем.',
+    explanation: 'Измерение — первый шаг к контролю. Когда мы переводим смутную тревогу в конкретные цифры, мозг начинает воспринимать её как решаемую задачу, а не как всепоглощающую угрозу.',
+    actions: [
+      { id: 'checkin', label: 'Оценка состояния', icon: 'Activity', type: 'checkin' },
+      { id: 'session', label: 'Сессия', icon: 'Play', type: 'practice' },
+      { id: 'evening_checkin', label: 'Вечерний итог', icon: 'Moon', type: 'checkin_evening' }
+    ]
   },
   { 
-    day: 2, 
+    day: 2,
+    focusTitle: "Гудение",
+    focusIcon: "Mic", 
     title: 'Длинный выдох', 
     duration: '5 мин', 
     session: '1. Дышите строго синхронно с анимацией круга.\n2. Делайте вдох на расширение и удлиненный выдох на сужение.\n3. Глазами непрерывно следите за движением шарика по экрану.', 
@@ -21,7 +29,9 @@ const courseData = [
     explanation: 'Сессия включает парасимпатическую систему торможения, а вибрация голосовых связок напрямую массирует блуждающий нерв, посылая мозгу сигнал безопасности.' 
   },
   { 
-    day: 3, 
+    day: 3,
+    focusTitle: "Правило 3х3",
+    focusIcon: "Eye", 
     title: 'Заземление', 
     duration: '3 мин', 
     session: '1. Расслабьте плечи и челюсть.\n2. Следите взглядом за диагональным движением шарика.\n3. Дышите спокойно, не пытаясь контролировать ритм.', 
@@ -29,7 +39,9 @@ const courseData = [
     explanation: 'Движение глаз перерабатывает эмоции, а правило 3х3 экстренно возвращает вас из пугающего будущего в безопасное настоящее.' 
   },
   { 
-    day: 4, 
+    day: 4,
+    focusTitle: "Массаж ушей",
+    focusIcon: "Headphones", 
     title: 'Мышечное освобождение', 
     duration: '4 мин', 
     session: '1. Следите за шариком, который двигается по плавной траектории "Восьмерка".\n2. Дышите свободно.\n3. Каждые 30 секунд добавляйте "физиологический вздох": два резких вдоха носом и расслабляющий выдох ртом.', 
@@ -37,7 +49,9 @@ const courseData = [
     explanation: 'Восьмерка и двойной вдох сбрасывают излишки углекислого газа, снижая панику, а массаж ушной раковины механически активирует ветвь блуждающего нерва.' 
   },
   { 
-    day: 5, 
+    day: 5,
+    focusTitle: "Якорь мысли",
+    focusIcon: "Anchor", 
     title: 'Расцепление с мыслью', 
     duration: '5 мин', 
     session: '1. Запустите горизонтальное слежение.\n2. Вспомните тревожащую мысль и мысленно «положите» её на шарик.\n3. Наблюдайте, как мысль катается влево-вправо, теряя свой эмоциональный заряд.', 
@@ -45,7 +59,9 @@ const courseData = [
     explanation: 'Сессия снижает заряд конкретной мысли, а якорь учит видеть в мыслях просто текст, а не реальную угрозу.' 
   },
   { 
-    day: 6, 
+    day: 6,
+    focusTitle: "Метод Розенберга",
+    focusIcon: "Smile", 
     title: 'Опора на землю', 
     duration: '4 мин', 
     session: '1. Дышите синхронно с кругом ("Квадратное дыхание": вдох, задержка, выдох, задержка).\n2. Одновременно следите за движущимся объектом.\n3. Старайтесь не отрывать взгляд.', 
@@ -53,7 +69,9 @@ const courseData = [
     explanation: 'Квадратное дыхание выравнивает пульс, а глазодвигательное упражнение со сцепленными руками физиологически высвобождает блуждающий нерв у основания черепа.' 
   },
   { 
-    day: 7, 
+    day: 7,
+    focusTitle: "Стоп-слово",
+    focusIcon: "Octagon", 
     title: 'Остановка катастрофизации', 
     duration: '5 мин', 
     session: '1. Начните практику с трех двойных вдохов носом и глубоких выдохов ртом.\n2. Затем перейдите на обычное спокойное дыхание.\n3. Непрерывно следите за шариком.', 
@@ -61,7 +79,9 @@ const courseData = [
     explanation: 'Двойные вдохи быстро расправляют альвеолы легких, успокаивая нервную систему, а «Стоп-слово» прерывает токсичный внутренний диалог.' 
   },
   { 
-    day: 8, 
+    day: 8,
+    focusTitle: "Рефлекс ныряльщика",
+    focusIcon: "Droplets", 
     title: 'Сенсорный якорь', 
     duration: '5 мин', 
     session: '1. Запустите траекторию "Бесконечность".\n2. Сфокусируйтесь на том, чтобы каждый выдох был немного длиннее вдоха.\n3. Позвольте глазам плавно скользить за объектом.', 
@@ -69,7 +89,9 @@ const courseData = [
     explanation: 'Холод на лице активирует «рефлекс ныряльщика», мгновенно замедляя пульс через блуждающий нерв в моменты острых скачков тревоги.' 
   },
   { 
-    day: 9, 
+    day: 9,
+    focusTitle: "Стимуляция гортани",
+    focusIcon: "Coffee", 
     title: 'Точка покоя', 
     duration: '3 мин', 
     session: '1. Это быстрая сессия для сбивания острой паники.\n2. Следите за очень быстрым движением шарика по горизонтали.\n3. Дыхание свободное, моргайте по мере необходимости.', 
@@ -77,7 +99,9 @@ const courseData = [
     explanation: 'Быстрое движение глаз сбивает острый стресс, а активное полоскание стимулирует мышцы гортани, которые напрямую иннервируются блуждающим нервом.' 
   },
   { 
-    day: 10, 
+    day: 10,
+    focusTitle: "SOS-аптечка",
+    focusIcon: "BriefcaseMedical", 
     title: 'Сборка протокола', 
     duration: '5 мин', 
     session: '1. Практика жестко синхронизирована с ритмом.\n2. Дышите строго вместе с кругом (вдох на расширение, выдох на сужение).\n3. Глаза не отрываются от шарика.', 
@@ -85,7 +109,9 @@ const courseData = [
     explanation: 'Сессия закрепляет навык синхронизации, а личная аптечка дает четкий план действий — мозг успокаивается, когда знает, что делать при панике.' 
   },
   { 
-    day: 11, 
+    day: 11,
+    focusTitle: "Инфо-детокс",
+    focusIcon: "PhoneOff", 
     title: 'Расширение контейнера', 
     duration: '6 мин', 
     session: '1. Длительная сессия тренировки выносливости внимания.\n2. Следите за шариком на протяжении всего времени.\n3. Каждый раз, когда ловите себя на том, что отвлеклись на мысли — делайте один "двойной вдох" и возвращайте взгляд на экран.', 
@@ -93,7 +119,9 @@ const courseData = [
     explanation: 'Долгая сессия тренирует выносливость (двойной вдох возвращает фокус), а детокс снижает базовый уровень кортизола перед сном.' 
   },
   { 
-    day: 12, 
+    day: 12,
+    focusTitle: "Пауза",
+    focusIcon: "Pause", 
     title: 'Тренировка с микро-триггером', 
     duration: '5 мин', 
     session: '1. ПРЕДЫГРА: Вспомните мелкую неприятную ситуацию (на 3-4 балла тревоги из 10).\n2. ПРАКТИКА: Запустите горизонтальное слежение.\n3. Следите за шариком, пока воспоминание не поблекнет и тело не расслабится.', 
@@ -101,7 +129,9 @@ const courseData = [
     explanation: 'Сессия доказывает мозгу, что вы можете справиться с напряжением, а пауза перед реакцией ломает автоматический паттерн паники.' 
   },
   { 
-    day: 13, 
+    day: 13,
+    focusTitle: "Мягкий живот",
+    focusIcon: "Circle", 
     title: 'Возврат к себе', 
     duration: '5 мин', 
     session: '1. Начните сессию с 5 циклов "двойного вдоха" и долгого выдоха.\n2. Затем перейдите в заданный ритм: выдох будет длиннее вдоха.\n3. Поддерживайте фокус на движущемся шарике.', 
@@ -109,7 +139,9 @@ const courseData = [
     explanation: 'Двойной вдох на старте успокаивает физиологию, а расслабление мышц пресса дает блуждающему нерву пространство для нормальной работы (он проходит через диафрагму).' 
   },
   { 
-    day: 14, 
+    day: 14,
+    focusTitle: "Присвоение силы",
+    focusIcon: "ShieldCheck", 
     title: 'Интеграция', 
     duration: '7 мин', 
     session: '1. Финальная длинная сессия без жестких привязок.\n2. Дышите свободно, в комфортном для вас ритме.\n3. Мысленно просканируйте тело на наличие остаточного напряжения и отпустите его.', 
@@ -156,10 +188,37 @@ export function Course() {
     }
   };
 
-  const isDev = import.meta.env.DEV || (typeof process !== 'undefined' && process.env.NODE_ENV === 'development');
+    // Map icon strings back to actual Lucide components
+  const getIconComponent = (iconName: string) => {
+    const components: Record<string, React.ReactNode> = {
+      Activity: <Activity className="w-5 h-5 text-indigo-400" />,
+      Mic: <Mic className="w-5 h-5 text-indigo-400" />,
+      Eye: <Eye className="w-5 h-5 text-indigo-400" />,
+      Headphones: <Headphones className="w-5 h-5 text-indigo-400" />,
+      Anchor: <Anchor className="w-5 h-5 text-indigo-400" />,
+      Smile: <Smile className="w-5 h-5 text-indigo-400" />,
+      Octagon: <Octagon className="w-5 h-5 text-indigo-400" />,
+      Droplets: <Droplets className="w-5 h-5 text-indigo-400" />,
+      Coffee: <Coffee className="w-5 h-5 text-indigo-400" />,
+      BriefcaseMedical: <BriefcaseMedical className="w-5 h-5 text-indigo-400" />,
+      PhoneOff: <PhoneOff className="w-5 h-5 text-indigo-400" />,
+      Pause: <Pause className="w-5 h-5 text-indigo-400" />,
+      Circle: <Circle className="w-5 h-5 text-indigo-400" />,
+      ShieldCheck: <ShieldCheck className="w-5 h-5 text-indigo-400" />
+    };
+    return components[iconName] || <Search className="w-5 h-5 text-indigo-400" />;
+  };
+
+  const isDev = (typeof process !== "undefined" && process.env.NODE_ENV === "development") || (typeof process !== 'undefined' && process.env.NODE_ENV === 'development');
   const visibleCourseData = isDev 
     ? courseData 
-    : courseData.filter(lesson => lesson.day <= courseProgress.currentDay);
+    : courseData.filter(lesson => lesson.day <= courseProgress.currentDay + 1);
+    
+    // Только самые мощные техники попадают в постоянный Арсенал
+  const ARTIFACT_DAYS = [2, 3, 6, 8, 10, 13];
+  const completedFocusItems = courseData.filter(lesson => 
+    courseProgress.completedFocusDays?.includes(lesson.day) && ARTIFACT_DAYS.includes(lesson.day)
+  );
 
   return (
     <div className="flex-1 flex flex-col px-4 py-8 max-w-2xl mx-auto w-full">
@@ -190,12 +249,54 @@ export function Course() {
         )}
       </header>
 
+      
+      {completedFocusItems.length > 0 && (
+        <section className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-medium text-neutral-100 ml-2">Мой арсенал</h2>
+            <span className="text-xs text-neutral-500 bg-neutral-800 px-2 py-1 rounded-full">{completedFocusItems.length} освоено</span>
+          </div>
+          <div className="flex gap-3 overflow-x-auto pb-4 snap-x pl-2 -ml-2 pr-4 scrollbar-hide">
+            {completedFocusItems.map((item) => (
+              <div key={item.day} className="flex-shrink-0 w-40 bg-neutral-800/80 p-4 rounded-2xl border border-neutral-700/50 snap-start flex flex-col gap-3">
+                <div className="w-10 h-10 rounded-full bg-indigo-500/10 flex items-center justify-center">
+                  {getIconComponent(item.focusIcon || 'Search')}
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium text-neutral-200 leading-tight">{item.focusTitle}</h4>
+                  <p className="text-xs text-neutral-500 mt-1">День {item.day}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
       <main className="flex-1 flex flex-col gap-4 pb-12">
         {visibleCourseData.map((lesson) => {
           const isCompleted = courseProgress.completedDays.includes(lesson.day);
           const isFocusCompleted = courseProgress.completedFocusDays?.includes(lesson.day);
           const isAvailable = lesson.day <= courseProgress.currentDay;
           const isCurrent = lesson.day === courseProgress.currentDay;
+
+          const isFogOfWar = !isDev && lesson.day > courseProgress.currentDay;
+
+          if (isFogOfWar) {
+            return (
+              <div 
+                key={lesson.day}
+                className="relative bg-neutral-800/30 p-5 rounded-3xl border border-dashed border-neutral-700/50 flex flex-col items-center justify-center min-h-[140px] gap-3"
+              >
+                <div className="w-12 h-12 rounded-full bg-gradient-to-b from-neutral-700 via-neutral-800 to-neutral-900 flex items-center justify-center border border-neutral-600/40 shadow-[inset_0_2px_4px_rgba(255,255,255,0.1),inset_0_-4px_6px_rgba(0,0,0,0.5),0_6px_12px_rgba(0,0,0,0.3)]">
+                  <Lock className="w-5 h-5 drop-shadow-md text-neutral-400" />
+                </div>
+                <div className="text-center">
+                  <h3 className="text-neutral-400 font-medium text-sm tracking-wide uppercase mb-1">День {lesson.day}</h3>
+                  <p className="text-neutral-500 text-xs">Откроется после завершения текущего дня</p>
+                </div>
+              </div>
+            );
+          }
 
           return (
             <div 
@@ -219,24 +320,32 @@ export function Course() {
               <h3 className={`text-lg font-medium mb-2 ${!isAvailable && 'text-neutral-500'}`}>
                 {lesson.title}
               </h3>
-              <div className="text-sm text-neutral-400 mb-6 space-y-6">
-                <div className="space-y-2">
-                  <div className="font-medium text-neutral-200">Сессия по протоколу:</div>
-                  <div className="whitespace-pre-wrap pl-3 border-l-2 border-neutral-700/60 text-neutral-400 leading-relaxed">
-                    {lesson.session}
+                            <div className="text-sm text-neutral-400 mb-6 space-y-6">
+                {lesson.content ? (
+                  <div className="whitespace-pre-wrap text-neutral-400 leading-relaxed text-base">
+                    {lesson.content}
                   </div>
-                </div>
+                ) : lesson.session ? (
+                  <div className="space-y-2">
+                    <div className="font-medium text-neutral-200">Сессия по протоколу:</div>
+                    <div className="whitespace-pre-wrap pl-3 border-l-2 border-neutral-700/60 text-neutral-400 leading-relaxed">
+                      {lesson.session}
+                    </div>
+                  </div>
+                ) : null}
                 
-                <div className="space-y-2">
-                  <div className="font-medium text-neutral-200">Фокус дня:</div>
-                  <div className="whitespace-pre-wrap pl-3 border-l-2 border-neutral-700/60 text-neutral-400 leading-relaxed">
-                    {lesson.focus}
+                {lesson.focus && (
+                  <div className="space-y-2">
+                    <div className="font-medium text-neutral-200">Фокус дня:</div>
+                    <div className="whitespace-pre-wrap pl-3 border-l-2 border-neutral-700/60 text-neutral-400 leading-relaxed text-base">
+                      {lesson.focus}
+                    </div>
                   </div>
-                </div>
+                )}
                 
                 {lesson.explanation && (
                   <div className="mt-4 pt-4 border-t border-neutral-700/50">
-                    <p className="text-neutral-500 italic text-sm leading-relaxed">
+                    <p className="text-neutral-500 italic text-sm leading-relaxed text-base">
                       <span className="font-medium text-neutral-400 not-italic">Для чего это нужно:</span> {lesson.explanation}
                     </p>
                   </div>
@@ -244,7 +353,7 @@ export function Course() {
               </div>
 
               {isAvailable ? (
-                <div className="flex flex-col sm:flex-row gap-3 mt-4 border-t border-neutral-700/50 pt-4">
+                <div className={`flex flex-col gap-3 mt-4 border-t border-neutral-700/50 pt-4 ${lesson.day === 2 || lesson.actions ? 'sm:flex-col' : 'sm:flex-row'}`}>
                   {isLockedByTime(lesson.day) ? (
                     <div className="flex-1 flex flex-col items-center justify-center gap-2 px-4 py-3 bg-neutral-800/80 border border-neutral-700/50 rounded-xl text-neutral-400">
                       <div className="flex items-center gap-2">
@@ -253,13 +362,56 @@ export function Course() {
                       </div>
                       <span className="text-xs text-neutral-500 text-center">Дайте нервной системе время на усвоение</span>
                     </div>
+                  ) : lesson.actions ? (
+                    <>
+                      {lesson.actions.map((act, idx) => {
+                         // Very naive completion tracking for actions:
+                         // We can consider checking complete if isCompleted is true,
+                         // but ideally each action tracks itself. For MVP, if it's checkin or evening_checkin,
+                         // we can just allow them to press it anytime. If it's a practice, we start practice.
+                         const IconComp = act.icon === 'Play' ? Play : act.icon === 'Moon' ? Moon : Activity;
+                         return (
+                           <button
+                             key={act.id}
+                             onClick={() => {
+                               if (act.type === 'checkin' || act.type === 'checkin_evening') {
+                                 navigate('/checkin');
+                               } else {
+                                 handleStartDay(lesson.day);
+                               }
+                             }}
+                             className={`w-full flex items-center justify-center gap-2 px-6 py-4 rounded-xl font-medium text-sm transition-all border active:scale-[0.98] ${
+                               isCompleted 
+                                 ? 'bg-gradient-to-b from-neutral-600 via-neutral-700 to-neutral-900 text-neutral-300 border-neutral-400/40 shadow-[inset_0_2px_4px_rgba(255,255,255,0.3),inset_0_-4px_6px_rgba(0,0,0,0.6),0_6px_12px_rgba(0,0,0,0.3)]' 
+                                 : 'bg-gradient-to-b from-indigo-400 via-indigo-600 to-indigo-800 text-white border-indigo-300/40 shadow-[inset_0_2px_4px_rgba(255,255,255,0.5),inset_0_-4px_6px_rgba(0,0,0,0.5),0_6px_12px_rgba(79,70,229,0.4)] drop-shadow-md hover:scale-[1.02]'
+                             }`}
+                           >
+                             <IconComp className="w-5 h-5 drop-shadow-md" />
+                             {act.label}
+                           </button>
+                         )
+                      })}
+                    </>
+                  ) : lesson.day === 2 ? (
+                    <div className="w-full flex flex-col gap-3">
+                      <AudioPlayer 
+                        src="https://actions.google.com/sounds/v1/water/waves_crashing_on_rock_beach.ogg" 
+                        title="Аудио-сессия: Длинный выдох" 
+                        onComplete={() => markCourseDayCompleted(2)} 
+                      />
+                      {isCompleted && (
+                         <div className="flex items-center justify-center gap-2 text-sm text-green-400 font-medium bg-green-900/10 py-2.5 rounded-xl border border-green-900/30">
+                            <CheckCircle2 className="w-4 h-4" /> Сессия прослушана
+                         </div>
+                      )}
+                    </div>
                   ) : (
                     <button
                       onClick={() => handleStartDay(lesson.day)}
-                      className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-medium text-sm transition-transform active:scale-[0.98] ${
+                      className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-medium text-sm transition-all border active:scale-[0.98] ${
                         isCompleted 
-                          ? 'bg-neutral-700/50 text-neutral-400 hover:bg-neutral-700/80' 
-                          : 'bg-white text-neutral-900 hover:bg-neutral-200 shadow-sm'
+                          ? 'bg-gradient-to-b from-neutral-600 via-neutral-700 to-neutral-900 text-neutral-300 border-neutral-400/40 shadow-[inset_0_2px_4px_rgba(255,255,255,0.3),inset_0_-4px_6px_rgba(0,0,0,0.6),0_6px_12px_rgba(0,0,0,0.3)]' 
+                          : 'bg-gradient-to-b from-indigo-400 via-indigo-600 to-indigo-800 text-white border-indigo-300/40 shadow-[inset_0_2px_4px_rgba(255,255,255,0.5),inset_0_-4px_6px_rgba(0,0,0,0.5),0_6px_12px_rgba(79,70,229,0.4)] drop-shadow-md hover:scale-[1.02]'
                       }`}
                     >
                       {isCompleted ? <CheckCircle2 className="w-4 h-4" /> : <Play className="w-4 h-4 fill-current" />}
@@ -268,10 +420,10 @@ export function Course() {
                   )}
                   <button
                     onClick={() => toggleCourseFocusDay(lesson.day)}
-                    className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-medium text-sm transition-transform active:scale-[0.98] border ${
+                    className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-medium text-sm transition-all active:scale-[0.98] border ${
                       isFocusCompleted 
-                        ? 'bg-green-900/20 text-green-400 border-green-900/50 hover:bg-green-900/30' 
-                        : 'bg-neutral-800 text-neutral-300 border-neutral-700 hover:bg-neutral-700'
+                        ? 'bg-gradient-to-b from-emerald-400 via-emerald-600 to-emerald-800 text-emerald-50 border-emerald-300/40 shadow-[inset_0_2px_4px_rgba(255,255,255,0.5),inset_0_-4px_6px_rgba(0,0,0,0.5),0_6px_12px_rgba(16,185,129,0.4)] drop-shadow-md' 
+                        : 'bg-gradient-to-b from-neutral-700 via-neutral-800 to-neutral-900 text-neutral-400 border-neutral-600/40 shadow-[inset_0_2px_4px_rgba(255,255,255,0.1),inset_0_-4px_6px_rgba(0,0,0,0.5),0_6px_12px_rgba(0,0,0,0.3)] hover:scale-[1.02]'
                     }`}
                   >
                     <CheckCircle2 className={`w-4 h-4 ${isFocusCompleted ? 'text-green-400' : 'text-neutral-500'}`} />

@@ -23,9 +23,9 @@ export function SynchronizedSetup() {
       <header className="flex items-center mb-8">
         <button 
           onClick={() => navigate(-1)}
-          className="p-2 -ml-2 text-neutral-500 hover:text-neutral-100 transition-colors"
+          className="w-10 h-10 rounded-full bg-gradient-to-b from-neutral-600 via-neutral-700 to-neutral-900 text-neutral-200 flex items-center justify-center shrink-0 border border-neutral-400/40 shadow-[inset_0_2px_4px_rgba(255,255,255,0.3),inset_0_-4px_6px_rgba(0,0,0,0.6),0_6px_12px_rgba(0,0,0,0.3)] hover:scale-105 active:scale-95 transition-all"
         >
-          <ArrowLeft className="w-6 h-6" />
+          <ArrowLeft className="w-5 h-5 drop-shadow-md" />
         </button>
         <h1 className="text-xl font-medium ml-2 text-neutral-100">
           Синхронная практика
@@ -81,7 +81,7 @@ export function SynchronizedSetup() {
                 onClick={() => updateSettings({ syncBilateralAudio: false })}
                 className={`flex-1 py-3 rounded-2xl border text-sm transition-all ${
                   !settings.syncBilateralAudio 
-                    ? 'border-neutral-800 bg-neutral-200 text-neutral-900 shadow-md' 
+                    ? 'bg-gradient-to-b from-indigo-400 via-indigo-600 to-indigo-800 text-white border-indigo-300/40 shadow-[inset_0_2px_4px_rgba(255,255,255,0.5),inset_0_-4px_6px_rgba(0,0,0,0.5),0_6px_12px_rgba(79,70,229,0.4)] drop-shadow-md' 
                     : 'border-neutral-700 text-neutral-500 hover:border-neutral-400'
                 }`}
               >
@@ -91,7 +91,7 @@ export function SynchronizedSetup() {
                 onClick={() => updateSettings({ syncBilateralAudio: true })}
                 className={`flex-1 py-3 rounded-2xl border text-sm transition-all ${
                   settings.syncBilateralAudio 
-                    ? 'border-neutral-800 bg-neutral-200 text-neutral-900 shadow-md' 
+                    ? 'bg-gradient-to-b from-indigo-400 via-indigo-600 to-indigo-800 text-white border-indigo-300/40 shadow-[inset_0_2px_4px_rgba(255,255,255,0.5),inset_0_-4px_6px_rgba(0,0,0,0.5),0_6px_12px_rgba(79,70,229,0.4)] drop-shadow-md' 
                     : 'border-neutral-700 text-neutral-500 hover:border-neutral-400'
                 }`}
               >
@@ -176,7 +176,7 @@ export function SynchronizedSetup() {
           onClick={handleStart}
           className="mt-4 w-full py-4 rounded-full bg-white text-neutral-900 text-lg font-medium transition-transform active:scale-[0.98] hover:bg-neutral-200 shadow-md flex justify-center items-center gap-2"
         >
-          <Play className="w-5 h-5 fill-neutral-900" />
+          <Play className="w-5 h-5 fill-indigo-100 drop-shadow-md" />
           Начать
         </button>
       </main>

@@ -53,9 +53,18 @@ export interface CourseProgress {
   lastCompletedDate?: string;
 }
 
+export interface DailyCheckin {
+  date: string;
+  anxiety: number;
+  physical: number;
+  emotional: number;
+  thoughts: number;
+}
+
 export interface AppState {
   hasCompletedOnboarding: boolean;
   settings: AppSettings;
   sessions: PracticeSession[];
   courseProgress: CourseProgress;
+  checkins: DailyCheckin[];
 }

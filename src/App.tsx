@@ -15,6 +15,7 @@ import { SosInstruction } from './screens/SosInstruction';
 import { Instruction } from './screens/Instruction';
 import { Progress } from './screens/Progress';
 import { Course } from './screens/Course';
+import { Checkin } from './screens/Checkin';
 import { Settings } from './screens/Settings';
 
 function PracticeSetupRouter() {
@@ -59,6 +60,7 @@ function AppRouter() {
       <Route path="/practice/active" element={<PracticeEngineWrapper />} />
       <Route path="/progress" element={<Progress />} />
       <Route path="/course" element={<Course />} />
+          <Route path="/checkin" element={<Checkin />} />
       <Route path="/settings" element={<Settings />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

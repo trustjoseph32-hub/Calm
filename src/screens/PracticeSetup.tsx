@@ -30,9 +30,9 @@ export function PracticeSetup() {
       <header className="flex items-center mb-8">
         <button 
           onClick={() => navigate(-1)}
-          className="p-2 -ml-2 text-neutral-500 hover:text-neutral-100 transition-colors"
+          className="w-10 h-10 rounded-full bg-gradient-to-b from-neutral-600 via-neutral-700 to-neutral-900 text-neutral-200 flex items-center justify-center shrink-0 border border-neutral-400/40 shadow-[inset_0_2px_4px_rgba(255,255,255,0.3),inset_0_-4px_6px_rgba(0,0,0,0.6),0_6px_12px_rgba(0,0,0,0.3)] hover:scale-105 active:scale-95 transition-all"
         >
-          <ArrowLeft className="w-6 h-6" />
+          <ArrowLeft className="w-5 h-5 drop-shadow-md" />
         </button>
         <h1 className="text-xl font-medium ml-2 text-neutral-100">
           {isRelief ? 'Выбор практики' : 'Настройка времени'}
@@ -50,7 +50,7 @@ export function PracticeSetup() {
                   onClick={() => setDurationStr(min)}
                   className={`py-4 rounded-2xl border text-lg transition-all ${
                     durationStr === min 
-                      ? 'border-neutral-800 bg-neutral-200 text-neutral-900 shadow-md' 
+                      ? 'bg-gradient-to-b from-indigo-400 via-indigo-600 to-indigo-800 text-white border-indigo-300/40 shadow-[inset_0_2px_4px_rgba(255,255,255,0.5),inset_0_-4px_6px_rgba(0,0,0,0.5),0_6px_12px_rgba(79,70,229,0.4)] drop-shadow-md' 
                       : 'border-neutral-700 text-neutral-500 hover:border-neutral-400'
                   }`}
                 >
@@ -61,9 +61,9 @@ export function PracticeSetup() {
             
             <button
               onClick={() => handleStart(type || 'breathing')}
-              className="w-full py-4 rounded-full bg-white text-neutral-900 text-lg font-medium transition-transform active:scale-[0.98] hover:bg-neutral-200 shadow-md flex justify-center items-center gap-2"
+              className="w-full py-4 rounded-full bg-gradient-to-b from-indigo-400 via-indigo-600 to-indigo-800 text-white text-lg font-medium transition-all active:scale-[0.98] border border-indigo-300/40 shadow-[inset_0_2px_4px_rgba(255,255,255,0.5),inset_0_-4px_6px_rgba(0,0,0,0.5),0_6px_12px_rgba(79,70,229,0.4)] drop-shadow-md hover:scale-[1.02] flex justify-center items-center gap-2"
             >
-              <Play className="w-5 h-5 fill-neutral-900" />
+              <Play className="w-5 h-5 fill-indigo-100 drop-shadow-md" />
               Начать
             </button>
           </div>
@@ -77,8 +77,8 @@ export function PracticeSetup() {
                 onClick={() => handleStart('breathing')}
                 className="flex items-start text-left p-4 rounded-2xl border border-neutral-700 hover:border-neutral-600 hover:shadow-sm transition-all group bg-neutral-900"
               >
-                <div className="w-12 h-12 rounded-full bg-neutral-800 flex items-center justify-center text-neutral-500 shadow-sm shrink-0 mt-1">
-                  <Wind className="w-6 h-6" strokeWidth={1.5} />
+                <div className="w-12 h-12 rounded-full bg-gradient-to-b from-neutral-600 via-neutral-700 to-neutral-900 text-neutral-200 flex items-center justify-center shrink-0 border border-neutral-400/40 shadow-[inset_0_2px_4px_rgba(255,255,255,0.3),inset_0_-4px_6px_rgba(0,0,0,0.6),0_6px_12px_rgba(0,0,0,0.3)] mt-1">
+                  <Wind className="w-6 h-6 drop-shadow-md text-neutral-400" strokeWidth={1.5} />
                 </div>
                 <div className="ml-4">
                   <h3 className="text-lg font-medium text-neutral-100 group-hover:text-white">Спокойное дыхание</h3>
@@ -90,8 +90,8 @@ export function PracticeSetup() {
                 onClick={() => handleStart('bilateral')}
                 className="flex items-start text-left p-4 rounded-2xl border border-neutral-700 hover:border-neutral-600 hover:shadow-sm transition-all group bg-neutral-900"
               >
-                <div className="w-12 h-12 rounded-full bg-neutral-800 flex items-center justify-center text-neutral-500 shadow-sm shrink-0 mt-1">
-                  <Activity className="w-6 h-6" strokeWidth={1.5} />
+                <div className="w-12 h-12 rounded-full bg-gradient-to-b from-neutral-600 via-neutral-700 to-neutral-900 text-neutral-200 flex items-center justify-center shrink-0 border border-neutral-400/40 shadow-[inset_0_2px_4px_rgba(255,255,255,0.3),inset_0_-4px_6px_rgba(0,0,0,0.6),0_6px_12px_rgba(0,0,0,0.3)] mt-1">
+                  <Activity className="w-6 h-6 drop-shadow-md text-neutral-400" strokeWidth={1.5} />
                 </div>
                 <div className="ml-4">
                   <h3 className="text-lg font-medium text-neutral-100 group-hover:text-white">Визуальное слежение</h3>
@@ -103,8 +103,8 @@ export function PracticeSetup() {
                 onClick={() => handleStart('combined')}
                 className="flex items-start text-left p-4 rounded-2xl border border-neutral-700 hover:border-neutral-600 hover:shadow-sm transition-all group bg-neutral-900"
               >
-                <div className="w-12 h-12 rounded-full bg-neutral-800 flex items-center justify-center text-neutral-500 shadow-sm shrink-0 mt-1">
-                  <ScanEye className="w-6 h-6" strokeWidth={1.5} />
+                <div className="w-12 h-12 rounded-full bg-gradient-to-b from-neutral-600 via-neutral-700 to-neutral-900 text-neutral-200 flex items-center justify-center shrink-0 border border-neutral-400/40 shadow-[inset_0_2px_4px_rgba(255,255,255,0.3),inset_0_-4px_6px_rgba(0,0,0,0.6),0_6px_12px_rgba(0,0,0,0.3)] mt-1">
+                  <ScanEye className="w-6 h-6 drop-shadow-md text-neutral-400" strokeWidth={1.5} />
                 </div>
                 <div className="ml-4">
                   <h3 className="text-lg font-medium text-neutral-100 group-hover:text-white">Переключение внимания</h3>
@@ -116,8 +116,8 @@ export function PracticeSetup() {
                 onClick={() => navigate('/practice/setup/synchronized', { state: { anxietyBefore } })}
                 className="flex items-start text-left p-4 rounded-2xl border border-neutral-800 hover:bg-neutral-200 group hover:text-white transition-all bg-neutral-800 shadow-sm"
               >
-                <div className="w-12 h-12 rounded-full bg-neutral-700 flex items-center justify-center text-neutral-100 shrink-0 mt-1 group-hover:bg-neutral-700 group-hover:text-white transition-colors">
-                  <Activity className="w-6 h-6" strokeWidth={1.5} />
+                <div className="w-12 h-12 rounded-full bg-gradient-to-b from-indigo-400 via-indigo-600 to-indigo-800 text-indigo-50 flex items-center justify-center shrink-0 border border-indigo-300/40 shadow-[inset_0_2px_4px_rgba(255,255,255,0.5),inset_0_-4px_6px_rgba(0,0,0,0.5),0_6px_12px_rgba(79,70,229,0.4)] drop-shadow-md mt-1">
+                  <Activity className="w-6 h-6 drop-shadow-md text-neutral-400" strokeWidth={1.5} />
                 </div>
                 <div className="ml-4">
                   <h3 className="text-lg font-medium text-white group-hover:text-white transition-colors">Синхронная практика</h3>

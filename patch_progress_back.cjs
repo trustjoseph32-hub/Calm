@@ -1,5 +1,5 @@
 const fs = require('fs');
-let code = fs.readFileSync('src/screens/Settings.tsx', 'utf8');
+let code = fs.readFileSync('src/screens/Progress.tsx', 'utf8');
 
 const backOld = `<button 
           onClick={() => navigate(-1)}
@@ -15,9 +15,5 @@ const backNew = `<button
         </button>`;
 code = code.replace(backOld, backNew);
 
-const clearOld = `className="w-full bg-red-950/50 hover:bg-red-900/50 text-red-400 font-medium py-3 rounded-2xl transition-colors active:scale-[0.98] border border-red-900/50"`;
-const clearNew = `className="w-full py-4 rounded-full bg-gradient-to-b from-red-400 via-red-600 to-red-800 text-white font-medium transition-all active:scale-[0.98] border border-red-300/40 shadow-[inset_0_2px_4px_rgba(255,255,255,0.5),inset_0_-4px_6px_rgba(0,0,0,0.5),0_6px_12px_rgba(220,38,38,0.4)] drop-shadow-md hover:scale-[1.02]"`;
-code = code.replace(clearOld, clearNew);
-
-fs.writeFileSync('src/screens/Settings.tsx', code);
-console.log("Patched Settings.tsx buttons");
+fs.writeFileSync('src/screens/Progress.tsx', code);
+console.log("Patched Progress.tsx back button");

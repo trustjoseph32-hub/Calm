@@ -43,9 +43,9 @@ export function Progress() {
       <header className="flex items-center mb-8">
         <button 
           onClick={() => navigate(-1)}
-          className="p-2 -ml-2 text-neutral-500 hover:text-neutral-100 transition-colors"
+          className="w-10 h-10 rounded-full bg-gradient-to-b from-neutral-600 via-neutral-700 to-neutral-900 text-neutral-200 flex items-center justify-center shrink-0 border border-neutral-400/40 shadow-[inset_0_2px_4px_rgba(255,255,255,0.3),inset_0_-4px_6px_rgba(0,0,0,0.6),0_6px_12px_rgba(0,0,0,0.3)] hover:scale-105 active:scale-95 transition-all"
         >
-          <ArrowLeft className="w-6 h-6" />
+          <ArrowLeft className="w-5 h-5 drop-shadow-md" />
         </button>
         <h1 className="text-xl font-medium ml-2 text-neutral-100">
           Мой прогресс
@@ -63,15 +63,15 @@ export function Progress() {
           <>
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-neutral-800 p-6 rounded-3xl shadow-sm border border-neutral-700 flex flex-col items-start">
-                <div className="w-10 h-10 rounded-full bg-neutral-900 flex items-center justify-center text-neutral-500 mb-4">
-                  <Activity className="w-5 h-5" />
+                <div className="w-10 h-10 rounded-full bg-gradient-to-b from-indigo-400 via-indigo-600 to-indigo-800 text-white flex items-center justify-center border border-indigo-300/40 shadow-[inset_0_2px_4px_rgba(255,255,255,0.5),inset_0_-4px_6px_rgba(0,0,0,0.5),0_6px_12px_rgba(79,70,229,0.4)] mb-4">
+                  <Activity className="w-5 h-5 drop-shadow-md text-indigo-50" />
                 </div>
                 <span className="text-3xl font-light text-neutral-100">{stats.totalPractices}</span>
                 <span className="text-sm text-neutral-500 mt-1">Всего практик</span>
               </div>
               <div className="bg-neutral-800 p-6 rounded-3xl shadow-sm border border-neutral-700 flex flex-col items-start">
-                <div className="w-10 h-10 rounded-full bg-neutral-900 flex items-center justify-center text-neutral-500 mb-4">
-                  <Calendar className="w-5 h-5" />
+                <div className="w-10 h-10 rounded-full bg-gradient-to-b from-emerald-400 via-emerald-600 to-emerald-800 text-white flex items-center justify-center border border-emerald-300/40 shadow-[inset_0_2px_4px_rgba(255,255,255,0.5),inset_0_-4px_6px_rgba(0,0,0,0.5),0_6px_12px_rgba(16,185,129,0.4)] mb-4">
+                  <Calendar className="w-5 h-5 drop-shadow-md text-emerald-50" />
                 </div>
                 <span className="text-3xl font-light text-neutral-100">{stats.uniqueDays}</span>
                 <span className="text-sm text-neutral-500 mt-1">Дней с практикой</span>
