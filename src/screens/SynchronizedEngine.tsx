@@ -11,6 +11,7 @@ type EngineState =
   | 'INTRO'
   | 'ACTIVE_ROUND'
   | 'SOS_PAUSE'
+  | 'SOS_OUTRO'
   | 'EVALUATION'
   | 'EVAL_EASIER'
   | 'EVAL_SAME'
@@ -18,6 +19,37 @@ type EngineState =
   | 'SAFE_CLOSING'
   | 'CHECKOUT'
   | 'PAUSED';
+
+
+const EyeAnimation = ({ axis }: { axis: 'horizontal' | 'vertical' | 'diagonal' }) => {
+  const pupilVariants = {
+    horizontal: { x: [-18, 18, -18], y: 0 },
+    vertical: { x: 0, y: [-12, 12, -12] },
+    diagonal: { x: [-14, 14, -14], y: [-10, 10, -10] }
+  };
+  
+  return (
+    <div className="flex justify-center items-center gap-4 sm:gap-8 mt-6">
+      {[1, 2].map((i) => (
+        <div key={i} className="w-16 h-8 sm:w-20 sm:h-10 bg-neutral-100 rounded-[50%] flex items-center justify-center shadow-[inset_0_4px_8px_rgba(0,0,0,0.3),inset_0_-1px_3px_rgba(0,0,0,0.1)] relative overflow-hidden border-t-[3px] border-neutral-500">
+           <motion.div 
+             animate={axis} 
+             variants={pupilVariants} 
+             transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
+             className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-amber-700 via-amber-800 to-neutral-900 flex items-center justify-center shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)] relative"
+           >
+              {/* Pupil */}
+              <div className="w-3 h-3 sm:w-4 sm:h-4 bg-black rounded-full" />
+              {/* Catchlight */}
+              <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-white/80 rounded-full absolute top-1.5 right-1.5 sm:top-2 sm:right-2 blur-[0.5px]" />
+           </motion.div>
+           {/* Eyelid shadow overlay */}
+           <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-black/20 to-transparent pointer-events-none" />
+        </div>
+      ))}
+    </div>
+  );
+};
 
 export function SynchronizedEngine() {
   const navigate = useNavigate();
@@ -74,6 +106,7 @@ export function SynchronizedEngine() {
   const [xOffset, setXOffset] = useState(0);
   const [circleScale, setCircleScale] = useState(1);
   const [isExpanding, setIsExpanding] = useState(true);
+  const [isSecondInhale, setIsSecondInhale] = useState(false);
   const [yOffset, setYOffset] = useState(0);
 
   // SOS state
@@ -121,30 +154,7 @@ export function SynchronizedEngine() {
         setPauseTimeLeft(10);
         setEngineState('SOS_PAUSE');
       } else {
-        if (anxietyBefore !== null && anxietyBefore !== undefined) {
-          setEngineState('CHECKOUT');
-        } else {
-          // Finish directly
-          const finalDuration = totalTime + roundDuration;
-          addSession({
-            sessionId: Date.now().toString(),
-            date: new Date().toISOString(),
-            endTime: new Date().toISOString(),
-            practiceType: sessionData.practiceType as any,
-            duration: finalDuration,
-            anxietyBefore: sessionData.anxietyBefore,
-            status: 'completed',
-            completedRounds: (sessionData.completedRounds || 0) + 1,
-            roundAnswers: sessionData.roundAnswers || [],
-            usedGrounding: sessionData.usedGrounding || false,
-            reducedMotion: sessionData.reducedMotion || false,
-            validForOutcomeStats: false,
-            schemaVersion: 2,
-            isSOS: isSOS,
-            courseDay: sessionData.courseDay
-          });
-          navigate('/', { replace: true });
-        }
+        setEngineState('SOS_OUTRO');
       }
     } else {
       setEngineState('EVALUATION');
@@ -192,19 +202,58 @@ export function SynchronizedEngine() {
       setIsExpanding(expanding);
       
       // Breathing cycle animation
+      let mappedProgress = 0;
+      let circleMappedProgress = 0;
+      
       if (expanding) {
         const progress = phase * 2; // 0 to 1
-        const ease = 0.5 * (1 - Math.cos(Math.PI * progress));
-        setCircleScale(1 + ease * 0.5);
+        // Ball movement mappedProgress (Smooth for ball in both cases)
+        mappedProgress = 0.5 * (1 - Math.cos(Math.PI * progress));
+        
+        if (isSOS) {
+          // 35% time for first inhale, 10% recoil, 55% time for second inhale
+          if (progress < 0.35) {
+            // First inhale (0 to 35% of time, grows exactly to 35% of max expansion to match timing)
+            const localProgress = progress / 0.35;
+            circleMappedProgress = 0.35 * Math.sin(localProgress * (Math.PI / 2));
+            setIsSecondInhale(false);
+          } else if (progress < 0.45) {
+            // Recoil (35% to 45% of time) - shrinks slightly from 35% down to 25%
+            const localProgress = (progress - 0.35) / 0.10;
+            circleMappedProgress = 0.35 - 0.10 * (0.5 * (1 - Math.cos(Math.PI * localProgress)));
+            setIsSecondInhale(false);
+          } else {
+            // Second inhale (45% to 100% of time). Grows sharply from 25% all the way to 100% max expansion!
+            const localProgress = (progress - 0.45) / 0.55;
+            const sharpEaseOut = 1 - Math.pow(1 - localProgress, 6);
+            circleMappedProgress = 0.25 + 0.75 * sharpEaseOut;
+            setIsSecondInhale(true);
+          }
+        } else {
+          // Standard smooth breathing
+          circleMappedProgress = mappedProgress;
+        }
+        setCircleScale(1 + circleMappedProgress * 0.5);
       } else {
+        // Exhale
         const progress = (phase - 0.5) * 2; // 0 to 1
-        const ease = 0.5 * (1 - Math.cos(Math.PI * progress));
-        setCircleScale(1.5 - ease * 0.5);
+        // Smooth ease in/out for exhale
+        mappedProgress = 0.5 * (1 - Math.cos(Math.PI * progress));
+        circleMappedProgress = mappedProgress;
+        
+        // Reverse for exhale
+        setCircleScale(1.5 - circleMappedProgress * 0.5);
       }
       
       // Bilateral Movement
       if (!reducedMotion) {
-        const sineProgress = -Math.cos(phase * Math.PI * 2);
+        let sineProgress = 0;
+        if (expanding) {
+          // The ball ALWAYS uses the smooth mappedProgress, never the jerky circle one
+          sineProgress = -1 + mappedProgress * 2;
+        } else {
+          sineProgress = 1 - mappedProgress * 2;
+        }
         
         let newX = 0;
         let newY = 0;
@@ -412,8 +461,9 @@ export function SynchronizedEngine() {
               <h2 className="text-2xl font-medium">Отдых</h2>
               <div className="text-neutral-400">
                 <p>Сделай глубокий вдох и медленный выдох.</p>
-                <p className="mt-2">Готовимся к следующему этапу.</p>
+                <p className="mt-2">Готовимся к следующему этапу (движение {sosConfig[roundIndex + 1]?.axis === 'horizontal' ? 'горизонтальное' : sosConfig[roundIndex + 1]?.axis === 'vertical' ? 'вертикальное' : 'диагональное'}).</p>
               </div>
+              <EyeAnimation axis={sosConfig[roundIndex + 1]?.axis || 'horizontal'} />
               <div className="text-8xl font-light text-neutral-100 mt-8">{pauseTimeLeft}</div>
             </motion.div>
           )}
@@ -449,7 +499,7 @@ export function SynchronizedEngine() {
               {/* Text overlay for breathing */}
               {settings.showText && (
                 <div className="absolute text-2xl font-light tracking-[0.2em] uppercase text-white/70 pointer-events-none z-0 transition-opacity duration-500">
-                  {isExpanding ? 'Вдох' : 'Выдох'}
+                  {isExpanding ? (isSOS && isSecondInhale ? 'До-вдох' : 'Вдох') : 'Выдох'}
                 </div>
               )}
 
@@ -564,6 +614,53 @@ export function SynchronizedEngine() {
             </motion.div>
           )}
           
+                    {engineState === 'SOS_OUTRO' && (
+            <motion.div key="sos_outro" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-center space-y-8 max-w-sm">
+              <h2 className="text-2xl font-medium">Отлично.</h2>
+              <div className="text-neutral-400">
+                <p>А теперь давайте немного заземлимся.</p>
+                <p className="mt-4 text-neutral-200 font-medium leading-relaxed">Найдите сейчас 5 предметов, которые видите вокруг себя, и назовите их про себя.</p>
+                <p className="mt-4 text-neutral-200 font-medium leading-relaxed">После того, как сделаете это, прикоснитесь руками также к 5 разным предметам.</p>
+              </div>
+              <button 
+                onClick={() => {
+                  if (anxietyBefore !== null && anxietyBefore !== undefined) {
+                    setEngineState('CHECKOUT');
+                  } else {
+                    const finalDuration = totalTime;
+                    addSession({
+                      sessionId: Date.now().toString(),
+                      date: new Date().toISOString(),
+                      endTime: new Date().toISOString(),
+                      practiceType: sessionData.practiceType as any,
+                      duration: finalDuration,
+                      anxietyBefore: sessionData.anxietyBefore,
+                      status: 'completed',
+                      completedRounds: (sessionData.completedRounds || 0),
+                      roundAnswers: sessionData.roundAnswers || [],
+                      usedGrounding: sessionData.usedGrounding || false,
+                      reducedMotion: sessionData.reducedMotion || false,
+                      validForOutcomeStats: false,
+                      schemaVersion: 2,
+                      isSOS: isSOS,
+                      courseDay: sessionData.courseDay
+                    });
+                    
+                    if (courseDay) {
+                      updateCourseTodayState('completed');
+                      navigate('/course');
+                    } else {
+                      navigate('/');
+                    }
+                  }
+                }}
+                className="w-full py-4 mt-8 bg-indigo-600 rounded-full font-medium"
+              >
+                Готово, я назвал(а)
+              </button>
+            </motion.div>
+          )}
+
           {engineState === 'CHECKOUT' && (
             <motion.div key="checkout" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="max-w-sm w-full text-center space-y-8">
               <h2 className="text-2xl font-medium">Оценка состояния</h2>

@@ -34,7 +34,7 @@ export function SosInstruction() {
         <div className="flex gap-6 items-start">
           <div className="text-2xl sm:text-4xl font-light text-neutral-500">1</div>
           <p className="text-lg sm:text-2xl font-medium text-neutral-100 leading-tight">
-            Дышите вместе с расширяющимся кругом.
+            Дышите вместе с расширяющимся кругом двойным вдохом носом (Вдох-доВдох) и выдохом ртом.
           </p>
         </div>
 

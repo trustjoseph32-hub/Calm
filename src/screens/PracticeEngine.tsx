@@ -98,7 +98,9 @@ export function PracticeEngine() {
       usedGrounding: false,
       reducedMotion: false,
       validForOutcomeStats: true,
-      schemaVersion: 2
+      schemaVersion: 2,
+      isSOS,
+      courseDay
     };
     addSession(session);
     

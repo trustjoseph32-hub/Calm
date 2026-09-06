@@ -8,21 +8,23 @@ export function Progress() {
   const navigate = useNavigate();
   const { sessions } = useAppStore();
 
+  const courseSessions = useMemo(() => sessions.filter(s => !s.isSOS), [sessions]);
+
   const stats = useMemo(() => {
-    if (sessions.length === 0) return null;
+    if (courseSessions.length === 0) return null;
     
     // Only use valid sessions for outcome stats
-    const validOutcomes = sessions.filter(s => s.validForOutcomeStats && s.anxietyBefore !== undefined && s.anxietyAfter !== undefined);
+    const validOutcomes = courseSessions.filter(s => s.validForOutcomeStats && s.anxietyBefore !== undefined && s.anxietyAfter !== undefined);
     const avgBefore = validOutcomes.length ? validOutcomes.reduce((sum, s) => sum + (s.anxietyBefore || 0), 0) / validOutcomes.length : 0;
     const avgAfter = validOutcomes.length ? validOutcomes.reduce((sum, s) => sum + (s.anxietyAfter || 0), 0) / validOutcomes.length : 0;
     
-    // Total minutes can include all sessions, maybe except 'not_started'
-    const totalMinutes = sessions.filter(s => s.status !== 'not_started').reduce((sum, s) => sum + s.duration, 0) / 60;
+    // Total minutes can include all course sessions, maybe except 'not_started'
+    const totalMinutes = courseSessions.filter(s => s.status !== 'not_started').reduce((sum, s) => sum + s.duration, 0) / 60;
     
-    const uniqueDays = new Set(sessions.map(s => new Date(s.date).toDateString())).size;
+    const uniqueDays = new Set(courseSessions.map(s => new Date(s.date).toDateString())).size;
 
     return {
-      totalPractices: sessions.length,
+      totalPractices: courseSessions.length,
       uniqueDays,
       avgBefore: avgBefore.toFixed(1),
       avgAfter: avgAfter.toFixed(1),
@@ -30,17 +32,17 @@ export function Progress() {
       totalMinutes: Math.round(totalMinutes),
       hasValidOutcomes: validOutcomes.length > 0
     };
-  }, [sessions]);
+  }, [courseSessions]);
 
   const chartData = useMemo(() => {
-    const validOutcomes = sessions.filter(s => s.validForOutcomeStats && s.anxietyBefore !== undefined && s.anxietyAfter !== undefined);
+    const validOutcomes = courseSessions.filter(s => s.validForOutcomeStats && s.anxietyBefore !== undefined && s.anxietyAfter !== undefined);
     // Take last 14 practices
     return validOutcomes.slice(-14).map((s, i) => ({
       index: i + 1,
       before: s.anxietyBefore,
       after: s.anxietyAfter,
     }));
-  }, [sessions]);
+  }, [courseSessions]);
 
   return (
     <div className="flex-1 flex flex-col px-4 py-8 max-w-2xl mx-auto w-full">
