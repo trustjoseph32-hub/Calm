@@ -21,7 +21,7 @@ export class BilateralAudioEngine {
     if (this.ctx.state === 'suspended') {
       this.ctx.resume();
     }
-    this.volume = volumePercentage * 0.25; // Lowered volume from 0.5 to 0.25 for softer sound
+    this.volume = volumePercentage * 0.2125; // Lowered volume by an additional 15% // Lowered volume from 0.5 to 0.25 for softer sound
     this.bilateralVolume = (bilateralVolumePercentage !== undefined ? bilateralVolumePercentage : volumePercentage) * 0.5;
     
     if (noiseType && noiseType !== 'none') {

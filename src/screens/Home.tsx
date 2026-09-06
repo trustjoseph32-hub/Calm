@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { Wind, ScanEye, Calendar, Settings, Activity, BookOpen, Zap, Pill } from 'lucide-react';
+import { Wind, ScanEye, Calendar, Activity, BookOpen, Zap, Pill } from 'lucide-react';
 import { useAppStore } from '../store/AppProvider';
 import { Logo } from '../components/Logo';
 
@@ -31,9 +31,7 @@ export function Home() {
           <button onClick={() => navigate('/progress')} className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-to-b from-neutral-600 via-neutral-700 to-neutral-900 text-neutral-200 flex items-center justify-center shrink-0 border border-neutral-400/40 shadow-[inset_0_2px_4px_rgba(255,255,255,0.3),inset_0_-4px_6px_rgba(0,0,0,0.6),0_6px_12px_rgba(0,0,0,0.3)] hover:scale-105 active:scale-95 transition-all" aria-label="Progress">
             <Activity className="w-4 h-4 sm:w-5 sm:h-5 drop-shadow-md" strokeWidth={1.5} />
           </button>
-          <button onClick={() => navigate('/settings')} className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-to-b from-neutral-600 via-neutral-700 to-neutral-900 text-neutral-200 flex items-center justify-center shrink-0 border border-neutral-400/40 shadow-[inset_0_2px_4px_rgba(255,255,255,0.3),inset_0_-4px_6px_rgba(0,0,0,0.6),0_6px_12px_rgba(0,0,0,0.3)] hover:scale-105 active:scale-95 transition-all" aria-label="Settings">
-            <Settings className="w-4 h-4 sm:w-5 sm:h-5 drop-shadow-md" strokeWidth={1.5} />
-          </button>
+
         </div>
       </header>
 

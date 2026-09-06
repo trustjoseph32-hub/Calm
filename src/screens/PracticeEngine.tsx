@@ -19,6 +19,7 @@ export function PracticeEngine() {
     courseDay: undefined
   };
 
+  const isSOS = location.state?.isSOS || false;
   const [sessionState, setSessionState] = useState<SessionState>('countdown');
   const [timeLeft, setTimeLeft] = useState(durationSeconds);
   const [countdown, setCountdown] = useState(3);
