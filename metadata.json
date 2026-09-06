@@ -1,6 +1,8 @@
 {
-  "name": "Panic Attack Club",
+  "name": "Calm Motion",
   "description": "Приложение для самостоятельной эмоциональной саморегуляции и снижения текущего уровня тревоги.",
   "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
 }

@@ -86,14 +86,19 @@ export function PracticeEngine() {
     const session: PracticeSession = {
       sessionId: Date.now().toString(),
       date: new Date().toISOString(),
+      endTime: new Date().toISOString(),
       practiceType: type,
       duration: durationSeconds - timeLeft,
       anxietyBefore,
       anxietyAfter,
       anxietyDelta: anxietyAfter - anxietyBefore,
-      completed: sessionState === 'checkout',
-      stoppedEarly: timeLeft > 0 && sessionState !== 'checkout',
-      discomfortTriggered: sessionState === 'grounding',
+      status: 'closed_safely',
+      completedRounds: 0,
+      roundAnswers: [],
+      usedGrounding: false,
+      reducedMotion: false,
+      validForOutcomeStats: true,
+      schemaVersion: 2
     };
     addSession(session);
     

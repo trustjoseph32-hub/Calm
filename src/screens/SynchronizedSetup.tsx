@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ArrowLeft, Play, Info } from 'lucide-react';
+import { ArrowLeft, Play, Info, Wind, CloudRain, Waves } from 'lucide-react';
 import { useAppStore } from '../store/AppProvider';
 
 export function SynchronizedSetup() {
@@ -36,14 +36,11 @@ export function SynchronizedSetup() {
         <section className="bg-neutral-800 p-6 rounded-3xl shadow-sm border border-neutral-700 flex flex-col gap-6">
           <div className="flex flex-col gap-1">
             <h2 className="text-lg font-medium text-neutral-100">Структура практики</h2>
-            <p className="text-sm text-neutral-500">Практика состоит из 5 фаз по 1.5 минуты с короткими паузами.</p>
+            <p className="text-sm text-neutral-500">Практика состоит из коротких раундов по 20-30 секунд.</p>
           </div>
           <div className="flex flex-col gap-3 text-sm text-neutral-500">
-            <div className="flex items-center gap-3"><div className="w-2 h-2 rounded-full bg-neutral-800"></div> Фаза 1: Горизонтальное слежение</div>
-            <div className="flex items-center gap-3"><div className="w-2 h-2 rounded-full bg-neutral-400"></div> Фаза 2: Вертикальное слежение</div>
-            <div className="flex items-center gap-3"><div className="w-2 h-2 rounded-full bg-neutral-800"></div> Фаза 3: Треугольное слежение</div>
-            <div className="flex items-center gap-3"><div className="w-2 h-2 rounded-full bg-neutral-400"></div> Фаза 4: Диагональное слежение</div>
-            <div className="flex items-center gap-3"><div className="w-2 h-2 rounded-full bg-neutral-800"></div> Фаза 5: Слежение восьмеркой</div>
+            <div className="flex items-center gap-3"><div className="w-2 h-2 rounded-full bg-neutral-700"></div> После каждого раунда — вопрос о самочувствии</div>
+            <div className="flex items-center gap-3"><div className="w-2 h-2 rounded-full bg-neutral-700"></div> Если станет хуже, мы предложим мягкое заземление</div>
           </div>
         </section>
 
@@ -99,7 +96,7 @@ export function SynchronizedSetup() {
               </button>
           </div>
 
-          {(settings.syncBilateralAudio || settings.syncBackgroundNoise !== 'none') && (
+          {(settings.syncBilateralAudio || settings.syncAmbientSound !== 'none') && (
             <div className="flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-200 mt-4">
                {settings.syncBilateralAudio && (
                  <div className="flex items-start gap-2 bg-neutral-900 p-3 rounded-xl text-sm text-neutral-500">
@@ -129,9 +126,9 @@ export function SynchronizedSetup() {
             <h3 className="text-sm font-medium text-neutral-100">Фоновый шум</h3>
             <div className="grid grid-cols-2 gap-2">
               <button
-                onClick={() => updateSettings({ syncBackgroundNoise: 'none' })}
+                onClick={() => updateSettings({ syncAmbientSound: 'none' })}
                 className={`py-2 rounded-xl border text-sm transition-all ${
-                  settings.syncBackgroundNoise === 'none'
+                  settings.syncAmbientSound === 'none'
                     ? 'border-neutral-800 bg-neutral-200 text-neutral-900' 
                     : 'border-neutral-700 text-neutral-500 hover:border-neutral-400'
                 }`}
@@ -139,9 +136,9 @@ export function SynchronizedSetup() {
                 Без шума
               </button>
               <button
-                onClick={() => updateSettings({ syncBackgroundNoise: 'wind' })}
+                onClick={() => updateSettings({ syncAmbientSound: 'wind' })}
                 className={`py-2 rounded-xl border text-sm transition-all ${
-                  settings.syncBackgroundNoise === 'wind'
+                  settings.syncAmbientSound === 'wind'
                     ? 'border-neutral-800 bg-neutral-200 text-neutral-900' 
                     : 'border-neutral-700 text-neutral-500 hover:border-neutral-400'
                 }`}
@@ -149,9 +146,9 @@ export function SynchronizedSetup() {
                 Ветер
               </button>
               <button
-                onClick={() => updateSettings({ syncBackgroundNoise: 'rain' })}
+                onClick={() => updateSettings({ syncAmbientSound: 'rain' })}
                 className={`py-2 rounded-xl border text-sm transition-all ${
-                  settings.syncBackgroundNoise === 'rain'
+                  settings.syncAmbientSound === 'rain'
                     ? 'border-neutral-800 bg-neutral-200 text-neutral-900' 
                     : 'border-neutral-700 text-neutral-500 hover:border-neutral-400'
                 }`}
@@ -159,9 +156,9 @@ export function SynchronizedSetup() {
                 Дождь
               </button>
               <button
-                onClick={() => updateSettings({ syncBackgroundNoise: 'sea' })}
+                onClick={() => updateSettings({ syncAmbientSound: 'sea' })}
                 className={`py-2 rounded-xl border text-sm transition-all ${
-                  settings.syncBackgroundNoise === 'sea'
+                  settings.syncAmbientSound === 'sea'
                     ? 'border-neutral-800 bg-neutral-200 text-neutral-900' 
                     : 'border-neutral-700 text-neutral-500 hover:border-neutral-400'
                 }`}

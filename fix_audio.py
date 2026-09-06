@@ -1,35 +1,15 @@
-export class BilateralAudioEngine {
-  private ctx: AudioContext | null = null;
-  private volume: number = 0.25;
-  private bilateralVolume: number = 0.25;
+import re
 
-  private noiseSource: AudioBufferSourceNode | null = null;
-  private noiseGain: GainNode | null = null;
-  private noiseModGain: GainNode | null = null;
-  private noiseFilter: BiquadFilterNode | null = null;
-  private noiseFilter2: BiquadFilterNode | null = null;
-  private noisePanner: StereoPannerNode | null = null;
-  private noiseLFO: OscillatorNode | null = null;
-  private ampLFO: OscillatorNode | null = null;
+with open('src/lib/audio.ts', 'r') as f:
+    content = f.read()
 
-  constructor() {}
+# I will replace the startNoise method entirely to ensure all settings are perfect.
+# It starts at: private startNoise(type: 'wind' | 'rain' | 'sea') {
+# It ends right before: private stopNoise() {
 
-  init(volumePercentage: number, noiseType?: 'none' | 'wind' | 'rain' | 'sea', bilateralVolumePercentage?: number) {
-    if (!this.ctx) {
-      this.ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
-    }
-    if (this.ctx.state === 'suspended') {
-      this.ctx.resume();
-    }
-    this.volume = volumePercentage * 0.25; // Lowered volume from 0.5 to 0.25 for softer sound
-    this.bilateralVolume = (bilateralVolumePercentage !== undefined ? bilateralVolumePercentage : volumePercentage) * 0.5;
-    
-    if (noiseType && noiseType !== 'none') {
-      this.startNoise(noiseType);
-    }
-  }
+target_pattern = re.compile(r'  private startNoise\(type: \'wind\' \| \'rain\' \| \'sea\'\) \{.*?  private stopNoise\(\) \{', re.DOTALL)
 
-  private masterCompressor: DynamicsCompressorNode | null = null;
+replacement = """  private masterCompressor: DynamicsCompressorNode | null = null;
 
   private startNoise(type: 'wind' | 'rain' | 'sea') {
     if (!this.ctx) return;
@@ -142,106 +122,21 @@ export class BilateralAudioEngine {
     this.noiseSource.start(now);
   }
 
-  private stopNoise() {
-    if (this.noiseSource) {
-      try { this.noiseSource.stop(); } catch(e) {}
-      this.noiseSource.disconnect();
-      this.noiseSource = null;
-    }
-    if (this.noiseLFO) {
-      try { this.noiseLFO.stop(); } catch(e) {}
-      this.noiseLFO.disconnect();
-      this.noiseLFO = null;
-    }
-    if (this.ampLFO) {
-      try { this.ampLFO.stop(); } catch(e) {}
-      this.ampLFO.disconnect();
-      this.ampLFO = null;
-    }
-    if (this.noisePanner) {
-      this.noisePanner.disconnect();
-      this.noisePanner = null;
-    }
-    if (this.noiseModGain) {
-      this.noiseModGain.disconnect();
-      this.noiseModGain = null;
-    }
-  }
+  private stopNoise() {"""
 
-  setNoisePan(panValue: number) {
-    if (this.noisePanner && this.ctx) {
-      const now = this.ctx.currentTime;
-      // Small ramp time to prevent clicking, but fast enough to track movement smoothly
-      this.noisePanner.pan.setTargetAtTime(panValue, now, 0.05);
-    }
-  }
+content = target_pattern.sub(replacement, content)
 
-  setNoiseVolumeMod(verticalRatio: number) {
-    if (this.noiseModGain && this.ctx) {
-      const now = this.ctx.currentTime;
-      // verticalRatio goes from -1 (top, loudest) to 1 (bottom, quietest)
-      // Base volume is 1. We modulate between 0.8 (bottom) and 1.2 (top)
-      const targetGain = 1.0 - (verticalRatio * 0.2);
-      this.noiseModGain.gain.setTargetAtTime(targetGain, now, 0.05);
-    }
-  }
+# Replace playTone connections to also use the masterCompressor if possible,
+# or just drastically lower its volume and prevent clipping.
+# We'll just patch the playTone routing directly:
 
-  playTone(side: 'left' | 'right' | 'center' | number) {
-
-    if (!this.ctx) return;
-    
-    const osc = this.ctx.createOscillator();
-    const gain = this.ctx.createGain();
-    const panner = this.ctx.createStereoPanner();
-
-    osc.type = 'sine';
-    osc.frequency.value = 250; // Calming low frequency (250Hz)
-
-    let panValue = 0;
-    if (typeof side === 'number') {
-      panValue = side;
-    } else {
-      panValue = side === 'left' ? -1 : side === 'right' ? 1 : 0;
-    }
-    panner.pan.value = panValue;
-
-    // Envelope
-    const now = this.ctx.currentTime;
-    gain.gain.setValueAtTime(0, now);
-    gain.gain.linearRampToValueAtTime(this.bilateralVolume, now + 0.05); // Attack
-    gain.gain.setValueAtTime(this.bilateralVolume, now + 0.15); // Sustain
-    gain.gain.linearRampToValueAtTime(0, now + 0.4); // Release
-
-    osc.connect(panner);
-    panner.connect(gain);
-    if (this.masterCompressor) {
+target_tone = """    gain.connect(this.ctx.destination);"""
+replacement_tone = """    if (this.masterCompressor) {
       gain.connect(this.masterCompressor);
     } else {
       gain.connect(this.ctx.destination);
-    }
+    }"""
+content = content.replace(target_tone, replacement_tone)
 
-    osc.start(now);
-    osc.stop(now + 0.5);
-  }
-
-  stopAll() {
-    this.stopNoise();
-    if (this.ctx) {
-      this.ctx.suspend();
-    }
-  }
-  
-  resume() {
-    if (this.ctx && this.ctx.state === 'suspended') {
-      this.ctx.resume();
-    }
-  }
-
-  destroy() {
-    this.stopNoise();
-    if (this.ctx) {
-      this.ctx.close();
-      this.ctx = null;
-    }
-  }
-}
+with open('src/lib/audio.ts', 'w') as f:
+    f.write(content)

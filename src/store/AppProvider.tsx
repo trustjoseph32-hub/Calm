@@ -21,7 +21,8 @@ const defaultSettings: AppSettings = {
   syncReducedMotion: false,
   syncShowText: true,
   syncBreathingCircle: true,
-  syncBackgroundNoise: 'none',
+  syncAmbientSound: 'none',
+  syncBilateralVolume: 0.5,
 };
 
 const initialState: AppState = {
@@ -45,6 +46,7 @@ interface AppContextType extends AppState {
   toggleCourseFocusDay: (day: number) => void;
   skipWaitTime: () => void;
   saveCheckin: (checkin: import('../types').DailyCheckin) => void;
+  updateCourseTodayState: (updates: Partial<NonNullable<import('../types').CourseProgress['todayState']>>) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -55,13 +57,40 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
+
+        // Migrate old sessions
+        const migratedSessions = (parsed.sessions || []).map(session => {
+          if (!session.schemaVersion) {
+            // Old version
+            return {
+              ...session,
+              schemaVersion: 2,
+              status: session.completed ? 'completed' : session.stoppedEarly ? 'interrupted' : 'not_started',
+              completedRounds: 0,
+              roundAnswers: [],
+              usedGrounding: false,
+              reducedMotion: !!session.reducedMotion,
+              // If it's an old SOS session with preScore 10 (likely auto-filled), invalidate it
+              validForOutcomeStats: session.isSOS && session.anxietyBefore === 10 ? false : true,
+            };
+          }
+          return session;
+        });
+
+        // Migrate settings mapping (syncBackgroundNoise -> syncAmbientSound)
+        const migratedSettings = {
+          ...initialState.settings,
+          ...(parsed.settings || {})
+        };
+        if (parsed.settings && parsed.settings.syncBackgroundNoise && !parsed.settings.syncAmbientSound) {
+          migratedSettings.syncAmbientSound = parsed.settings.syncBackgroundNoise;
+        }
+
         return { 
           ...initialState, 
           ...parsed,
-          settings: {
-            ...initialState.settings,
-            ...(parsed.settings || {})
-          },
+          settings: migratedSettings,
+          sessions: migratedSessions,
           courseProgress: {
             ...initialState.courseProgress,
             ...(parsed.courseProgress || {})
@@ -158,6 +187,23 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }));
   };
 
+  const updateCourseTodayState = (updates: Partial<NonNullable<import('../types').CourseProgress['todayState']>>) => {
+    setState((prev) => ({
+      ...prev,
+      courseProgress: {
+        ...prev.courseProgress,
+        todayState: {
+          ...(prev.courseProgress.todayState || {
+            practiceStatus: 'not_started',
+            checkinCompleted: false,
+            eveningCheckinCompleted: false
+          }),
+          ...updates
+        }
+      }
+    }));
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -170,6 +216,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         toggleCourseFocusDay,
         skipWaitTime,
         saveCheckin,
+        updateCourseTodayState,
       }}
     >
       {children}

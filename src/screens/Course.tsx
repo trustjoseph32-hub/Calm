@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Play, Moon, CheckCircle2, Lock, Activity, Mic, Eye, Headphones, Anchor, Smile, Octagon, Droplets, Coffee, BriefcaseMedical, PhoneOff, Pause, Circle, ShieldCheck, Search } from "lucide-react";
+import { ArrowLeft, Play, Moon, CheckCircle2, CheckCircle, Info, Lock, Activity, Mic, Eye, Headphones, Anchor, Smile, Octagon, Droplets, Coffee, BriefcaseMedical, PhoneOff, Pause, Circle, ShieldCheck, Search } from "lucide-react";
 import { useAppStore } from '../store/AppProvider';
 import { AudioPlayer } from '../components/AudioPlayer';
 
@@ -152,7 +152,7 @@ const courseData = [
 
 export function Course() {
   const navigate = useNavigate();
-  const { courseProgress, markCourseDayCompleted, toggleCourseFocusDay, skipWaitTime } = useAppStore();
+  const { courseProgress, markCourseDayCompleted, toggleCourseFocusDay, skipWaitTime, updateCourseTodayState } = useAppStore();
 
   const isSameDay = (d1: Date, d2: Date) => {
     return d1.getFullYear() === d2.getFullYear() &&

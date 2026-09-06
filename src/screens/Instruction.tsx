@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'motion/react';
 import { ArrowLeft, BookOpen, Wind, Activity, ScanEye, ListOrdered } from 'lucide-react';
 
 export function Instruction() {
@@ -28,7 +29,7 @@ export function Instruction() {
             Как пользоваться приложением
           </h2>
           <p className="text-neutral-500 mb-4 leading-relaxed">
-            Calm Motion объединяет дыхательные упражнения и билатеральную стимуляцию (основанную на принципах EMDR) для быстрого снижения тревоги и стресса.
+            Приложение использует дыхание, grounding, ритмическое движение и элементы билатеральной стимуляции. Это не является самостоятельной EMDR/ДПДГ-терапией и не предполагает самостоятельную переработку травматических воспоминаний.
           </p>
         </section>
 
@@ -88,11 +89,44 @@ export function Instruction() {
             <ScanEye className="w-6 h-6" strokeWidth={1.5} />
           </div>
           <h2 className="text-xl font-medium text-neutral-100 mb-4">
-            Движение глаз (EMDR)
+            Ритмическое движение
           </h2>
           <p className="text-neutral-500 mb-4 leading-relaxed">
-            В синхронной практике следите взглядом за движущимся шариком. Старайтесь не двигать головой, используйте только глаза. Это движение (из стороны в сторону) помогает мозгу переработать стрессовую информацию и снизить эмоциональный заряд тревожных мыслей.
+            Следи за точкой только в комфортной амплитуде. Не нужно напрягать глаза или доводить движение до боли. Дыши мягко и без усилия. Если заданный ритм неудобен, дыши в своём темпе. Ритмическое движение может помогать переключать внимание и снижать субъективное напряжение у некоторых людей.
           </p>
+          
+          <div className="flex justify-center mt-8 mb-6">
+            <div className="flex gap-4 sm:gap-8">
+              {/* Left Eye */}
+              <div className="w-20 h-10 sm:w-24 sm:h-12 bg-neutral-100 rounded-[50%] flex items-center justify-center shadow-[inset_0_4px_8px_rgba(0,0,0,0.3),inset_0_-1px_3px_rgba(0,0,0,0.1)] relative overflow-hidden border-t-[3px] border-neutral-500">
+                <motion.div
+                  animate={{ x: [-22, 22, -22] }}
+                  transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
+                  className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-amber-700 via-amber-800 to-neutral-900 flex items-center justify-center shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)] relative"
+                >
+                  {/* Pupil */}
+                  <div className="w-4 h-4 sm:w-5 sm:h-5 bg-black rounded-full" />
+                  {/* Catchlight */}
+                  <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-white/80 rounded-full absolute top-2 right-2 sm:top-2.5 sm:right-2.5 blur-[0.5px]" />
+                </motion.div>
+                {/* Eyelid shadow overlay */}
+                <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-black/20 to-transparent pointer-events-none" />
+              </div>
+
+              {/* Right Eye */}
+              <div className="w-20 h-10 sm:w-24 sm:h-12 bg-neutral-100 rounded-[50%] flex items-center justify-center shadow-[inset_0_4px_8px_rgba(0,0,0,0.3),inset_0_-1px_3px_rgba(0,0,0,0.1)] relative overflow-hidden border-t-[3px] border-neutral-500">
+                <motion.div
+                  animate={{ x: [-22, 22, -22] }}
+                  transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
+                  className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-amber-700 via-amber-800 to-neutral-900 flex items-center justify-center shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)] relative"
+                >
+                  <div className="w-4 h-4 sm:w-5 sm:h-5 bg-black rounded-full" />
+                  <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-white/80 rounded-full absolute top-2 right-2 sm:top-2.5 sm:right-2.5 blur-[0.5px]" />
+                </motion.div>
+                <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-black/20 to-transparent pointer-events-none" />
+              </div>
+            </div>
+          </div>
         </section>
 
         <section className="bg-neutral-800 p-6 sm:p-8 rounded-3xl shadow-sm border border-neutral-700">
@@ -105,6 +139,23 @@ export function Instruction() {
           <p className="text-neutral-500 mb-4 leading-relaxed">
             Звук, который попеременно звучит в левом и правом ухе. Для правильного эффекта <strong>обязательно используйте наушники</strong>. В настройках практики вы также можете добавить фоновый шум (ветер, дождь, море) для большего погружения и успокоения.
           </p>
+        </section>
+      
+        <section className="bg-neutral-800 p-6 sm:p-8 rounded-3xl shadow-sm border border-neutral-700">
+          <div className="w-12 h-12 rounded-full bg-gradient-to-b from-red-400 via-red-600 to-red-800 flex items-center justify-center mb-6 border border-red-300/40 shadow-[inset_0_2px_4px_rgba(255,255,255,0.5),inset_0_-4px_6px_rgba(0,0,0,0.5),0_6px_12px_rgba(220,38,38,0.4)] text-red-50 drop-shadow-md">
+            <Activity className="w-6 h-6" strokeWidth={1.5} />
+          </div>
+          <h2 className="text-xl font-medium text-neutral-100 mb-6">
+            Безопасность
+          </h2>
+          <ul className="space-y-4 text-neutral-500 leading-relaxed list-disc pl-5">
+            <li>Не используйте приложение во время управления автомобилем или выполнения действий, требующих внимания.</li>
+            <li>Не продолжайте движение глаз при боли, головокружении, тошноте или ухудшении самочувствия.</li>
+            <li>При проблемах со зрением, выраженной чувствительности к движению или неврологических заболеваниях используйте режим без движения и обсудите практику со специалистом.</li>
+            <li>Приложение не предназначено для самостоятельной работы с травматическими воспоминаниями.</li>
+            <li>Не изменяйте назначенное лечение или препараты на основании рекомендаций приложения.</li>
+            <li>Если симптомы возникли впервые, отличаются от обычных, сопровождаются сильной болью в груди, потерей сознания, выраженной одышкой или другими необычными проявлениями — необходима медицинская оценка.</li>
+          </ul>
         </section>
       </main>
     </div>

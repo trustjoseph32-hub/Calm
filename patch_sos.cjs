@@ -1,61 +1,93 @@
 const fs = require('fs');
 let code = fs.readFileSync('src/screens/SosInstruction.tsx', 'utf8');
 
-// Back button
-code = code.replace(
-  `className="p-2 -ml-2 text-neutral-500 hover:text-neutral-100 transition-colors"`,
-  `className="w-10 h-10 rounded-full bg-gradient-to-b from-neutral-600 via-neutral-700 to-neutral-900 text-neutral-200 flex items-center justify-center shrink-0 border border-neutral-400/40 shadow-[inset_0_2px_4px_rgba(255,255,255,0.3),inset_0_-4px_6px_rgba(0,0,0,0.6),0_6px_12px_rgba(0,0,0,0.3)] hover:scale-105 active:scale-95 transition-all"`
-);
-// Drop shadow on the back icon
-code = code.replace(
-  `<ArrowLeft className="w-6 h-6" />`,
-  `<ArrowLeft className="w-5 h-5 drop-shadow-md" />`
-);
+const importOld = `import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, Play, Waves, CloudRain, Wind } from 'lucide-react';
+import { useAppStore } from '../store/AppProvider';`;
 
-// Start button
-code = code.replace(
-  `className="w-full py-5 rounded-full bg-red-500 text-white text-xl font-medium transition-transform active:scale-[0.98] hover:bg-red-600 shadow-md shadow-red-500/20 flex justify-center items-center gap-2"`,
-  `className="w-full py-5 rounded-full bg-gradient-to-b from-red-400 via-red-600 to-red-800 text-white text-xl font-medium transition-transform active:scale-[0.98] border border-red-300/40 shadow-[inset_0_2px_4px_rgba(255,255,255,0.5),inset_0_-4px_6px_rgba(0,0,0,0.5),0_6px_12px_rgba(220,38,38,0.4)] drop-shadow-md flex justify-center items-center gap-2"`
-);
-// Drop shadow on Play icon
-code = code.replace(
-  `<Play className="w-6 h-6 fill-white" />`,
-  `<Play className="w-6 h-6 fill-red-100 drop-shadow-md" />`
-);
+const importNew = `import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, Play, Waves, CloudRain, Wind } from 'lucide-react';
+import { useAppStore } from '../store/AppProvider';`;
 
-// Sound toggle buttons
-const activeClassOld = `'bg-neutral-200 text-neutral-900 shadow-md'`;
-const activeClassNew = `'bg-gradient-to-b from-indigo-400 via-indigo-600 to-indigo-800 text-white border-indigo-300/40 shadow-[inset_0_2px_4px_rgba(255,255,255,0.5),inset_0_-4px_6px_rgba(0,0,0,0.5),0_6px_12px_rgba(79,70,229,0.4)] drop-shadow-md'`;
-const inactiveClassOld = `'bg-neutral-800 border border-neutral-700 text-neutral-500 hover:border-neutral-600'`;
-const inactiveClassNew = `'bg-gradient-to-b from-neutral-700 via-neutral-800 to-neutral-900 border border-neutral-600/40 text-neutral-400 shadow-[inset_0_2px_4px_rgba(255,255,255,0.1),inset_0_-4px_6px_rgba(0,0,0,0.5),0_6px_12px_rgba(0,0,0,0.3)] hover:scale-[1.02]'`;
+code = code.replace(importOld, importNew);
 
-code = code.split(activeClassOld).join(activeClassNew);
-code = code.split(inactiveClassOld).join(inactiveClassNew);
+const logicOld = `export function SosInstruction() {
+  const navigate = useNavigate();
+  const { settings, updateSettings } = useAppStore();
 
-// Adjust sound buttons container gap
-code = code.replace(
-  `className="grid grid-cols-2 sm:grid-cols-4 gap-2"`,
-  `className="grid grid-cols-2 sm:grid-cols-4 gap-3"`
-);
+  const handleStart = () => {
+    navigate('/practice/active', {
+      state: {
+        type: 'synchronized',
+        isSOS: true,
+        anxietyBefore: 10,
+      }
+    });
+  };`;
 
-// We need to add border to the button base classes in SosInstruction
-code = code.replace(
-  `className={\`py-3 rounded-2xl text-sm font-medium transition-all \${`,
-  `className={\`py-3 rounded-2xl text-sm font-medium transition-all border \${`
-);
-code = code.replace(
-  `className={\`py-3 flex justify-center items-center gap-2 rounded-2xl text-sm font-medium transition-all \${`,
-  `className={\`py-3 flex justify-center items-center gap-2 rounded-2xl text-sm font-medium transition-all border \${`
-);
-code = code.replace(
-  `className={\`py-3 flex justify-center items-center gap-2 rounded-2xl text-sm font-medium transition-all \${`,
-  `className={\`py-3 flex justify-center items-center gap-2 rounded-2xl text-sm font-medium transition-all border \${`
-);
-code = code.replace(
-  `className={\`py-3 flex justify-center items-center gap-2 rounded-2xl text-sm font-medium transition-all \${`,
-  `className={\`py-3 flex justify-center items-center gap-2 rounded-2xl text-sm font-medium transition-all border \${`
-);
+const logicNew = `export function SosInstruction() {
+  const navigate = useNavigate();
+  const { settings, updateSettings } = useAppStore();
+  const [anxietyBefore, setAnxietyBefore] = useState<number | null>(null);
 
+  const handleStart = () => {
+    navigate('/practice/active', {
+      state: {
+        type: 'synchronized',
+        isSOS: true,
+        anxietyBefore: anxietyBefore,
+      }
+    });
+  };`;
+
+code = code.replace(logicOld, logicNew);
+
+const uiOld = `        <div className="flex gap-6 items-start">
+          <div className="text-4xl font-light text-neutral-500">1</div>
+          <p className="text-2xl font-medium text-neutral-100 leading-tight">
+            Дышите вместе с расширяющимся кругом.
+          </p>
+        </div>
+
+        <div className="flex gap-6 items-start">
+          <div className="text-4xl font-light text-neutral-500">2</div>
+          <p className="text-2xl font-medium text-neutral-100 leading-tight">
+            Следите за шариком на экране.
+          </p>
+        </div>
+
+        <div className="mt-8 space-y-6">`;
+
+const uiNew = `        <div className="mb-4 bg-neutral-900 border border-neutral-800 rounded-3xl p-6">
+          <h2 className="text-lg font-medium text-neutral-200 mb-2">Насколько сильное напряжение сейчас?</h2>
+          <p className="text-sm text-neutral-400 mb-6">Оцените по шкале от 0 (спокойно) до 10 (максимально сильное напряжение).</p>
+          <div className="px-2">
+            <input 
+              type="range" 
+              min="0" 
+              max="10" 
+              value={anxietyBefore === null ? 5 : anxietyBefore} 
+              onChange={(e) => setAnxietyBefore(Number(e.target.value))}
+              className={\`w-full h-2 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6 [&::-webkit-slider-thumb]:bg-gradient-to-b [&::-webkit-slider-thumb]:from-gray-100 [&::-webkit-slider-thumb]:to-gray-300 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border [&::-webkit-slider-thumb]:border-white/50 [&::-webkit-slider-thumb]:shadow-[0_2px_5px_rgba(0,0,0,0.5),inset_0_-2px_4px_rgba(0,0,0,0.2)] \${anxietyBefore === null ? 'bg-neutral-800' : 'bg-red-900/50'}\`}
+            />
+            <div className="flex justify-between text-xs text-neutral-500 mt-2 font-medium">
+              <span>0</span>
+              <span>10</span>
+            </div>
+            {anxietyBefore === null && (
+               <p className="text-red-400/80 text-xs text-center mt-4">Укажите значение, чтобы статистика была точной. Или можете начать без оценки.</p>
+            )}
+          </div>
+        </div>
+
+        <div className="mt-4 space-y-6">`;
+
+code = code.replace(uiOld, uiNew);
+
+// Replace syncBackgroundNoise references with syncAmbientSound
+code = code.split('syncBackgroundNoise').join('syncAmbientSound');
 
 fs.writeFileSync('src/screens/SosInstruction.tsx', code);
 console.log("Patched SosInstruction.tsx");

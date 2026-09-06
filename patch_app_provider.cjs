@@ -1,50 +1,52 @@
 const fs = require('fs');
 let code = fs.readFileSync('src/store/AppProvider.tsx', 'utf8');
 
-code = code.replace(
-  'completedDays: [],',
-  'completedDays: [],\n    completedFocusDays: [],'
-);
+const targetStr1 = `  const saveCheckin = (checkin: import('../types').DailyCheckin) => {
+    setState((prev) => ({
+      ...prev,
+      checkins: [...(prev.checkins || []), checkin],
+    }));
+  };`;
 
-code = code.replace(
-  'markCourseDayCompleted: (day: number) => void;',
-  'markCourseDayCompleted: (day: number) => void;\n  toggleCourseFocusDay: (day: number) => void;'
-);
-
-code = code.replace(
-  'courseProgress: { currentDay: 1, completedDays: [] }',
-  'courseProgress: { currentDay: 1, completedDays: [], completedFocusDays: [] }'
-);
-
-code = code.replace(
-  'nextDay > 10 ? 10 : nextDay',
-  'nextDay > 14 ? 14 : nextDay'
-);
-
-code = code.replace(
-  'const markCourseDayCompleted = (day: number) => {',
-  `const toggleCourseFocusDay = (day: number) => {
-    setState((prev) => {
-      const focusDays = prev.courseProgress.completedFocusDays || [];
-      const newFocusDays = focusDays.includes(day)
-        ? focusDays.filter((d) => d !== day)
-        : [...focusDays, day];
-      return {
-        ...prev,
-        courseProgress: {
-          ...prev.courseProgress,
-          completedFocusDays: newFocusDays,
-        },
-      };
-    });
+const replacement1 = `  const saveCheckin = (checkin: import('../types').DailyCheckin) => {
+    setState((prev) => ({
+      ...prev,
+      checkins: [...(prev.checkins || []), checkin],
+    }));
   };
 
-  const markCourseDayCompleted = (day: number) => {`
-);
+  const updateCourseTodayState = (updates: Partial<NonNullable<import('../types').CourseProgress['todayState']>>) => {
+    setState((prev) => ({
+      ...prev,
+      courseProgress: {
+        ...prev.courseProgress,
+        todayState: {
+          ...(prev.courseProgress.todayState || {
+            practiceStatus: 'not_started',
+            checkinCompleted: false,
+            eveningCheckinCompleted: false
+          }),
+          ...updates
+        }
+      }
+    }));
+  };`;
 
-code = code.replace(
-  'markCourseDayCompleted,',
-  'markCourseDayCompleted,\n        toggleCourseFocusDay,'
-);
+const targetStr2 = `        saveCheckin,
+      }}
+    >
+      {children}
+    </AppContext.Provider>`;
+
+const replacement2 = `        saveCheckin,
+        updateCourseTodayState,
+      }}
+    >
+      {children}
+    </AppContext.Provider>`;
+
+code = code.replace(targetStr1, replacement1);
+code = code.replace(targetStr2, replacement2);
 
 fs.writeFileSync('src/store/AppProvider.tsx', code);
+console.log("Patched AppProvider.tsx");

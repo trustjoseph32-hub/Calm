@@ -8,26 +8,25 @@ export function Checkin() {
   const navigate = useNavigate();
   const { saveCheckin, markCourseDayCompleted, courseProgress } = useAppStore();
 
-  const [anxiety, setAnxiety] = useState(5);
-  const [physical, setPhysical] = useState(5);
-  const [emotional, setEmotional] = useState(5);
-  const [thoughts, setThoughts] = useState(5);
+  const [anxiety, setAnxiety] = useState<number | null>(null);
+  const [physical, setPhysical] = useState<number | null>(null);
+  const [emotional, setEmotional] = useState<number | null>(null);
+  const [thoughts, setThoughts] = useState<number | null>(null);
 
   const handleSubmit = () => {
     saveCheckin({
       date: new Date().toISOString(),
-      anxiety,
-      physical,
-      emotional,
-      thoughts,
+      anxiety: anxiety ?? 5,
+      physical: physical ?? 5,
+      emotional: emotional ?? 5,
+      thoughts: thoughts ?? 5,
     });
 
     // If they are on Day 1, this acts as the Day 1 practice completion.
     // Let's just always try to mark Day 1 if they haven't yet, or we can let Course.tsx handle it.
     // Actually, it's safer to just mark Day 1 completed if it's currently Day 1.
-    if (courseProgress.currentDay === 1 && !courseProgress.completedDays.includes(1)) {
-      markCourseDayCompleted(1);
-    }
+    // WAIT: Now we have a proper course structure for Day 1 where they have a session.
+    // So we don't automatically mark it completed here.
 
     // Go back to the course page
     navigate(-1);
@@ -74,16 +73,16 @@ export function Checkin() {
           <SliderField 
             icon={<Heart className="w-5 h-5 drop-shadow-md text-pink-50" />}
             color="pink"
-            title="Эмоциональный фон"
-            description="От подавленного (0) до радостного (10)"
+            title="Эмоциональное напряжение"
+            description="От эмоционально спокойного (0) до эмоционально очень тяжелого (10)"
             value={emotional} 
             setValue={setEmotional} 
           />
           <SliderField 
             icon={<BrainCircuit className="w-5 h-5 drop-shadow-md text-emerald-50" />}
             color="emerald"
-            title="Навязчивые мысли"
-            description="От ясной головы (0) до мысленной «жвачки» (10)"
+            title="Загруженность мыслями"
+            description="От ясной головы (0) до мыслей, полностью захватывающих внимание (10)"
             value={thoughts} 
             setValue={setThoughts} 
           />
@@ -124,7 +123,7 @@ function SliderField({ icon, color, title, description, value, setValue }: {
         <div>
           <h3 className="font-medium text-lg text-neutral-200 flex items-center gap-2">
             {title} 
-            <span className="text-indigo-400 font-semibold bg-indigo-900/30 px-2 py-0.5 rounded-md text-sm">{value}</span>
+            <span className="text-indigo-400 font-semibold bg-indigo-900/30 px-2 py-0.5 rounded-md text-sm">{value === null ? "-" : value}</span>
           </h3>
           <p className="text-sm text-neutral-500">{description}</p>
         </div>
@@ -134,7 +133,7 @@ function SliderField({ icon, color, title, description, value, setValue }: {
           type="range" 
           min="0" 
           max="10" 
-          value={value} 
+          value={value === null ? 5 : value} 
           onChange={(e) => setValue(Number(e.target.value))}
           className={`w-full h-2 bg-neutral-700 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6 [&::-webkit-slider-thumb]:bg-gradient-to-b [&::-webkit-slider-thumb]:from-gray-100 [&::-webkit-slider-thumb]:to-gray-300 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border [&::-webkit-slider-thumb]:border-white/50 [&::-webkit-slider-thumb]:shadow-[0_2px_5px_rgba(0,0,0,0.5),inset_0_-2px_4px_rgba(0,0,0,0.2)] [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:w-6 [&::-moz-range-thumb]:h-6 [&::-moz-range-thumb]:bg-gradient-to-b [&::-moz-range-thumb]:from-gray-100 [&::-moz-range-thumb]:to-gray-300 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border [&::-moz-range-thumb]:border-white/50 [&::-moz-range-thumb]:shadow-[0_2px_5px_rgba(0,0,0,0.5),inset_0_-2px_4px_rgba(0,0,0,0.2)]`}
         />

@@ -41,7 +41,7 @@ function PracticeEngineWrapper() {
   if (type === 'synchronized') {
     return <SynchronizedEngine />;
   }
-  return <PracticeEngine />;
+  return <SynchronizedEngine />;
 }
 
 function AppRouter() {
