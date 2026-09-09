@@ -1,4 +1,5 @@
-import React from 'react';
+with open('src/components/Logo.tsx', 'w') as f:
+    f.write("""import React from 'react';
 import { motion } from 'motion/react';
 
 export function Logo({ className = "w-8 h-8" }: { className?: string }) {
@@ -12,7 +13,7 @@ export function Logo({ className = "w-8 h-8" }: { className?: string }) {
         color: ['#818cf8', '#ef4444', '#818cf8'] 
       }}
       transition={{
-        duration: 8,
+        duration: 4,
         repeat: Infinity,
         ease: "easeInOut"
       }}
@@ -23,3 +24,5 @@ export function Logo({ className = "w-8 h-8" }: { className?: string }) {
     </motion.svg>
   );
 }
+""")
+print("Logo updated")

@@ -16,6 +16,7 @@ import { Instruction } from './screens/Instruction';
 import { Progress } from './screens/Progress';
 import { Course } from './screens/Course';
 import { Checkin } from './screens/Checkin';
+import { Day1Engine } from './screens/Day1Engine';
 
 function PracticeSetupRouter() {
   const { type } = useParams<{ type: string }>();
@@ -57,6 +58,7 @@ function AppRouter() {
       <Route path="/instruction" element={<Instruction />} />
       <Route path="/practice/setup/:type" element={<PracticeSetupRouter />} />
       <Route path="/practice/active" element={<PracticeEngineWrapper />} />
+      <Route path="/practice/day1" element={<Day1Engine />} />
       <Route path="/progress" element={<Progress />} />
       <Route path="/course" element={<Course />} />
           <Route path="/checkin" element={<Checkin />} />

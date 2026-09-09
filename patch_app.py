@@ -3,12 +3,15 @@ import re
 with open('src/App.tsx', 'r') as f:
     content = f.read()
 
-# Remove Settings import
-content = re.sub(r"import \{ Settings \} from '\./screens/Settings';\n", "", content)
+if "import { Day1Engine }" not in content:
+    content = content.replace("import { PracticeSetupRouter } from './screens/PracticeSetup';", "import { PracticeSetupRouter } from './screens/PracticeSetup';\nimport { Day1Engine } from './screens/Day1Engine';")
 
-# Remove the Settings route
-content = re.sub(r"\s*<Route path=\"/settings\" element=\{<Settings />\} />", "", content)
+target = '<Route path="/practice/active" element={<PracticeEngineWrapper />} />'
+replacement = '<Route path="/practice/active" element={<PracticeEngineWrapper />} />\n      <Route path="/practice/day1" element={<Day1Engine />} />'
+
+if '<Route path="/practice/day1"' not in content:
+    content = content.replace(target, replacement)
 
 with open('src/App.tsx', 'w') as f:
     f.write(content)
-print("Removed Settings from App.tsx")
+print("Patched App.tsx")

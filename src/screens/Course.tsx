@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Play, Moon, CheckCircle2, CheckCircle, Info, Lock, Activity, Mic, Eye, Headphones, Anchor, Smile, Octagon, Droplets, Coffee, BriefcaseMedical, PhoneOff, Pause, Circle, ShieldCheck, Search } from "lucide-react";
 import { useAppStore } from '../store/AppProvider';
@@ -7,15 +7,18 @@ import { AudioPlayer } from '../components/AudioPlayer';
 const courseData = [
   {
     day: 1,
-    title: 'Стартовая точка.',
+    title: 'Старт',
     duration: '5 мин',
-    content: '1. Честно оцените свое состояние по 4 базовым критериям (Тревожность, Физическое напряжение, Эмоциональный фон, Мысли), чтобы мы могли отслеживать прогресс. Для этого нажмите кнопку Оценка состояния.\n\n2. Пройдите пробную сессию для того чтобы понять принцип работы этого упражнения. Все подсказки будут на экране во время упражнения.\nЧтобы начать упражнение нажмите кнопку Сессия\n\n3. Оцените свое состояние в конце дня по 4 базовым критериям. Для этого нажмите кнопку Вечерний итог.',
+    slides: [
+      'В первый день мы знакомимся с базовым упражнением для саморегуляции.\nОсваиваем движение глаз, добавим дыхание и мышечный сброс.',
+      'Замерим уровень вашей тревоги "До и После" упражнения, чтобы психика получила подтверждение что вы можете управлять своим состоянием.',
+      <span key="explanation"><span className="font-medium text-neutral-200 block mb-2">Для чего мы это делаем:</span>Когда мы переводим тревогу в конкретные цифры, мозг начинает воспринимать ее как решаемую задачу, а не глобальную угрозу.</span>,
+      'Если готовы, нажмите\nНачать обучающую сессию'
+    ],
     focus: 'Замечать свои ощущения безоценочно. Мы не пытаемся их изменить прямо сейчас, мы просто их фиксируем.',
     explanation: 'Измерение — первый шаг к контролю. Когда мы переводим смутную тревогу в конкретные цифры, мозг начинает воспринимать её как решаемую задачу, а не как всепоглощающую угрозу.',
     actions: [
-      { id: 'checkin', label: 'Оценка состояния', icon: 'Activity', type: 'checkin' },
-      { id: 'session', label: 'Сессия', icon: 'Play', type: 'practice' },
-      { id: 'evening_checkin', label: 'Вечерний итог', icon: 'Moon', type: 'checkin_evening' }
+      { id: 'session', label: 'Начать обучающую сессию', icon: 'Play', type: 'practice' }
     ]
   },
   { 
@@ -150,9 +153,111 @@ const courseData = [
   }
 ];
 
+
+const SlideRenderer = ({ slides, actions, handleAction }: { slides: React.ReactNode[], actions: any[], handleAction: (id: string) => void }) => {
+  const [currentSlide, setCurrentSlide] = React.useState(0);
+  
+  const [touchStart, setTouchStart] = React.useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = React.useState<number | null>(null);
+
+  const minSwipeDistance = 50;
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe && currentSlide < slides.length - 1) {
+      setCurrentSlide(prev => prev + 1);
+    }
+    if (isRightSwipe && currentSlide > 0) {
+      setCurrentSlide(prev => prev - 1);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div 
+        className="relative min-h-[160px] sm:min-h-[120px] bg-neutral-900/50 rounded-xl p-6 sm:p-4 border border-neutral-800 flex items-center justify-center text-center select-none active:scale-[0.99] transition-transform shadow-inner touch-pan-y"
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+      >
+        <p className="text-neutral-300 text-[15px] sm:text-base leading-relaxed pointer-events-none whitespace-pre-wrap">
+          {slides[currentSlide]}
+        </p>
+      </div>
+      
+      <div className="flex justify-center gap-2">
+        {slides.map((_, i) => (
+          <div 
+            key={i} 
+            className={`w-2 h-2 rounded-full transition-colors ${i === currentSlide ? 'bg-indigo-500' : 'bg-neutral-700'}`} 
+          />
+        ))}
+      </div>
+
+      <div className="flex gap-4 w-full">
+        {currentSlide > 0 && (
+          <button 
+            onClick={() => setCurrentSlide(prev => prev - 1)}
+            className="hidden sm:block flex-1 py-3 rounded-xl font-medium text-neutral-400 bg-neutral-800/50 hover:bg-neutral-800 transition-colors"
+          >
+            Назад
+          </button>
+        )}
+        {currentSlide < slides.length - 1 ? (
+          <button 
+            onClick={() => setCurrentSlide(prev => prev + 1)}
+            className="hidden sm:block flex-1 py-3 rounded-xl font-medium text-neutral-200 bg-neutral-800 border border-neutral-700 hover:bg-neutral-700 transition-colors"
+          >
+            Далее
+          </button>
+        ) : (
+          actions?.map((action, index) => {
+            return (
+              <button
+                key={index}
+                onClick={() => handleAction(action.id)}
+                className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-medium transition-all ${
+                  action.type === 'practice'
+                    ? 'bg-gradient-to-b from-neutral-700 to-neutral-800 text-white border border-neutral-600 shadow-md'
+                    : 'bg-neutral-800 text-neutral-300 border border-neutral-700'
+                }`}
+              >
+                {action.icon === 'Play' && <Play className="w-4 h-4" />}
+                {action.label}
+              </button>
+            );
+          })
+        )}
+      </div>
+    </div>
+  );
+};
+
 export function Course() {
+
   const navigate = useNavigate();
   const { courseProgress, markCourseDayCompleted, toggleCourseFocusDay, skipWaitTime, updateCourseTodayState } = useAppStore();
+
+
+
+  const handleAction = (id: string, day: number) => {
+    if (id === 'session') {
+      handleStartDay(day);
+    }
+  };
 
   const isSameDay = (d1: Date, d2: Date) => {
     return d1.getFullYear() === d2.getFullYear() &&
@@ -167,6 +272,10 @@ export function Course() {
   };
 
   const handleStartDay = (day: number) => {
+    if (day === 1) {
+      navigate('/practice/day1');
+      return;
+    }
     // For MVP, we will simulate the day completion just by opening the practice
     // and passing a flag to return to course and mark as completed.
     // Ideally we would have custom screens for each day's logic, but this fulfills the MVP structure.
@@ -234,9 +343,6 @@ export function Course() {
             14 дней спокойствия
           </h1>
         </div>
-        <p className="text-neutral-500 ml-2">
-          Ежедневные практики по 5–10 минут для формирования навыка саморегуляции.
-        </p>
         
         {/* DEV ONLY: Skip time button */}
         {process.env.NODE_ENV === 'development' && (
@@ -321,7 +427,9 @@ export function Course() {
                 {lesson.title}
               </h3>
                             <div className="text-sm text-neutral-400 mb-6 space-y-6">
-                {lesson.content ? (
+                {lesson.slides ? (
+                  <SlideRenderer slides={lesson.slides} actions={lesson.actions} handleAction={(id) => handleAction(id, lesson.day)} />
+                ) : lesson.content ? (
                   <div className="whitespace-pre-wrap text-neutral-400 leading-relaxed text-base">
                     {lesson.content}
                   </div>
@@ -334,7 +442,7 @@ export function Course() {
                   </div>
                 ) : null}
                 
-                {lesson.focus && (
+                {lesson.focus && !lesson.slides && (
                   <div className="space-y-2">
                     <div className="font-medium text-neutral-200">Фокус дня:</div>
                     <div className="whitespace-pre-wrap pl-3 border-l-2 border-neutral-700/60 text-neutral-400 leading-relaxed text-base">
@@ -343,7 +451,7 @@ export function Course() {
                   </div>
                 )}
                 
-                {lesson.explanation && (
+                {lesson.explanation && !lesson.slides && (
                   <div className="mt-4 pt-4 border-t border-neutral-700/50">
                     <p className="text-neutral-500 italic text-sm leading-relaxed text-base">
                       <span className="font-medium text-neutral-400 not-italic">Для чего это нужно:</span> {lesson.explanation}
@@ -362,7 +470,7 @@ export function Course() {
                       </div>
                       <span className="text-xs text-neutral-500 text-center">Дайте нервной системе время на усвоение</span>
                     </div>
-                  ) : lesson.actions ? (
+                  ) : lesson.actions && !lesson.slides ? (
                     <>
                       {lesson.actions.map((act, idx) => {
                          // Very naive completion tracking for actions:
@@ -405,7 +513,7 @@ export function Course() {
                          </div>
                       )}
                     </div>
-                  ) : (
+                  ) : lesson.slides ? null : (
                     <button
                       onClick={() => handleStartDay(lesson.day)}
                       className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-medium text-sm transition-all border active:scale-[0.98] ${
