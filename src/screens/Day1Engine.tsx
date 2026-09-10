@@ -88,7 +88,7 @@ export function Day1Engine() {
                   times: [0, 0.05, 0.4, 0.45, 0.5, 0.55, 0.9, 0.95, 1]
                 }}
               >
-                НАПРЯЧЬСЯ
+                ВДОХ - НАПРЯЖЕНИЕ
               </motion.div>
             )}
           </>
@@ -136,7 +136,7 @@ export function Day1Engine() {
               times: [0, 0.05, 0.4, 0.45, 0.5, 0.55, 0.9, 0.95, 1]
             }}
           >
-            РАССЛАБИТЬСЯ
+            ВЫДОХ - РАССЛАБЛЕНИЕ
           </motion.div>
         )}
 
@@ -218,7 +218,7 @@ export function Day1Engine() {
         {step === 'TUTORIAL_EYES_INTRO' && (
           <motion.div key="tut_eyes_intro" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="flex-1 flex flex-col justify-center w-full max-w-sm gap-8 text-center">
             <h2 className="text-2xl font-medium text-white">Этап 1: Движение глаз</h2>
-            <p className="text-neutral-400">На этом этапе просто непрерывно следите глазами за двигающимся шариком. Это запустит процесс первичный переработки напряжения вашей нервной системы.</p>
+            <p className="text-neutral-400">На этом этапе просто непрерывно следите глазами за двигающимся шариком. Это запустит процесс первичной переработки напряжения вашей нервной системы.</p>
             <button 
               onClick={() => startActivePhase('TUTORIAL_EYES_ACTIVE')}
               className="w-full py-4 mt-8 bg-indigo-600 rounded-full font-medium"
