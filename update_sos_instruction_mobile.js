@@ -1,4 +1,6 @@
-import React from 'react';
+import fs from 'node:fs';
+
+const content = `import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { ArrowLeft, Play, Waves, CloudRain, Wind, VolumeX } from 'lucide-react';
@@ -102,41 +104,41 @@ export function SosInstruction() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
               <button
                 onClick={() => updateSettings({ syncAmbientSound: 'none', syncBilateralAudio: false })}
-                className={`py-2.5 px-3 md:py-3 md:px-4 rounded-xl text-xs md:text-sm font-medium transition-all border flex justify-center items-center gap-2 ${
+                className={\`py-2.5 px-3 md:py-3 md:px-4 rounded-xl text-xs md:text-sm font-medium transition-all border flex justify-center items-center gap-2 \${
                   settings.syncAmbientSound === 'none' && !settings.syncBilateralAudio
                     ? 'bg-blue-500/20 border-blue-500/50 text-blue-300' 
                     : 'bg-white/5 border-white/10 text-white/50 hover:bg-white/10 hover:text-white/80'
-                }`}
+                }\`}
               >
                 <VolumeX className="w-3.5 h-3.5 md:w-4 md:h-4" /> Тишина
               </button>
               <button
                 onClick={() => updateSettings({ syncAmbientSound: 'wind', syncBilateralAudio: true })}
-                className={`py-2.5 px-3 md:py-3 md:px-4 rounded-xl text-xs md:text-sm font-medium transition-all border flex justify-center items-center gap-2 ${
+                className={\`py-2.5 px-3 md:py-3 md:px-4 rounded-xl text-xs md:text-sm font-medium transition-all border flex justify-center items-center gap-2 \${
                   settings.syncAmbientSound === 'wind'
                     ? 'bg-blue-500/20 border-blue-500/50 text-blue-300' 
                     : 'bg-white/5 border-white/10 text-white/50 hover:bg-white/10 hover:text-white/80'
-                }`}
+                }\`}
               >
                 <Wind className="w-3.5 h-3.5 md:w-4 md:h-4" /> Ветер
               </button>
               <button
                 onClick={() => updateSettings({ syncAmbientSound: 'rain', syncBilateralAudio: true })}
-                className={`py-2.5 px-3 md:py-3 md:px-4 rounded-xl text-xs md:text-sm font-medium transition-all border flex justify-center items-center gap-2 ${
+                className={\`py-2.5 px-3 md:py-3 md:px-4 rounded-xl text-xs md:text-sm font-medium transition-all border flex justify-center items-center gap-2 \${
                   settings.syncAmbientSound === 'rain'
                     ? 'bg-blue-500/20 border-blue-500/50 text-blue-300' 
                     : 'bg-white/5 border-white/10 text-white/50 hover:bg-white/10 hover:text-white/80'
-                }`}
+                }\`}
               >
                 <CloudRain className="w-3.5 h-3.5 md:w-4 md:h-4" /> Дождь
               </button>
               <button
                 onClick={() => updateSettings({ syncAmbientSound: 'sea', syncBilateralAudio: true })}
-                className={`py-2.5 px-3 md:py-3 md:px-4 rounded-xl text-xs md:text-sm font-medium transition-all border flex justify-center items-center gap-2 ${
+                className={\`py-2.5 px-3 md:py-3 md:px-4 rounded-xl text-xs md:text-sm font-medium transition-all border flex justify-center items-center gap-2 \${
                   settings.syncAmbientSound === 'sea'
                     ? 'bg-blue-500/20 border-blue-500/50 text-blue-300' 
                     : 'bg-white/5 border-white/10 text-white/50 hover:bg-white/10 hover:text-white/80'
-                }`}
+                }\`}
               >
                 <Waves className="w-3.5 h-3.5 md:w-4 md:h-4" /> Море
               </button>
@@ -156,3 +158,6 @@ export function SosInstruction() {
     </div>
   );
 }
+`;
+
+fs.writeFileSync('src/screens/SosInstruction.tsx', content);

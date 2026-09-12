@@ -260,17 +260,17 @@ export function Course() {
     else navigate("/practice/active", { state: { type: "breathing", durationSeconds: 180, returnToCourseDay: viewingDay } });
   };
 
-  const displayTitle = viewingDay === 1 ? "Снизить напряжение" :
+  const displayTitle = viewingDay === 1 ? "Снижаем напряжение" :
                        viewingDay === 2 ? "Переключить внимание" :
                        viewingDay === 3 ? "Мысли — это мысли" : lesson.title;
                        
-  const displayDesc = viewingDay === 1 ? "Сегодня мы попробуем простой способ немного снизить телесное возбуждение. Это займёт всего пару минут." :
+  const displayDesc = viewingDay === 1 ? <React.Fragment>Сегодня мы знакомимся с базовым упражнением и попробуем простой способ немного снизить телесное возбуждение.<br/>Это займёт всего три минуты.</React.Fragment> :
                       viewingDay === 2 ? "Сегодня потренируем сенсорное переключение. Это помогает быстрее выйти из тревожной петли и вернуть опору здесь и сейчас." :
                       viewingDay === 3 ? "Сегодня научимся немного отступать от тревожных мыслей. Это поможет видеть их яснее и меньше в них увязать." :
                       (lesson.explanation || lesson.session);
                       
-  const features = viewingDay === 1 ? [{icon: Clock, label: "≈ 2-3 минуты"}, {icon: Volume2, label: "Аудио-поддержка"}, {icon: Info, label: "Подходит для любого момента дня"}] :
-                   viewingDay === 2 ? [{icon: Clock, label: "≈ 5 минут"}, {icon: Volume2, label: "Аудио-практика"}, {icon: Info, label: "Никакого специального оборудования"}] :
+  const features = viewingDay === 1 ? [{icon: Clock, label: "≈ 3 минуты"}] :
+                   viewingDay === 2 ? [{icon: Clock, label: "≈ 5 минут"}, {icon: Volume2, label: "Аудио-практика"}] :
                    viewingDay === 3 ? [{icon: Clock, label: "≈ 4 минуты"}, {icon: Volume2, label: "Аудио-практика"}, {icon: Info, label: "Простой и безопасный метод"}] :
                    [{icon: Clock, label: lesson.duration || "≈ 5 минут"}, {icon: Info, label: "Самостоятельная практика"}];
 
@@ -333,16 +333,14 @@ export function Course() {
             </p>
             
             {/* Mobile-only features */}
-            {viewingDay !== 1 && (
-              <div className="flex flex-col gap-3 mb-8 md:hidden">
-                {features.map((f, i) => (
-                  <div key={i} className="flex items-center gap-3 text-white/60 text-xs">
-                    <f.icon className="w-4 h-4 text-[#38bdf8]/70" />
-                    <span>{f.label}</span>
-                  </div>
-                ))}
-              </div>
-            )}
+            <div className="flex flex-col gap-3 mb-8 md:hidden">
+              {features.map((f, i) => (
+                <div key={i} className="flex items-center gap-3 text-white/60 text-xs">
+                  <f.icon className="w-4 h-4 text-[#38bdf8]/70" />
+                  <span>{f.label}</span>
+                </div>
+              ))}
+            </div>
 
             <div className="flex flex-col md:flex-row gap-6 items-end w-full max-w-[800px]">
               {/* Slider Card */}
