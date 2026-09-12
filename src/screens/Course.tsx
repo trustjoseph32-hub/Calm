@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Play, Moon, CheckCircle2, CheckCircle, Info, Lock, Activity, Mic, Eye, Headphones, Anchor, Smile, Octagon, Droplets, Coffee, BriefcaseMedical, PhoneOff, Pause, Circle, ShieldCheck, Search } from "lucide-react";
+import { ArrowLeft, ArrowRight, Play, Info, Lock, Volume2, Clock, CheckCircle2 } from "lucide-react";
+import { motion, AnimatePresence } from 'motion/react';
 import { useAppStore } from '../store/AppProvider';
-import { AudioPlayer } from '../components/AudioPlayer';
 
 const courseData = [
   {
@@ -12,7 +12,7 @@ const courseData = [
     slides: [
       'В первый день мы знакомимся с базовым упражнением для саморегуляции.\nОсваиваем движение глаз, добавим дыхание и мышечный сброс.',
       'Замерим уровень вашей тревоги "До и После" упражнения, чтобы психика получила подтверждение что вы можете управлять своим состоянием.',
-      <span key="explanation"><span className="font-medium text-neutral-200 block mb-2">Для чего мы это делаем:</span>Когда мы переводим тревогу в конкретные цифры, мозг начинает воспринимать ее как решаемую задачу, а не глобальную угрозу.</span>,
+      <span key="explanation"><span className="font-medium text-blue-100/80 block mb-2">Для чего мы это делаем:</span>Когда мы переводим тревогу в конкретные цифры, мозг начинает воспринимать ее как решаемую задачу, а не глобальную угрозу.</span>,
       'Если готовы, нажмите\nНачать обучающую сессию'
     ],
     focus: 'Замечать свои ощущения безоценочно. Мы не пытаемся их изменить прямо сейчас, мы просто их фиксируем.',
@@ -153,400 +153,315 @@ const courseData = [
   }
 ];
 
+const BackgroundEffect = ({ day }: { day: number }) => {
+  if (day === 1) {
+    return (
+      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[-10%] right-[-10%] w-[60vw] h-[60vw] max-w-[600px] max-h-[600px] rounded-full bg-blue-500/10 blur-[120px]" />
+        
+        {/* Night Sky / Stars */}
+        <div className="absolute inset-0 opacity-50" style={{ backgroundImage: 'radial-gradient(circle at 50% 50%, #ffffff 1px, transparent 1px)', backgroundSize: '100px 100px' }} />
 
-const SlideRenderer = ({ slides, actions, handleAction }: { slides: React.ReactNode[], actions: any[], handleAction: (id: string) => void }) => {
-  const [currentSlide, setCurrentSlide] = React.useState(0);
+        {/* Mountain Silhouette */}
+        <div className="absolute right-0 bottom-0 w-[150%] md:w-full h-[60vh] md:h-[90vh] opacity-80 transform translate-x-[20%] md:translate-x-[10%]">
+          <svg viewBox="0 0 1000 800" preserveAspectRatio="none" className="w-full h-full">
+            <defs>
+              <linearGradient id="mount1" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#1e293b" />
+                <stop offset="100%" stopColor="#050B14" />
+              </linearGradient>
+              <linearGradient id="mount2" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#0f172a" />
+                <stop offset="100%" stopColor="#050B14" />
+              </linearGradient>
+            </defs>
+            <path d="M0,800 L0,500 L150,350 L250,450 L400,200 L550,450 L700,100 L850,400 L1000,250 L1000,800 Z" fill="url(#mount1)" />
+            <path d="M100,800 L300,400 L450,550 L650,250 L850,500 L1000,350 L1000,800 L100,800 Z" fill="url(#mount2)" />
+            {/* Ice highlights */}
+            <path d="M400,200 L450,280 L420,320 Z" fill="#475569" opacity="0.4" />
+            <path d="M700,100 L750,200 L680,250 Z" fill="#64748b" opacity="0.3" />
+            <path d="M650,250 L700,350 L630,400 Z" fill="#64748b" opacity="0.2" />
+          </svg>
+        </div>
+        <div className="absolute bottom-0 w-full h-[30vh] bg-gradient-to-t from-[#050B14] to-transparent" />
+      </div>
+    )
+  }
   
-  const [touchStart, setTouchStart] = React.useState<number | null>(null);
-  const [touchEnd, setTouchEnd] = React.useState<number | null>(null);
-
-  const minSwipeDistance = 50;
-
-  const onTouchStart = (e: React.TouchEvent) => {
-    setTouchEnd(null);
-    setTouchStart(e.targetTouches[0].clientX);
-  };
-
-  const onTouchMove = (e: React.TouchEvent) => {
-    setTouchEnd(e.targetTouches[0].clientX);
-  };
-
-  const onTouchEnd = () => {
-    if (!touchStart || !touchEnd) return;
-    const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > minSwipeDistance;
-    const isRightSwipe = distance < -minSwipeDistance;
-
-    if (isLeftSwipe && currentSlide < slides.length - 1) {
-      setCurrentSlide(prev => prev + 1);
-    }
-    if (isRightSwipe && currentSlide > 0) {
-      setCurrentSlide(prev => prev - 1);
-    }
-  };
+  if (day === 2) {
+    return (
+      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[20%] left-[20%] w-[500px] h-[500px] rounded-full bg-blue-600/10 blur-[120px]" />
+        
+        {/* Dot Sphere simulation */}
+        <div className="absolute top-[20%] md:top-[10%] right-[-30%] md:right-[5%] w-[400px] md:w-[600px] h-[400px] md:h-[600px] flex items-center justify-center opacity-60 mix-blend-screen">
+           <div className="absolute w-[80%] h-[80%] rounded-full border border-[#38bdf8]/30 rotate-45" style={{ borderStyle: 'dashed', borderWidth: '2px' }} />
+           <div className="absolute w-[80%] h-[80%] rounded-full border border-[#38bdf8]/30 -rotate-45" style={{ borderStyle: 'dashed', borderWidth: '2px' }} />
+           <div className="absolute w-[80%] h-[80%] rounded-full border border-[#38bdf8]/30 rotate-90" style={{ borderStyle: 'dashed', borderWidth: '2px' }} />
+           <div className="absolute w-[80%] h-[80%] rounded-full border border-[#38bdf8]/30" style={{ borderStyle: 'dashed', borderWidth: '2px' }} />
+           
+           <div className="absolute w-[100%] h-[100%] rounded-full border-[0.5px] border-[#38bdf8]/10" />
+           <div className="absolute w-[60%] h-[60%] rounded-full bg-[#38bdf8]/10 blur-[50px]" />
+        </div>
+      </div>
+    )
+  }
+  
+  if (day === 3) {
+    return (
+      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[10%] left-[30%] w-[400px] h-[400px] rounded-full bg-cyan-500/10 blur-[120px]" />
+        
+        {/* Bubbles */}
+        <div className="absolute top-[15%] right-[10%] md:right-[20%] w-32 md:w-48 h-32 md:h-48 rounded-full border-[0.5px] border-blue-300/40 bg-gradient-to-br from-[#38bdf8]/10 to-transparent backdrop-blur-md shadow-[inset_0_0_30px_rgba(56,189,248,0.3)]" />
+        <div className="absolute top-[35%] md:top-[40%] right-[30%] md:right-[40%] w-48 md:w-64 h-48 md:h-64 rounded-full border-[0.5px] border-blue-300/30 bg-gradient-to-tr from-cyan-400/5 to-transparent backdrop-blur-sm shadow-[inset_0_0_40px_rgba(56,189,248,0.2)]" />
+        <div className="absolute bottom-[20%] left-[20%] md:left-[30%] w-24 md:w-32 h-24 md:h-32 rounded-full border-[0.5px] border-cyan-300/40 bg-gradient-to-bl from-[#38bdf8]/10 to-transparent backdrop-blur-md shadow-[inset_0_0_20px_rgba(6,182,212,0.3)]" />
+      </div>
+    )
+  }
 
   return (
-    <div className="space-y-6">
-      <div 
-        className="relative min-h-[160px] sm:min-h-[120px] bg-neutral-900/50 rounded-xl p-6 sm:p-4 border border-neutral-800 flex items-center justify-center text-center select-none active:scale-[0.99] transition-transform shadow-inner touch-pan-y"
-        onTouchStart={onTouchStart}
-        onTouchMove={onTouchMove}
-        onTouchEnd={onTouchEnd}
-      >
-        <p className="text-neutral-300 text-[15px] sm:text-base leading-relaxed pointer-events-none whitespace-pre-wrap">
-          {slides[currentSlide]}
-        </p>
-      </div>
-      
-      <div className="flex justify-center gap-2">
-        {slides.map((_, i) => (
-          <div 
-            key={i} 
-            className={`w-2 h-2 rounded-full transition-colors ${i === currentSlide ? 'bg-indigo-500' : 'bg-neutral-700'}`} 
-          />
-        ))}
-      </div>
-
-      <div className="flex gap-4 w-full">
-        {currentSlide > 0 && (
-          <button 
-            onClick={() => setCurrentSlide(prev => prev - 1)}
-            className="hidden sm:block flex-1 py-3 rounded-xl font-medium text-neutral-400 bg-neutral-800/50 hover:bg-neutral-800 transition-colors"
-          >
-            Назад
-          </button>
-        )}
-        {currentSlide < slides.length - 1 ? (
-          <button 
-            onClick={() => setCurrentSlide(prev => prev + 1)}
-            className="hidden sm:block flex-1 py-3 rounded-xl font-medium text-neutral-200 bg-neutral-800 border border-neutral-700 hover:bg-neutral-700 transition-colors"
-          >
-            Далее
-          </button>
-        ) : (
-          actions?.map((action, index) => {
-            return (
-              <button
-                key={index}
-                onClick={() => handleAction(action.id)}
-                className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-medium transition-all ${
-                  action.type === 'practice'
-                    ? 'bg-gradient-to-b from-neutral-700 to-neutral-800 text-white border border-neutral-600 shadow-md'
-                    : 'bg-neutral-800 text-neutral-300 border border-neutral-700'
-                }`}
-              >
-                {action.icon === 'Play' && <Play className="w-4 h-4" />}
-                {action.label}
-              </button>
-            );
-          })
-        )}
-      </div>
+    <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+      <div className="absolute top-[10%] right-[10%] w-[300px] h-[300px] rounded-full bg-blue-500/20 blur-[100px]" />
+      <div className="absolute bottom-[20%] left-[-10%] w-[400px] h-[400px] rounded-full bg-cyan-500/10 blur-[120px]" />
+      <div className="absolute top-[40%] left-[50%] w-[500px] h-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full border-[1px] border-[#38bdf8]/10 opacity-30" />
+      <div className="absolute top-[40%] left-[50%] w-[300px] h-[300px] -translate-x-1/2 -translate-y-1/2 rounded-full border-[1px] border-[#38bdf8]/20 opacity-40" />
     </div>
-  );
-};
+  )
+}
 
 export function Course() {
-
   const navigate = useNavigate();
-  const { courseProgress, markCourseDayCompleted, toggleCourseFocusDay, skipWaitTime, updateCourseTodayState } = useAppStore();
+  const { courseProgress, saveCheckin, skipWaitTime } = useAppStore();
+  const [viewingDay, setViewingDay] = useState(courseProgress.currentDay);
+  
+  const [anxiety, setAnxiety] = useState<number>(7);
 
+  const lesson = courseData.find(d => d.day === viewingDay) || courseData[0];
+  const isAvailable = viewingDay <= courseProgress.currentDay;
+  const isCompleted = courseProgress.completedDays.includes(viewingDay);
 
-
-  const handleAction = (id: string, day: number) => {
-    if (id === 'session') {
-      handleStartDay(day);
-    }
-  };
-
-  const isSameDay = (d1: Date, d2: Date) => {
-    return d1.getFullYear() === d2.getFullYear() &&
-           d1.getMonth() === d2.getMonth() &&
-           d1.getDate() === d2.getDate();
-  };
-
-  const isLockedByTime = (day: number) => {
-    if (day !== courseProgress.currentDay || courseProgress.currentDay === 1) return false;
-    if (!courseProgress.lastCompletedDate) return false;
-    return isSameDay(new Date(), new Date(courseProgress.lastCompletedDate));
-  };
-
-  const handleStartDay = (day: number) => {
-    if (day === 1) {
-      navigate('/practice/day1');
-      return;
-    }
-    // For MVP, we will simulate the day completion just by opening the practice
-    // and passing a flag to return to course and mark as completed.
-    // Ideally we would have custom screens for each day's logic, but this fulfills the MVP structure.
+  const handleStartDay = () => {
+    if (!isAvailable) return;
     
-    // Using a basic combined practice for course days for now.
-    navigate('/practice/active', {
-      state: {
-        type: [2, 6, 10, 13].includes(day) ? 'synchronized' : 'course',
-        durationSeconds: 180, // 3 mins default
-        anxietyBefore: 5,
-        courseDay: day
-      }
-    });
-    
-    // We can just mark it completed here for the prototype so the UI unlocks
-    // In a full app, this happens in PracticeEngine on completion
-    if (day === courseProgress.currentDay) {
-       // markCourseDayCompleted(day);
+    if (viewingDay === 1 && !isCompleted) {
+      saveCheckin({
+        date: new Date().toISOString(),
+        anxiety: anxiety,
+        physical: 5,
+        emotional: 5,
+        thoughts: 5,
+      });
     }
+
+    if (viewingDay === 1) navigate("/practice/day1", { state: { anxietyBefore: anxiety } });
+    else if (viewingDay === 2) navigate("/practice/day2");
+    else if (viewingDay === 3) navigate("/practice/day3");
+    else navigate("/practice/active", { state: { type: "breathing", durationSeconds: 180, returnToCourseDay: viewingDay } });
   };
 
-    // Map icon strings back to actual Lucide components
-  const getIconComponent = (iconName: string) => {
-    const components: Record<string, React.ReactNode> = {
-      Activity: <Activity className="w-5 h-5 text-indigo-400" />,
-      Mic: <Mic className="w-5 h-5 text-indigo-400" />,
-      Eye: <Eye className="w-5 h-5 text-indigo-400" />,
-      Headphones: <Headphones className="w-5 h-5 text-indigo-400" />,
-      Anchor: <Anchor className="w-5 h-5 text-indigo-400" />,
-      Smile: <Smile className="w-5 h-5 text-indigo-400" />,
-      Octagon: <Octagon className="w-5 h-5 text-indigo-400" />,
-      Droplets: <Droplets className="w-5 h-5 text-indigo-400" />,
-      Coffee: <Coffee className="w-5 h-5 text-indigo-400" />,
-      BriefcaseMedical: <BriefcaseMedical className="w-5 h-5 text-indigo-400" />,
-      PhoneOff: <PhoneOff className="w-5 h-5 text-indigo-400" />,
-      Pause: <Pause className="w-5 h-5 text-indigo-400" />,
-      Circle: <Circle className="w-5 h-5 text-indigo-400" />,
-      ShieldCheck: <ShieldCheck className="w-5 h-5 text-indigo-400" />
-    };
-    return components[iconName] || <Search className="w-5 h-5 text-indigo-400" />;
-  };
-
-  const isDev = (typeof process !== "undefined" && process.env.NODE_ENV === "development") || (typeof process !== 'undefined' && process.env.NODE_ENV === 'development');
-  const visibleCourseData = isDev 
-    ? courseData 
-    : courseData.filter(lesson => lesson.day <= courseProgress.currentDay + 1);
-    
-    // Только самые мощные техники попадают в постоянный Арсенал
-  const ARTIFACT_DAYS = [2, 3, 6, 8, 10, 13];
-  const completedFocusItems = courseData.filter(lesson => 
-    courseProgress.completedFocusDays?.includes(lesson.day) && ARTIFACT_DAYS.includes(lesson.day)
-  );
+  const displayTitle = viewingDay === 1 ? "Снизить напряжение" :
+                       viewingDay === 2 ? "Переключить внимание" :
+                       viewingDay === 3 ? "Мысли — это мысли" : lesson.title;
+                       
+  const displayDesc = viewingDay === 1 ? "Сегодня мы попробуем простой способ немного снизить телесное возбуждение. Это займёт всего пару минут." :
+                      viewingDay === 2 ? "Сегодня потренируем сенсорное переключение. Это помогает быстрее выйти из тревожной петли и вернуть опору здесь и сейчас." :
+                      viewingDay === 3 ? "Сегодня научимся немного отступать от тревожных мыслей. Это поможет видеть их яснее и меньше в них увязать." :
+                      (lesson.explanation || lesson.session);
+                      
+  const features = viewingDay === 1 ? [{icon: Clock, label: "≈ 2-3 минуты"}, {icon: Volume2, label: "Аудио-поддержка"}, {icon: Info, label: "Подходит для любого момента дня"}] :
+                   viewingDay === 2 ? [{icon: Clock, label: "≈ 5 минут"}, {icon: Volume2, label: "Аудио-практика"}, {icon: Info, label: "Никакого специального оборудования"}] :
+                   viewingDay === 3 ? [{icon: Clock, label: "≈ 4 минуты"}, {icon: Volume2, label: "Аудио-практика"}, {icon: Info, label: "Простой и безопасный метод"}] :
+                   [{icon: Clock, label: lesson.duration || "≈ 5 минут"}, {icon: Info, label: "Самостоятельная практика"}];
 
   return (
-    <div className="flex-1 flex flex-col px-4 py-8 max-w-2xl mx-auto w-full">
-      <header className="flex flex-col mb-8">
-        <div className="flex items-center mb-4">
+    <div className="flex-1 w-full min-h-[100svh] relative bg-[#050B14] overflow-hidden font-sans flex flex-col">
+      <BackgroundEffect day={viewingDay} />
+      
+      {/* Header */}
+      <header className="relative z-20 flex items-center justify-between px-4 py-6 md:px-8 w-full max-w-7xl mx-auto">
+        <div className="flex items-center gap-3">
           <button 
-            onClick={() => navigate(-1)}
-            className="p-2 -ml-2 text-neutral-500 hover:text-neutral-100 transition-colors"
+            onClick={() => navigate("/")}
+            className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 transition-colors backdrop-blur-md"
           >
-            <ArrowLeft className="w-6 h-6" />
+            <ArrowLeft className="w-5 h-5" />
           </button>
-          <h1 className="text-xl font-medium ml-2 text-neutral-100">
-            14 дней спокойствия
-          </h1>
         </div>
         
-        {/* DEV ONLY: Skip time button */}
-        {process.env.NODE_ENV === 'development' && (
-          <button 
-            onClick={skipWaitTime}
-            className="mt-4 self-start text-xs bg-neutral-800 text-neutral-400 px-3 py-1 rounded-md hover:bg-neutral-700"
-          >
-            [Test] Пропустить 24 часа
-          </button>
-        )}
+        <div className="flex flex-col items-center absolute left-1/2 -translate-x-1/2">
+          <div className="text-[10px] md:text-xs text-white/60 mb-2 font-medium tracking-wider uppercase">
+            День {viewingDay} из 14
+          </div>
+          <div className="flex gap-1 md:gap-1.5">
+            {Array.from({ length: 14 }).map((_, i) => {
+              const dayNum = i + 1;
+              const isPast = dayNum < courseProgress.currentDay;
+              const isCurrent = dayNum === courseProgress.currentDay;
+              return (
+                <div 
+                  key={i} 
+                  className={`h-1 rounded-full transition-all duration-300 ${isPast ? "bg-[#38bdf8] w-4 md:w-6" : isCurrent ? "bg-[#38bdf8] w-4 md:w-6 shadow-[0_0_8px_rgba(56,189,248,0.8)]" : "bg-white/10 w-2 md:w-4"}`}
+                />
+              )
+            })}
+          </div>
+        </div>
+        
+        <div className="w-10 flex justify-end">
+          <span className="hidden md:block text-xs text-white/50 whitespace-nowrap tracking-wide font-light">
+            Осталось {14 - courseProgress.currentDay} дней
+          </span>
+        </div>
       </header>
 
-      
-      {completedFocusItems.length > 0 && (
-        <section className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-medium text-neutral-100 ml-2">Мой арсенал</h2>
-            <span className="text-xs text-neutral-500 bg-neutral-800 px-2 py-1 rounded-full">{completedFocusItems.length} освоено</span>
-          </div>
-          <div className="flex gap-3 overflow-x-auto pb-4 snap-x pl-2 -ml-2 pr-4 scrollbar-hide">
-            {completedFocusItems.map((item) => (
-              <div key={item.day} className="flex-shrink-0 w-40 bg-neutral-800/80 p-4 rounded-2xl border border-neutral-700/50 snap-start flex flex-col gap-3">
-                <div className="w-10 h-10 rounded-full bg-indigo-500/10 flex items-center justify-center">
-                  {getIconComponent(item.focusIcon || 'Search')}
-                </div>
-                <div>
-                  <h4 className="text-sm font-medium text-neutral-200 leading-tight">{item.focusTitle}</h4>
-                  <p className="text-xs text-neutral-500 mt-1">День {item.day}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      <main className="flex-1 flex flex-col gap-4 pb-12">
-        {visibleCourseData.map((lesson) => {
-          const isCompleted = courseProgress.completedDays.includes(lesson.day);
-          const isFocusCompleted = courseProgress.completedFocusDays?.includes(lesson.day);
-          const isAvailable = lesson.day <= courseProgress.currentDay;
-          const isCurrent = lesson.day === courseProgress.currentDay;
-
-          const isFogOfWar = !isDev && lesson.day > courseProgress.currentDay;
-
-          if (isFogOfWar) {
-            return (
-              <div 
-                key={lesson.day}
-                className="relative bg-neutral-800/30 p-5 rounded-3xl border border-dashed border-neutral-700/50 flex flex-col items-center justify-center min-h-[140px] gap-3"
-              >
-                <div className="w-12 h-12 rounded-full bg-gradient-to-b from-neutral-700 via-neutral-800 to-neutral-900 flex items-center justify-center border border-neutral-600/40 shadow-[inset_0_2px_4px_rgba(255,255,255,0.1),inset_0_-4px_6px_rgba(0,0,0,0.5),0_6px_12px_rgba(0,0,0,0.3)]">
-                  <Lock className="w-5 h-5 drop-shadow-md text-neutral-400" />
-                </div>
-                <div className="text-center">
-                  <h3 className="text-neutral-400 font-medium text-sm tracking-wide uppercase mb-1">День {lesson.day}</h3>
-                  <p className="text-neutral-500 text-xs">Откроется после завершения текущего дня</p>
-                </div>
-              </div>
-            );
-          }
-
-          return (
-            <div 
-              key={lesson.day}
-              className={`relative bg-neutral-800 p-5 rounded-3xl border transition-all ${
-                isCurrent 
-                  ? 'border-neutral-800 shadow-md' 
-                  : isAvailable 
-                    ? 'border-neutral-700 hover:border-neutral-600 shadow-sm' 
-                    : 'border-neutral-700 opacity-60'
-              }`}
-            >
-              <div className="flex justify-between items-start mb-2">
-                <span className={`text-sm font-medium uppercase tracking-wider ${isCurrent ? 'text-neutral-100' : 'text-neutral-500'}`}>
-                  День {lesson.day}
-                </span>
-                <span className="text-xs text-neutral-500 font-medium bg-neutral-900 px-2 py-1 rounded-md">
-                  {lesson.duration}
-                </span>
-              </div>
-              <h3 className={`text-lg font-medium mb-2 ${!isAvailable && 'text-neutral-500'}`}>
-                {lesson.title}
-              </h3>
-                            <div className="text-sm text-neutral-400 mb-6 space-y-6">
-                {lesson.slides ? (
-                  <SlideRenderer slides={lesson.slides} actions={lesson.actions} handleAction={(id) => handleAction(id, lesson.day)} />
-                ) : lesson.content ? (
-                  <div className="whitespace-pre-wrap text-neutral-400 leading-relaxed text-base">
-                    {lesson.content}
+      {/* Content */}
+      <main className="relative z-10 flex-1 flex flex-col md:flex-row w-full max-w-7xl mx-auto">
+        
+        <div className="flex-1 flex flex-col justify-end md:justify-center px-4 sm:px-8 pb-8 md:pb-0 pt-4 md:pl-12 lg:pl-24 h-full">
+          <motion.div 
+            key={viewingDay}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="max-w-3xl w-full"
+          >
+            <h3 className="text-[#38bdf8] text-sm md:text-base mb-2 font-medium tracking-wide">День {lesson.day}</h3>
+            <h1 className="text-4xl md:text-[3.5rem] font-light text-white mb-4 leading-tight tracking-tight">{displayTitle}</h1>
+            <p className="text-white/70 font-light text-sm md:text-lg leading-relaxed mb-4 md:mb-10 max-w-md">
+              {displayDesc}
+            </p>
+            
+            {/* Mobile-only features */}
+            {viewingDay !== 1 && (
+              <div className="flex flex-col gap-3 mb-8 md:hidden">
+                {features.map((f, i) => (
+                  <div key={i} className="flex items-center gap-3 text-white/60 text-xs">
+                    <f.icon className="w-4 h-4 text-[#38bdf8]/70" />
+                    <span>{f.label}</span>
                   </div>
-                ) : lesson.session ? (
-                  <div className="space-y-2">
-                    <div className="font-medium text-neutral-200">Сессия по протоколу:</div>
-                    <div className="whitespace-pre-wrap pl-3 border-l-2 border-neutral-700/60 text-neutral-400 leading-relaxed">
-                      {lesson.session}
+                ))}
+              </div>
+            )}
+
+            <div className="flex flex-col md:flex-row gap-6 items-end w-full max-w-[800px]">
+              {/* Slider Card */}
+              {viewingDay === 1 && !isCompleted && (
+                <div className="flex-1 w-full p-5 md:p-8 rounded-[1.5rem] md:rounded-[2rem] bg-[#0A1325]/80 border border-blue-500/20 backdrop-blur-xl shadow-2xl">
+                  <div className="flex justify-between items-start mb-4 md:mb-8">
+                    <h4 className="text-white text-base md:text-lg font-medium max-w-[200px]">Как сильно ощущается напряжение сейчас?</h4>
+                    <div className="w-12 h-12 rounded-[14px] bg-[#122343] border border-[#38bdf8]/30 flex items-center justify-center text-white text-xl font-medium shadow-[0_0_15px_rgba(56,189,248,0.2)]">
+                      {anxiety}
                     </div>
                   </div>
-                ) : null}
-                
-                {lesson.focus && !lesson.slides && (
-                  <div className="space-y-2">
-                    <div className="font-medium text-neutral-200">Фокус дня:</div>
-                    <div className="whitespace-pre-wrap pl-3 border-l-2 border-neutral-700/60 text-neutral-400 leading-relaxed text-base">
-                      {lesson.focus}
-                    </div>
-                  </div>
-                )}
-                
-                {lesson.explanation && !lesson.slides && (
-                  <div className="mt-4 pt-4 border-t border-neutral-700/50">
-                    <p className="text-neutral-500 italic text-sm leading-relaxed text-base">
-                      <span className="font-medium text-neutral-400 not-italic">Для чего это нужно:</span> {lesson.explanation}
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              {isAvailable ? (
-                <div className={`flex flex-col gap-3 mt-4 border-t border-neutral-700/50 pt-4 ${lesson.day === 2 || lesson.actions ? 'sm:flex-col' : 'sm:flex-row'}`}>
-                  {isLockedByTime(lesson.day) ? (
-                    <div className="flex-1 flex flex-col items-center justify-center gap-2 px-4 py-3 bg-neutral-800/80 border border-neutral-700/50 rounded-xl text-neutral-400">
-                      <div className="flex items-center gap-2">
-                        <Lock className="w-4 h-4" />
-                        <span className="font-medium text-sm">Откроется завтра</span>
+                  
+                  <div className="relative pt-2 pb-4 md:pb-6">
+                    <input 
+                      type="range" 
+                      min="0" max="10" 
+                      value={anxiety} 
+                      onChange={(e) => setAnxiety(parseInt(e.target.value))}
+                      className="w-full h-1 bg-[#1E293B] rounded-lg appearance-none cursor-pointer relative z-10"
+                      style={{
+                        background: `linear-gradient(to right, #38bdf8 ${anxiety * 10}%, #1E293B ${anxiety * 10}%)`
+                      }}
+                    />
+                    <style>{`
+                      input[type=range]::-webkit-slider-thumb {
+                        appearance: none;
+                        width: 28px;
+                        height: 28px;
+                        border-radius: 50%;
+                        background: #38bdf8;
+                        border: 4px solid #fff;
+                        box-shadow: 0 0 20px rgba(56, 189, 248, 0.6);
+                        cursor: pointer;
+                        transition: transform 0.1s;
+                      }
+                      input[type=range]::-webkit-slider-thumb:active {
+                        transform: scale(1.1);
+                      }
+                    `}</style>
+                    <div className="flex justify-between text-[10px] md:text-xs text-white/40 mt-6 px-1 font-light tracking-wide relative">
+                      <div className="flex justify-between w-full">
+                        {[0,1,2,3,4,5,6,7,8,9,10].map(n => (
+                          <div key={n} className="flex flex-col items-center gap-2">
+                            <div className="w-px h-1.5 bg-white/20" />
+                            <span>{n}</span>
+                          </div>
+                        ))}
                       </div>
-                      <span className="text-xs text-neutral-500 text-center">Дайте нервной системе время на усвоение</span>
                     </div>
-                  ) : lesson.actions && !lesson.slides ? (
-                    <>
-                      {lesson.actions.map((act, idx) => {
-                         // Very naive completion tracking for actions:
-                         // We can consider checking complete if isCompleted is true,
-                         // but ideally each action tracks itself. For MVP, if it's checkin or evening_checkin,
-                         // we can just allow them to press it anytime. If it's a practice, we start practice.
-                         const IconComp = act.icon === 'Play' ? Play : act.icon === 'Moon' ? Moon : Activity;
-                         return (
-                           <button
-                             key={act.id}
-                             onClick={() => {
-                               if (act.type === 'checkin' || act.type === 'checkin_evening') {
-                                 navigate('/checkin');
-                               } else {
-                                 handleStartDay(lesson.day);
-                               }
-                             }}
-                             className={`w-full flex items-center justify-center gap-2 px-6 py-4 rounded-xl font-medium text-sm transition-all border active:scale-[0.98] ${
-                               isCompleted 
-                                 ? 'bg-gradient-to-b from-neutral-600 via-neutral-700 to-neutral-900 text-neutral-300 border-neutral-400/40 shadow-[inset_0_2px_4px_rgba(255,255,255,0.3),inset_0_-4px_6px_rgba(0,0,0,0.6),0_6px_12px_rgba(0,0,0,0.3)]' 
-                                 : 'bg-gradient-to-b from-indigo-400 via-indigo-600 to-indigo-800 text-white border-indigo-300/40 shadow-[inset_0_2px_4px_rgba(255,255,255,0.5),inset_0_-4px_6px_rgba(0,0,0,0.5),0_6px_12px_rgba(79,70,229,0.4)] drop-shadow-md hover:scale-[1.02]'
-                             }`}
-                           >
-                             <IconComp className="w-5 h-5 drop-shadow-md" />
-                             {act.label}
-                           </button>
-                         )
-                      })}
-                    </>
-                  ) : lesson.day === 2 ? (
-                    <div className="w-full flex flex-col gap-3">
-                      <AudioPlayer 
-                        src="https://actions.google.com/sounds/v1/water/waves_crashing_on_rock_beach.ogg" 
-                        title="Аудио-сессия: Длинный выдох" 
-                        onComplete={() => markCourseDayCompleted(2)} 
-                      />
-                      {isCompleted && (
-                         <div className="flex items-center justify-center gap-2 text-sm text-green-400 font-medium bg-green-900/10 py-2.5 rounded-xl border border-green-900/30">
-                            <CheckCircle2 className="w-4 h-4" /> Сессия прослушана
-                         </div>
-                      )}
+                    <div className="flex justify-between text-[10px] md:text-xs text-white/40 mt-4 px-1">
+                      <span>0 — спокойно</span>
+                      <span>10 — максимально напряженно</span>
                     </div>
-                  ) : lesson.slides ? null : (
-                    <button
-                      onClick={() => handleStartDay(lesson.day)}
-                      className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-medium text-sm transition-all border active:scale-[0.98] ${
-                        isCompleted 
-                          ? 'bg-gradient-to-b from-neutral-600 via-neutral-700 to-neutral-900 text-neutral-300 border-neutral-400/40 shadow-[inset_0_2px_4px_rgba(255,255,255,0.3),inset_0_-4px_6px_rgba(0,0,0,0.6),0_6px_12px_rgba(0,0,0,0.3)]' 
-                          : 'bg-gradient-to-b from-indigo-400 via-indigo-600 to-indigo-800 text-white border-indigo-300/40 shadow-[inset_0_2px_4px_rgba(255,255,255,0.5),inset_0_-4px_6px_rgba(0,0,0,0.5),0_6px_12px_rgba(79,70,229,0.4)] drop-shadow-md hover:scale-[1.02]'
-                      }`}
-                    >
-                      {isCompleted ? <CheckCircle2 className="w-4 h-4" /> : <Play className="w-4 h-4 fill-current" />}
-                      {isCompleted ? 'Протокол пройден' : 'Начать по протоколу'}
-                    </button>
-                  )}
-                  <button
-                    onClick={() => toggleCourseFocusDay(lesson.day)}
-                    className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-medium text-sm transition-all active:scale-[0.98] border ${
-                      isFocusCompleted 
-                        ? 'bg-gradient-to-b from-emerald-400 via-emerald-600 to-emerald-800 text-emerald-50 border-emerald-300/40 shadow-[inset_0_2px_4px_rgba(255,255,255,0.5),inset_0_-4px_6px_rgba(0,0,0,0.5),0_6px_12px_rgba(16,185,129,0.4)] drop-shadow-md' 
-                        : 'bg-gradient-to-b from-neutral-700 via-neutral-800 to-neutral-900 text-neutral-400 border-neutral-600/40 shadow-[inset_0_2px_4px_rgba(255,255,255,0.1),inset_0_-4px_6px_rgba(0,0,0,0.5),0_6px_12px_rgba(0,0,0,0.3)] hover:scale-[1.02]'
-                    }`}
-                  >
-                    <CheckCircle2 className={`w-4 h-4 ${isFocusCompleted ? 'text-green-400' : 'text-neutral-500'}`} />
-                    {isFocusCompleted ? 'Фокус выполнен' : 'Отметить фокус'}
-                  </button>
-                </div>
-              ) : (
-                <div className="flex items-center gap-2 text-neutral-500 text-sm font-medium">
-                  <Lock className="w-4 h-4" />
-                  <span>Недоступно</span>
+                  </div>
                 </div>
               )}
+
+              <div className="flex flex-col w-full md:w-[320px] shrink-0 gap-3 pb-2">
+                <button 
+                  onClick={handleStartDay}
+                  disabled={!isAvailable}
+                  className={`w-full flex items-center justify-between px-8 py-5 rounded-[1.5rem] font-medium text-lg transition-all duration-300 group active:scale-[0.98] ${
+                    isAvailable 
+                      ? 'bg-gradient-to-r from-[#1E40AF] to-[#38BDF8] text-white shadow-[0_0_30px_rgba(56,189,248,0.3)] hover:shadow-[0_0_40px_rgba(56,189,248,0.5)] border border-blue-400/30' 
+                      : 'bg-white/5 text-white/30 border border-white/10'
+                  }`}
+                >
+                  {isCompleted ? (
+                    <>Практика завершена <CheckCircle2 className="w-6 h-6" /></>
+                  ) : isAvailable ? (
+                    <>Начать практику <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" /></>
+                  ) : (
+                    <><Lock className="w-5 h-5 mr-1" /> Откроется позже</>
+                  )}
+                </button>
+                
+                {viewingDay === 1 && !isCompleted && (
+                  <p className="text-center text-xs text-white/40 font-light hidden md:block mt-2 tracking-wide">
+                    Это займёт около 2-3 минут
+                  </p>
+                )}
+              </div>
             </div>
-          );
-        })}
+
+            {/* Pagination Controls / Dev Tools */}
+            <div className="flex items-center justify-between mt-8 md:mt-12 pt-6 border-t border-white/10 max-w-[800px]">
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => setViewingDay(Math.max(1, viewingDay - 1))}
+                  disabled={viewingDay === 1}
+                  className="p-2 rounded-full bg-white/5 text-white/50 hover:bg-white/10 hover:text-white disabled:opacity-30 transition-colors"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                </button>
+                <button 
+                  onClick={() => setViewingDay(Math.min(14, viewingDay + 1))}
+                  disabled={viewingDay === 14}
+                  className="p-2 rounded-full bg-white/5 text-white/50 hover:bg-white/10 hover:text-white disabled:opacity-30 transition-colors"
+                >
+                  <ArrowRight className="w-5 h-5" />
+                </button>
+              </div>
+              
+              {process.env.NODE_ENV === 'development' && (
+                <button 
+                  onClick={skipWaitTime}
+                  className="text-xs bg-white/5 text-white/30 px-4 py-2 rounded-xl hover:bg-white/10 transition-colors"
+                >
+                  [Dev] Пропустить 24ч
+                </button>
+              )}
+            </div>
+
+          </motion.div>
+        </div>
+
+        {/* Right side for desktop purely visual balance */}
+        <div className="hidden md:flex flex-1 relative pointer-events-none" />
+
       </main>
     </div>
   );

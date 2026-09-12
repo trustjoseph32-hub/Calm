@@ -49,7 +49,7 @@ export function Progress() {
       <header className="flex items-center mb-8">
         <button 
           onClick={() => navigate(-1)}
-          className="w-10 h-10 rounded-full bg-gradient-to-b from-neutral-600 via-neutral-700 to-neutral-900 text-neutral-200 flex items-center justify-center shrink-0 border border-neutral-400/40 shadow-[inset_0_2px_4px_rgba(255,255,255,0.3),inset_0_-4px_6px_rgba(0,0,0,0.6),0_6px_12px_rgba(0,0,0,0.3)] hover:scale-105 active:scale-95 transition-all"
+          className="w-10 h-10 rounded-full bg-gradient-to-b from-neutral-600 via-neutral-700 to-neutral-900 text-blue-100/80 flex items-center justify-center shrink-0 border border-neutral-400/40 shadow-[inset_0_2px_4px_rgba(255,255,255,0.3),inset_0_-4px_6px_rgba(0,0,0,0.6),0_6px_12px_rgba(0,0,0,0.3)] hover:scale-105 active:scale-95 transition-all"
         >
           <ArrowLeft className="w-5 h-5 drop-shadow-md" />
         </button>
@@ -60,42 +60,42 @@ export function Progress() {
 
       <main className="flex-1 flex flex-col gap-6">
         {!stats ? (
-          <div className="bg-neutral-800 p-12 rounded-3xl shadow-sm border border-neutral-700 flex flex-col items-center justify-center text-center">
-            <Activity className="w-12 h-12 text-neutral-500 mb-4" strokeWidth={1} />
+          <div className="bg-white/10 p-12 rounded-3xl shadow-sm border border-white/10 flex flex-col items-center justify-center text-center">
+            <Activity className="w-12 h-12 text-slate-500 mb-4" strokeWidth={1} />
             <h2 className="text-xl font-medium text-neutral-100 mb-2">Пока нет данных</h2>
-            <p className="text-neutral-500">Заверши свою первую практику, чтобы увидеть статистику.</p>
+            <p className="text-slate-500">Заверши свою первую практику, чтобы увидеть статистику.</p>
           </div>
         ) : (
           <>
             <div className="grid grid-cols-2 gap-4">
-              <div className="bg-neutral-800 p-6 rounded-3xl shadow-sm border border-neutral-700 flex flex-col items-start">
+              <div className="bg-white/10 p-6 rounded-3xl shadow-sm border border-white/10 flex flex-col items-start">
                 <div className="w-10 h-10 rounded-full bg-gradient-to-b from-indigo-400 via-indigo-600 to-indigo-800 text-white flex items-center justify-center border border-indigo-300/40 shadow-[inset_0_2px_4px_rgba(255,255,255,0.5),inset_0_-4px_6px_rgba(0,0,0,0.5),0_6px_12px_rgba(79,70,229,0.4)] mb-4">
                   <Activity className="w-5 h-5 drop-shadow-md text-indigo-50" />
                 </div>
                 <span className="text-3xl font-light text-neutral-100">{stats.totalPractices}</span>
-                <span className="text-sm text-neutral-500 mt-1">Всего практик</span>
+                <span className="text-sm text-slate-500 mt-1">Всего практик</span>
               </div>
-              <div className="bg-neutral-800 p-6 rounded-3xl shadow-sm border border-neutral-700 flex flex-col items-start">
+              <div className="bg-white/10 p-6 rounded-3xl shadow-sm border border-white/10 flex flex-col items-start">
                 <div className="w-10 h-10 rounded-full bg-gradient-to-b from-emerald-400 via-emerald-600 to-emerald-800 text-white flex items-center justify-center border border-emerald-300/40 shadow-[inset_0_2px_4px_rgba(255,255,255,0.5),inset_0_-4px_6px_rgba(0,0,0,0.5),0_6px_12px_rgba(16,185,129,0.4)] mb-4">
                   <Calendar className="w-5 h-5 drop-shadow-md text-emerald-50" />
                 </div>
                 <span className="text-3xl font-light text-neutral-100">{stats.uniqueDays}</span>
-                <span className="text-sm text-neutral-500 mt-1">Дней с практикой</span>
+                <span className="text-sm text-slate-500 mt-1">Дней с практикой</span>
               </div>
-              <div className="col-span-2 bg-neutral-800 p-6 rounded-3xl shadow-sm border border-neutral-700 flex flex-col">
-                <h3 className="text-sm font-medium text-neutral-500 uppercase tracking-wider mb-6">Среднее изменение</h3>
+              <div className="col-span-2 bg-white/10 p-6 rounded-3xl shadow-sm border border-white/10 flex flex-col">
+                <h3 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-6">Среднее изменение</h3>
                 <div className="flex items-center justify-around w-full">
                   <div className="flex flex-col items-center">
-                    <span className="text-sm text-neutral-500 mb-1">До</span>
+                    <span className="text-sm text-slate-500 mb-1">До</span>
                     <span className="text-3xl font-light">{stats.avgBefore}</span>
                   </div>
-                  <ArrowLeft className="w-6 h-6 text-neutral-500 rotate-180" />
+                  <ArrowLeft className="w-6 h-6 text-slate-500 rotate-180" />
                   <div className="flex flex-col items-center">
-                    <span className="text-sm text-neutral-500 mb-1">После</span>
+                    <span className="text-sm text-slate-500 mb-1">После</span>
                     <span className="text-3xl font-light">{stats.avgAfter}</span>
                   </div>
-                  <div className="flex flex-col items-center pl-4 border-l border-neutral-700">
-                    <span className="text-sm text-neutral-500 mb-1">Дельта</span>
+                  <div className="flex flex-col items-center pl-4 border-l border-white/10">
+                    <span className="text-sm text-slate-500 mb-1">Дельта</span>
                     <span className="text-3xl font-medium text-neutral-100">{stats.avgDelta}</span>
                   </div>
                 </div>
@@ -103,8 +103,8 @@ export function Progress() {
             </div>
 
             {chartData.length > 1 && (
-              <div className="bg-neutral-800 p-6 rounded-3xl shadow-sm border border-neutral-700 flex flex-col h-[300px]">
-                <h3 className="text-sm font-medium text-neutral-500 uppercase tracking-wider mb-6">Уровень тревоги (последние)</h3>
+              <div className="bg-white/10 p-6 rounded-3xl shadow-sm border border-white/10 flex flex-col h-[300px]">
+                <h3 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-6">Уровень тревоги (последние)</h3>
                 <div className="flex-1 w-full min-h-0">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={chartData} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>

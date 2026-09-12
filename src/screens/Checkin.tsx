@@ -34,10 +34,10 @@ export function Checkin() {
 
   return (
     <div className="flex-1 flex flex-col bg-neutral-950 min-h-screen text-neutral-100">
-      <header className="flex items-center gap-4 p-4 border-b border-neutral-800">
+      <header className="flex items-center gap-4 p-4 border-b border-white/10">
         <button 
           onClick={() => navigate(-1)}
-          className="w-10 h-10 rounded-full bg-gradient-to-b from-neutral-600 via-neutral-700 to-neutral-900 text-neutral-200 flex items-center justify-center shrink-0 border border-neutral-400/40 shadow-[inset_0_2px_4px_rgba(255,255,255,0.3),inset_0_-4px_6px_rgba(0,0,0,0.6),0_6px_12px_rgba(0,0,0,0.3)] hover:scale-105 active:scale-95 transition-all"
+          className="w-10 h-10 rounded-full bg-gradient-to-b from-neutral-600 via-neutral-700 to-neutral-900 text-blue-100/80 flex items-center justify-center shrink-0 border border-neutral-400/40 shadow-[inset_0_2px_4px_rgba(255,255,255,0.3),inset_0_-4px_6px_rgba(0,0,0,0.6),0_6px_12px_rgba(0,0,0,0.3)] hover:scale-105 active:scale-95 transition-all"
         >
           <ArrowLeft className="w-5 h-5 drop-shadow-md" />
         </button>
@@ -47,7 +47,7 @@ export function Checkin() {
       <main className="flex-1 overflow-y-auto p-4 max-w-2xl mx-auto w-full">
         <div className="mb-8">
           <h2 className="text-2xl font-semibold mb-2">Как вы себя чувствуете?</h2>
-          <p className="text-neutral-400">
+          <p className="text-slate-400">
             Замечать свои ощущения безоценочно — первый шаг к спокойствию. 
             Оцените свое состояние по 4 критериям (от 0 до 10).
           </p>
@@ -121,11 +121,11 @@ function SliderField({ icon, color, title, description, value, setValue }: {
           {icon}
         </div>
         <div>
-          <h3 className="font-medium text-lg text-neutral-200 flex items-center gap-2">
+          <h3 className="font-medium text-lg text-blue-100/80 flex items-center gap-2">
             {title} 
             <span className="text-indigo-400 font-semibold bg-indigo-900/30 px-2 py-0.5 rounded-md text-sm">{value === null ? "-" : value}</span>
           </h3>
-          <p className="text-sm text-neutral-500">{description}</p>
+          <p className="text-sm text-slate-500">{description}</p>
         </div>
       </div>
       <div className="px-2">

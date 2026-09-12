@@ -9,3 +9,12 @@
     scrollbar-width: none;
   }
 }
+
+@layer base {
+  body {
+    @apply bg-[#040B16] text-slate-100;
+    /* Add a subtle global radial gradient to mimic the deep space glow */
+    background-image: radial-gradient(circle at 50% 0%, #0c1f38 0%, #040B16 60%);
+    background-attachment: fixed;
+  }
+}

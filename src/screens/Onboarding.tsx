@@ -12,17 +12,17 @@ export function Onboarding() {
     {
       title: 'Calm Motion',
       text: 'Небольшие практики для моментов, когда внутри слишком много напряжения.',
-      icon: <Wind className="w-12 h-12 text-neutral-500 mb-6" strokeWidth={1.5} />,
+      icon: <Wind className="w-12 h-12 text-slate-500 mb-6" strokeWidth={1.5} />,
     },
     {
       title: 'Выбирай свой ритм',
       text: 'Дыхание, движение и grounding можно использовать отдельно или вместе.',
-      icon: <Activity className="w-12 h-12 text-neutral-500 mb-6" strokeWidth={1.5} />,
+      icon: <Activity className="w-12 h-12 text-slate-500 mb-6" strokeWidth={1.5} />,
     },
     {
       title: 'Ты всегда управляешь практикой',
       text: 'Можно остановиться, изменить скорость или выключить любой элемент.',
-      icon: <Maximize className="w-12 h-12 text-neutral-500 mb-6" strokeWidth={1.5} />,
+      icon: <Maximize className="w-12 h-12 text-slate-500 mb-6" strokeWidth={1.5} />,
     },
     {
       title: 'Готово',
@@ -40,7 +40,7 @@ export function Onboarding() {
   };
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-center p-6 bg-neutral-900">
+    <div className="flex-1 flex flex-col items-center justify-center p-6 bg-transparent">
       <div className="max-w-md w-full flex flex-col items-center text-center">
         <AnimatePresence mode="wait">
           <motion.div
@@ -56,13 +56,13 @@ export function Onboarding() {
               {steps[step].title}
             </h1>
             {steps[step].text && (
-              <p className="text-lg text-neutral-500 leading-relaxed max-w-sm">
+              <p className="text-lg text-slate-500 leading-relaxed max-w-sm">
                 {steps[step].text}
               </p>
             )}
 
             {step === 3 && (
-              <div className="mt-8 flex flex-col items-start text-left bg-neutral-800 p-6 rounded-2xl shadow-sm border border-neutral-700">
+              <div className="mt-8 flex flex-col items-start text-left bg-white/10 p-6 rounded-2xl shadow-sm border border-white/10">
                 <label className="flex items-start gap-4 cursor-pointer group">
                   <div className="relative flex items-center justify-center mt-1">
                     <input
@@ -71,11 +71,11 @@ export function Onboarding() {
                       checked={agreed}
                       onChange={(e) => setAgreed(e.target.checked)}
                     />
-                    <div className={`w-6 h-6 rounded border-2 transition-colors flex items-center justify-center ${agreed ? 'bg-neutral-800 border-neutral-800' : 'border-neutral-600 group-hover:border-neutral-400'}`}>
+                    <div className={`w-6 h-6 rounded border-2 transition-colors flex items-center justify-center ${agreed ? 'bg-white/10 border-white/10' : 'border-neutral-600 group-hover:border-neutral-400'}`}>
                       {agreed && <ArrowRight className="w-4 h-4 text-white" />}
                     </div>
                   </div>
-                  <span className="text-neutral-500 leading-relaxed text-sm">
+                  <span className="text-slate-500 leading-relaxed text-sm">
                     Я понимаю, что приложение предназначено для саморегуляции и не заменяет профессиональную психологическую или медицинскую помощь.
                   </span>
                 </label>
@@ -90,7 +90,7 @@ export function Onboarding() {
               <div
                 key={i}
                 className={`h-1.5 rounded-full transition-all duration-300 ${
-                  i === step ? 'w-8 bg-neutral-800' : 'w-2 bg-neutral-700'
+                  i === step ? 'w-8 bg-white/10' : 'w-2 bg-neutral-700'
                 }`}
               />
             ))}

@@ -23,7 +23,7 @@ export function SynchronizedSetup() {
       <header className="flex items-center mb-8">
         <button 
           onClick={() => navigate(-1)}
-          className="w-10 h-10 rounded-full bg-gradient-to-b from-neutral-600 via-neutral-700 to-neutral-900 text-neutral-200 flex items-center justify-center shrink-0 border border-neutral-400/40 shadow-[inset_0_2px_4px_rgba(255,255,255,0.3),inset_0_-4px_6px_rgba(0,0,0,0.6),0_6px_12px_rgba(0,0,0,0.3)] hover:scale-105 active:scale-95 transition-all"
+          className="w-10 h-10 rounded-full bg-gradient-to-b from-neutral-600 via-neutral-700 to-neutral-900 text-blue-100/80 flex items-center justify-center shrink-0 border border-neutral-400/40 shadow-[inset_0_2px_4px_rgba(255,255,255,0.3),inset_0_-4px_6px_rgba(0,0,0,0.6),0_6px_12px_rgba(0,0,0,0.3)] hover:scale-105 active:scale-95 transition-all"
         >
           <ArrowLeft className="w-5 h-5 drop-shadow-md" />
         </button>
@@ -33,22 +33,22 @@ export function SynchronizedSetup() {
       </header>
 
       <main className="flex-1 flex flex-col gap-6">
-        <section className="bg-neutral-800 p-6 rounded-3xl shadow-sm border border-neutral-700 flex flex-col gap-6">
+        <section className="bg-white/10 p-6 rounded-3xl shadow-sm border border-white/10 flex flex-col gap-6">
           <div className="flex flex-col gap-1">
             <h2 className="text-lg font-medium text-neutral-100">Структура практики</h2>
-            <p className="text-sm text-neutral-500">Практика состоит из коротких раундов по 20-30 секунд.</p>
+            <p className="text-sm text-slate-500">Практика состоит из коротких раундов по 20-30 секунд.</p>
           </div>
-          <div className="flex flex-col gap-3 text-sm text-neutral-500">
+          <div className="flex flex-col gap-3 text-sm text-slate-500">
             <div className="flex items-center gap-3"><div className="w-2 h-2 rounded-full bg-neutral-700"></div> После каждого раунда — вопрос о самочувствии</div>
             <div className="flex items-center gap-3"><div className="w-2 h-2 rounded-full bg-neutral-700"></div> Если станет хуже, мы предложим мягкое заземление</div>
           </div>
         </section>
 
-        <section className="bg-neutral-800 p-6 rounded-3xl shadow-sm border border-neutral-700 flex flex-col gap-6">
+        <section className="bg-white/10 p-6 rounded-3xl shadow-sm border border-white/10 flex flex-col gap-6">
           <div className="flex flex-col gap-1">
             <h2 className="text-lg font-medium text-neutral-100">Дыхание</h2>
-            <div className="flex items-start gap-2 bg-neutral-900 p-3 rounded-xl mt-2 text-sm text-neutral-500">
-              <Info className="w-4 h-4 shrink-0 mt-0.5 text-neutral-500" />
+            <div className="flex items-start gap-2 bg-transparent p-3 rounded-xl mt-2 text-sm text-slate-500">
+              <Info className="w-4 h-4 shrink-0 mt-0.5 text-slate-500" />
               <p>Дыши комфортно. Не нужно делать максимально глубокий вдох.</p>
             </div>
           </div>
@@ -61,14 +61,14 @@ export function SynchronizedSetup() {
                 const val = Number(e.target.value);
                 updateSettings({ syncInhaleDuration: val, syncExhaleDuration: val });
               }}
-              className="bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-1 text-sm outline-none focus:border-neutral-500"
+              className="bg-transparent border border-white/10 rounded-lg px-3 py-1 text-sm outline-none focus:border-neutral-500"
             >
               {[1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6].map(n => <option key={n} value={n}>{n} с</option>)}
             </select>
           </div>
         </section>
 
-        <section className="bg-neutral-800 p-6 rounded-3xl shadow-sm border border-neutral-700 flex flex-col gap-6">
+        <section className="bg-white/10 p-6 rounded-3xl shadow-sm border border-white/10 flex flex-col gap-6">
           <div className="flex flex-col gap-1">
             <h2 className="text-lg font-medium text-neutral-100">Звук</h2>
           </div>
@@ -79,7 +79,7 @@ export function SynchronizedSetup() {
                 className={`flex-1 py-3 rounded-2xl border text-sm transition-all ${
                   !settings.syncBilateralAudio 
                     ? 'bg-gradient-to-b from-indigo-400 via-indigo-600 to-indigo-800 text-white border-indigo-300/40 shadow-[inset_0_2px_4px_rgba(255,255,255,0.5),inset_0_-4px_6px_rgba(0,0,0,0.5),0_6px_12px_rgba(79,70,229,0.4)] drop-shadow-md' 
-                    : 'border-neutral-700 text-neutral-500 hover:border-neutral-400'
+                    : 'border-white/10 text-slate-500 hover:border-neutral-400'
                 }`}
               >
                 Без звука
@@ -89,7 +89,7 @@ export function SynchronizedSetup() {
                 className={`flex-1 py-3 rounded-2xl border text-sm transition-all ${
                   settings.syncBilateralAudio 
                     ? 'bg-gradient-to-b from-indigo-400 via-indigo-600 to-indigo-800 text-white border-indigo-300/40 shadow-[inset_0_2px_4px_rgba(255,255,255,0.5),inset_0_-4px_6px_rgba(0,0,0,0.5),0_6px_12px_rgba(79,70,229,0.4)] drop-shadow-md' 
-                    : 'border-neutral-700 text-neutral-500 hover:border-neutral-400'
+                    : 'border-white/10 text-slate-500 hover:border-neutral-400'
                 }`}
               >
                 Билатеральный звук
@@ -99,14 +99,14 @@ export function SynchronizedSetup() {
           {(settings.syncBilateralAudio || settings.syncAmbientSound !== 'none') && (
             <div className="flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-200 mt-4">
                {settings.syncBilateralAudio && (
-                 <div className="flex items-start gap-2 bg-neutral-900 p-3 rounded-xl text-sm text-neutral-500">
-                    <Info className="w-4 h-4 shrink-0 mt-0.5 text-neutral-500" />
+                 <div className="flex items-start gap-2 bg-transparent p-3 rounded-xl text-sm text-slate-500">
+                    <Info className="w-4 h-4 shrink-0 mt-0.5 text-slate-500" />
                     <p>Для правильного эффекта используй наушники.</p>
                   </div>
                )}
                <div className="flex flex-col gap-2">
                  <div className="flex justify-between items-center text-sm">
-                    <span className="text-neutral-500">Громкость звука</span>
+                    <span className="text-slate-500">Громкость звука</span>
                     <span className="text-neutral-100 font-medium">{settings.syncVolume}%</span>
                  </div>
                  <input
@@ -122,15 +122,15 @@ export function SynchronizedSetup() {
             </div>
           )}
 
-          <div className="flex flex-col gap-3 pt-2 border-t border-neutral-700 mt-2">
+          <div className="flex flex-col gap-3 pt-2 border-t border-white/10 mt-2">
             <h3 className="text-sm font-medium text-neutral-100">Фоновый шум</h3>
             <div className="grid grid-cols-2 gap-2">
               <button
                 onClick={() => updateSettings({ syncAmbientSound: 'none' })}
                 className={`py-2 rounded-xl border text-sm transition-all ${
                   settings.syncAmbientSound === 'none'
-                    ? 'border-neutral-800 bg-neutral-200 text-neutral-900' 
-                    : 'border-neutral-700 text-neutral-500 hover:border-neutral-400'
+                    ? 'border-white/10 bg-neutral-200 text-slate-900' 
+                    : 'border-white/10 text-slate-500 hover:border-neutral-400'
                 }`}
               >
                 Без шума
@@ -139,8 +139,8 @@ export function SynchronizedSetup() {
                 onClick={() => updateSettings({ syncAmbientSound: 'wind' })}
                 className={`py-2 rounded-xl border text-sm transition-all ${
                   settings.syncAmbientSound === 'wind'
-                    ? 'border-neutral-800 bg-neutral-200 text-neutral-900' 
-                    : 'border-neutral-700 text-neutral-500 hover:border-neutral-400'
+                    ? 'border-white/10 bg-neutral-200 text-slate-900' 
+                    : 'border-white/10 text-slate-500 hover:border-neutral-400'
                 }`}
               >
                 Ветер
@@ -149,8 +149,8 @@ export function SynchronizedSetup() {
                 onClick={() => updateSettings({ syncAmbientSound: 'rain' })}
                 className={`py-2 rounded-xl border text-sm transition-all ${
                   settings.syncAmbientSound === 'rain'
-                    ? 'border-neutral-800 bg-neutral-200 text-neutral-900' 
-                    : 'border-neutral-700 text-neutral-500 hover:border-neutral-400'
+                    ? 'border-white/10 bg-neutral-200 text-slate-900' 
+                    : 'border-white/10 text-slate-500 hover:border-neutral-400'
                 }`}
               >
                 Дождь
@@ -159,8 +159,8 @@ export function SynchronizedSetup() {
                 onClick={() => updateSettings({ syncAmbientSound: 'sea' })}
                 className={`py-2 rounded-xl border text-sm transition-all ${
                   settings.syncAmbientSound === 'sea'
-                    ? 'border-neutral-800 bg-neutral-200 text-neutral-900' 
-                    : 'border-neutral-700 text-neutral-500 hover:border-neutral-400'
+                    ? 'border-white/10 bg-neutral-200 text-slate-900' 
+                    : 'border-white/10 text-slate-500 hover:border-neutral-400'
                 }`}
               >
                 Море
@@ -171,7 +171,7 @@ export function SynchronizedSetup() {
 
         <button
           onClick={handleStart}
-          className="mt-4 w-full py-4 rounded-full bg-white text-neutral-900 text-lg font-medium transition-transform active:scale-[0.98] hover:bg-neutral-200 shadow-md flex justify-center items-center gap-2"
+          className="mt-4 w-full py-4 rounded-full bg-white text-slate-900 text-lg font-medium transition-transform active:scale-[0.98] hover:bg-neutral-200 shadow-md flex justify-center items-center gap-2"
         >
           <Play className="w-5 h-5 fill-indigo-100 drop-shadow-md" />
           Начать

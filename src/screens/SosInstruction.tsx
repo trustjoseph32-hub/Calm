@@ -21,7 +21,7 @@ export function SosInstruction() {
       <header className="flex items-center mb-4 sm:mb-8">
         <button 
           onClick={() => navigate('/')}
-          className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-b from-neutral-600 via-neutral-700 to-neutral-900 text-neutral-200 flex items-center justify-center shrink-0 border border-neutral-400/40 shadow-[inset_0_2px_4px_rgba(255,255,255,0.3),inset_0_-4px_6px_rgba(0,0,0,0.6),0_6px_12px_rgba(0,0,0,0.3)] hover:scale-105 active:scale-95 transition-all"
+          className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-b from-neutral-600 via-neutral-700 to-neutral-900 text-blue-100/80 flex items-center justify-center shrink-0 border border-neutral-400/40 shadow-[inset_0_2px_4px_rgba(255,255,255,0.3),inset_0_-4px_6px_rgba(0,0,0,0.6),0_6px_12px_rgba(0,0,0,0.3)] hover:scale-105 active:scale-95 transition-all"
         >
           <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 drop-shadow-md" />
         </button>
@@ -32,14 +32,14 @@ export function SosInstruction() {
       
       <main className="flex-1 flex flex-col justify-center gap-4 sm:gap-8 max-w-md mx-auto w-full pb-4 sm:pb-8">
         <div className="flex gap-6 items-start">
-          <div className="text-2xl sm:text-4xl font-light text-neutral-500">1</div>
+          <div className="text-2xl sm:text-4xl font-light text-slate-500">1</div>
           <p className="text-lg sm:text-2xl font-medium text-neutral-100 leading-tight">
             Дышите вместе с расширяющимся кругом двойным вдохом носом (Вдох-доВдох) и выдохом ртом.
           </p>
         </div>
 
         <div className="flex gap-6 items-start">
-          <div className="text-2xl sm:text-4xl font-light text-neutral-500">2</div>
+          <div className="text-2xl sm:text-4xl font-light text-slate-500">2</div>
           <p className="text-lg sm:text-2xl font-medium text-neutral-100 leading-tight">
             Направляйте взгляд вместе с шариком до самого конца и до небольшого ощущения напряжения в мышцах глаз в крайних точках.
           </p>
@@ -79,7 +79,7 @@ export function SosInstruction() {
         </div>
 
         <div className="flex gap-6 items-start">
-          <div className="text-2xl sm:text-4xl font-light text-neutral-500">3</div>
+          <div className="text-2xl sm:text-4xl font-light text-slate-500">3</div>
           <p className="text-lg sm:text-2xl font-medium text-neutral-100 leading-tight">
             На вдохе зажимайте ладони в кулаки, на выдохе расслабляйте.
           </p>
@@ -88,14 +88,14 @@ export function SosInstruction() {
 
       <div className="mt-auto pt-2 sm:pt-6 flex flex-col gap-3 sm:gap-6">
         <div className="flex flex-col gap-3">
-          <h3 className="text-sm font-medium text-neutral-500 uppercase tracking-wider px-2">Звуковое сопровождение</h3>
+          <h3 className="text-sm font-medium text-slate-500 uppercase tracking-wider px-2">Звуковое сопровождение</h3>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
             <button
               onClick={() => updateSettings({ syncAmbientSound: 'none', syncBilateralAudio: false })}
               className={`py-2 sm:py-3 rounded-xl sm:rounded-2xl text-sm font-medium transition-all border ${
                 settings.syncAmbientSound === 'none' && !settings.syncBilateralAudio
                   ? 'bg-gradient-to-b from-indigo-400 via-indigo-600 to-indigo-800 text-white border-indigo-300/40 shadow-[inset_0_2px_4px_rgba(255,255,255,0.5),inset_0_-4px_6px_rgba(0,0,0,0.5),0_6px_12px_rgba(79,70,229,0.4)] drop-shadow-md' 
-                  : 'bg-gradient-to-b from-neutral-700 via-neutral-800 to-neutral-900 border border-neutral-600/40 text-neutral-400 shadow-[inset_0_2px_4px_rgba(255,255,255,0.1),inset_0_-4px_6px_rgba(0,0,0,0.5),0_6px_12px_rgba(0,0,0,0.3)] hover:scale-[1.02]'
+                  : 'bg-gradient-to-b from-neutral-700 via-neutral-800 to-neutral-900 border border-neutral-600/40 text-slate-400 shadow-[inset_0_2px_4px_rgba(255,255,255,0.1),inset_0_-4px_6px_rgba(0,0,0,0.5),0_6px_12px_rgba(0,0,0,0.3)] hover:scale-[1.02]'
               }`}
             >
               Тишина
@@ -105,7 +105,7 @@ export function SosInstruction() {
               className={`py-2 sm:py-3 flex justify-center items-center gap-2 rounded-2xl text-sm font-medium transition-all border ${
                 settings.syncAmbientSound === 'wind'
                   ? 'bg-gradient-to-b from-indigo-400 via-indigo-600 to-indigo-800 text-white border-indigo-300/40 shadow-[inset_0_2px_4px_rgba(255,255,255,0.5),inset_0_-4px_6px_rgba(0,0,0,0.5),0_6px_12px_rgba(79,70,229,0.4)] drop-shadow-md' 
-                  : 'bg-gradient-to-b from-neutral-700 via-neutral-800 to-neutral-900 border border-neutral-600/40 text-neutral-400 shadow-[inset_0_2px_4px_rgba(255,255,255,0.1),inset_0_-4px_6px_rgba(0,0,0,0.5),0_6px_12px_rgba(0,0,0,0.3)] hover:scale-[1.02]'
+                  : 'bg-gradient-to-b from-neutral-700 via-neutral-800 to-neutral-900 border border-neutral-600/40 text-slate-400 shadow-[inset_0_2px_4px_rgba(255,255,255,0.1),inset_0_-4px_6px_rgba(0,0,0,0.5),0_6px_12px_rgba(0,0,0,0.3)] hover:scale-[1.02]'
               }`}
             >
               <Wind className="w-4 h-4" /> Ветер
@@ -115,7 +115,7 @@ export function SosInstruction() {
               className={`py-2 sm:py-3 flex justify-center items-center gap-2 rounded-2xl text-sm font-medium transition-all border ${
                 settings.syncAmbientSound === 'rain'
                   ? 'bg-gradient-to-b from-indigo-400 via-indigo-600 to-indigo-800 text-white border-indigo-300/40 shadow-[inset_0_2px_4px_rgba(255,255,255,0.5),inset_0_-4px_6px_rgba(0,0,0,0.5),0_6px_12px_rgba(79,70,229,0.4)] drop-shadow-md' 
-                  : 'bg-gradient-to-b from-neutral-700 via-neutral-800 to-neutral-900 border border-neutral-600/40 text-neutral-400 shadow-[inset_0_2px_4px_rgba(255,255,255,0.1),inset_0_-4px_6px_rgba(0,0,0,0.5),0_6px_12px_rgba(0,0,0,0.3)] hover:scale-[1.02]'
+                  : 'bg-gradient-to-b from-neutral-700 via-neutral-800 to-neutral-900 border border-neutral-600/40 text-slate-400 shadow-[inset_0_2px_4px_rgba(255,255,255,0.1),inset_0_-4px_6px_rgba(0,0,0,0.5),0_6px_12px_rgba(0,0,0,0.3)] hover:scale-[1.02]'
               }`}
             >
               <CloudRain className="w-4 h-4" /> Дождь
@@ -125,7 +125,7 @@ export function SosInstruction() {
               className={`py-2 sm:py-3 flex justify-center items-center gap-2 rounded-2xl text-sm font-medium transition-all border ${
                 settings.syncAmbientSound === 'sea'
                   ? 'bg-gradient-to-b from-indigo-400 via-indigo-600 to-indigo-800 text-white border-indigo-300/40 shadow-[inset_0_2px_4px_rgba(255,255,255,0.5),inset_0_-4px_6px_rgba(0,0,0,0.5),0_6px_12px_rgba(79,70,229,0.4)] drop-shadow-md' 
-                  : 'bg-gradient-to-b from-neutral-700 via-neutral-800 to-neutral-900 border border-neutral-600/40 text-neutral-400 shadow-[inset_0_2px_4px_rgba(255,255,255,0.1),inset_0_-4px_6px_rgba(0,0,0,0.5),0_6px_12px_rgba(0,0,0,0.3)] hover:scale-[1.02]'
+                  : 'bg-gradient-to-b from-neutral-700 via-neutral-800 to-neutral-900 border border-neutral-600/40 text-slate-400 shadow-[inset_0_2px_4px_rgba(255,255,255,0.1),inset_0_-4px_6px_rgba(0,0,0,0.5),0_6px_12px_rgba(0,0,0,0.3)] hover:scale-[1.02]'
               }`}
             >
               <Waves className="w-4 h-4" /> Море

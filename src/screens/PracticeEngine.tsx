@@ -119,7 +119,7 @@ export function PracticeEngine() {
 
   return (
     <div 
-      className="flex-1 w-full bg-neutral-900 text-white relative overflow-hidden flex flex-col"
+      className="flex-1 w-full bg-transparent text-white relative overflow-hidden flex flex-col"
       onMouseMove={resetControlsTimeout}
       onTouchStart={resetControlsTimeout}
       onClick={resetControlsTimeout}
@@ -145,7 +145,7 @@ export function PracticeEngine() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-neutral-900/90 backdrop-blur-sm"
+            className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-transparent/90 backdrop-blur-sm"
           >
             <motion.div
               key={countdown}
@@ -156,11 +156,11 @@ export function PracticeEngine() {
             >
               {countdown}
             </motion.div>
-            <p className="text-xl text-neutral-500 font-medium">
+            <p className="text-xl text-slate-500 font-medium">
               {type === 'breathing' ? 'Дыши комфортно в ритме круга' : 'Смотри на движущийся объект и позволяй глазам следовать за ним'}
             </p>
             {type === 'combined' && (
-              <p className="text-neutral-500 mt-2">Не заставляй себя дышать глубже, чем комфортно</p>
+              <p className="text-slate-500 mt-2">Не заставляй себя дышать глубже, чем комфортно</p>
             )}
           </motion.div>
         )}
@@ -172,13 +172,13 @@ export function PracticeEngine() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-neutral-900/90 backdrop-blur-sm px-6 text-center"
+            className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-transparent/90 backdrop-blur-sm px-6 text-center"
           >
             <h2 className="text-3xl font-light mb-4">Остановись на несколько секунд.</h2>
-            <p className="text-xl text-neutral-500 mb-12">Заметь, что происходит в теле.</p>
+            <p className="text-xl text-slate-500 mb-12">Заметь, что происходит в теле.</p>
             <button
               onClick={() => setSessionState('checkout')}
-              className="px-8 py-4 bg-white text-neutral-900 rounded-full font-medium text-lg hover:bg-neutral-200 transition-colors pointer-events-auto"
+              className="px-8 py-4 bg-white text-slate-900 rounded-full font-medium text-lg hover:bg-neutral-200 transition-colors pointer-events-auto"
             >
               Продолжить
             </button>
@@ -192,12 +192,12 @@ export function PracticeEngine() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-neutral-900 text-white px-6 text-center"
+            className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-transparent text-white px-6 text-center"
           >
             <h2 className="text-2xl font-medium mb-8">Какой уровень напряжения сейчас?</h2>
             
             <div className="w-full max-w-md px-4 mb-12">
-              <div className="flex justify-between text-neutral-500 text-sm font-medium mb-4">
+              <div className="flex justify-between text-slate-500 text-sm font-medium mb-4">
                 <span>0 — спокойно</span>
                 <span>10 — напряжение</span>
               </div>
@@ -214,11 +214,11 @@ export function PracticeEngine() {
               </div>
             </div>
 
-            <div className="flex flex-col items-center gap-2 mb-12 bg-neutral-800 p-6 rounded-3xl shadow-sm border border-neutral-700 w-full max-w-xs">
-              <p className="text-sm text-neutral-500 uppercase tracking-wider font-medium">Изменение состояния</p>
+            <div className="flex flex-col items-center gap-2 mb-12 bg-white/10 p-6 rounded-3xl shadow-sm border border-white/10 w-full max-w-xs">
+              <p className="text-sm text-slate-500 uppercase tracking-wider font-medium">Изменение состояния</p>
               <div className="flex items-center gap-4 text-xl">
-                <span className="text-neutral-500">До: {anxietyBefore}</span>
-                <ArrowRight className="w-5 h-5 text-neutral-500" />
+                <span className="text-slate-500">До: {anxietyBefore}</span>
+                <ArrowRight className="w-5 h-5 text-slate-500" />
                 <span className="font-medium">После: {anxietyAfter}</span>
               </div>
               <div className="mt-2 text-3xl font-light">
@@ -228,7 +228,7 @@ export function PracticeEngine() {
 
             <button
               onClick={handleFinish}
-              className="w-full max-w-xs py-4 bg-white text-neutral-900 rounded-full font-medium text-lg hover:bg-neutral-200 transition-colors pointer-events-auto shadow-md"
+              className="w-full max-w-xs py-4 bg-white text-slate-900 rounded-full font-medium text-lg hover:bg-neutral-200 transition-colors pointer-events-auto shadow-md"
             >
               Завершить
             </button>
@@ -242,7 +242,7 @@ export function PracticeEngine() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-neutral-900 px-6 text-center"
+            className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-transparent px-6 text-center"
           >
             <h2 className="text-3xl font-light mb-8">Остановись. Посмотри вокруг.</h2>
             
@@ -253,7 +253,7 @@ export function PracticeEngine() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
-                  className="text-2xl text-neutral-500 leading-relaxed font-light"
+                  className="text-2xl text-slate-500 leading-relaxed font-light"
                 >
                   {groundingStep === 0 && 'Назови 5 вещей, которые видишь.'}
                   {groundingStep === 1 && 'Заметь 4 ощущения в теле.'}
@@ -268,21 +268,21 @@ export function PracticeEngine() {
               {groundingStep < 4 ? (
                 <button
                   onClick={() => setGroundingStep(s => s + 1)}
-                  className="w-full py-4 bg-white text-neutral-900 rounded-full font-medium text-lg hover:bg-neutral-200 transition-colors pointer-events-auto"
+                  className="w-full py-4 bg-white text-slate-900 rounded-full font-medium text-lg hover:bg-neutral-200 transition-colors pointer-events-auto"
                 >
                   Дальше
                 </button>
               ) : (
                 <button
                   onClick={handleFinish}
-                  className="w-full py-4 bg-white text-neutral-900 rounded-full font-medium text-lg hover:bg-neutral-200 transition-colors pointer-events-auto"
+                  className="w-full py-4 bg-white text-slate-900 rounded-full font-medium text-lg hover:bg-neutral-200 transition-colors pointer-events-auto"
                 >
                   Завершить
                 </button>
               )}
               <button
                 onClick={() => setSessionState('checkout')}
-                className="w-full py-4 bg-transparent border border-neutral-700 text-neutral-500 rounded-full font-medium text-lg hover:bg-neutral-700 transition-colors pointer-events-auto mt-4"
+                className="w-full py-4 bg-transparent border border-white/10 text-slate-500 rounded-full font-medium text-lg hover:bg-neutral-700 transition-colors pointer-events-auto mt-4"
               >
                 Мне лучше
               </button>
@@ -304,12 +304,12 @@ export function PracticeEngine() {
             <div className="flex justify-between items-start pointer-events-auto">
               <button 
                 onClick={() => setSessionState('checkout')}
-                className="p-3 bg-neutral-800/50 border border-neutral-700 hover:bg-neutral-800 backdrop-blur-md rounded-full text-neutral-500 transition-colors"
+                className="p-3 bg-white/5 border border-white/10 hover:bg-white/10 backdrop-blur-md rounded-full text-slate-500 transition-colors"
                 aria-label="Stop"
               >
                 <X className="w-6 h-6" />
               </button>
-              <div className="bg-neutral-800/50 border border-neutral-700 backdrop-blur-md px-4 py-2 rounded-full font-mono text-xl tracking-widest text-neutral-500">
+              <div className="bg-white/5 border border-white/10 backdrop-blur-md px-4 py-2 rounded-full font-mono text-xl tracking-widest text-slate-500">
                 {formatTime(timeLeft)}
               </div>
             </div>
@@ -317,7 +317,7 @@ export function PracticeEngine() {
             <div className="flex justify-between items-end pointer-events-auto">
               <button 
                 onClick={() => setSessionState('grounding')}
-                className="flex items-center gap-2 px-4 py-3 bg-neutral-800/50 border border-neutral-700 hover:bg-neutral-700/80 backdrop-blur-md rounded-full text-neutral-500 transition-colors text-sm font-medium"
+                className="flex items-center gap-2 px-4 py-3 bg-white/5 border border-white/10 hover:bg-neutral-700/80 backdrop-blur-md rounded-full text-slate-500 transition-colors text-sm font-medium"
               >
                 <AlertTriangle className="w-4 h-4" />
                 <span>Мне некомфортно</span>
@@ -325,7 +325,7 @@ export function PracticeEngine() {
 
               <button 
                 onClick={() => setSessionState(s => s === 'active' ? 'paused' : 'active')}
-                className="w-16 h-16 bg-white rounded-full flex items-center justify-center text-neutral-900 hover:bg-neutral-200 transition-colors shadow-lg"
+                className="w-16 h-16 bg-white rounded-full flex items-center justify-center text-slate-900 hover:bg-neutral-200 transition-colors shadow-lg"
                 aria-label={sessionState === 'active' ? 'Pause' : 'Play'}
               >
                 {sessionState === 'active' ? <Pause className="w-8 h-8 fill-neutral-900" /> : <Play className="w-8 h-8 fill-neutral-900 translate-x-0.5" />}
@@ -390,13 +390,13 @@ function PracticeCanvas({ type, isActive, settings }: { type: string, isActive: 
           initial={{ scale: 0.5, opacity: 0.1 }}
           animate={{
             scale: phase === 'in' ? 1 : 0.6,
-            opacity: phase === 'in' ? 0.7 : 0.2,
+            opacity: phase === 'in' ? 0.8 : 0.2,
           }}
           transition={{
             duration: phaseDuration,
             ease: "easeInOut"
           }}
-          className="absolute w-[80vw] h-[80vw] max-w-[600px] max-h-[600px] rounded-full bg-white blur-2xl sm:blur-3xl mix-blend-screen"
+          className="absolute w-[80vw] h-[80vw] max-w-[600px] max-h-[600px] rounded-full bg-sky-200/80 blur-[60px] sm:blur-[100px] mix-blend-screen pointer-events-none"
         />
       )}
 
@@ -408,7 +408,7 @@ function PracticeCanvas({ type, isActive, settings }: { type: string, isActive: 
           animate={{ opacity: 0.7, y: 0 }}
           exit={{ opacity: 0, y: -5 }}
           transition={{ duration: 1 }}
-          className="absolute text-2xl font-light tracking-[0.2em] uppercase text-white/70"
+          className="absolute text-2xl font-light tracking-[0.2em] uppercase text-white pointer-events-none z-20 drop-shadow-[0_2px_10px_rgba(0,0,0,1)]"
         >
           {phase === 'in' ? 'Вдох' : 'Выдох'}
         </motion.div>
