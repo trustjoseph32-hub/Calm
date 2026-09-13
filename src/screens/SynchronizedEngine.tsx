@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { Pause, Play, X, AlertTriangle } from 'lucide-react';
+import { Pause, Play, X, AlertTriangle, ArrowRight } from 'lucide-react';
 import { useAppStore } from '../store/AppProvider';
 import { PracticeSession, SessionStatus } from '../types';
 import { BilateralAudioEngine } from '../lib/audio';
@@ -604,84 +604,55 @@ export function SynchronizedEngine() {
           )}
           
                     {engineState === 'SOS_OUTRO' && (
-            <motion.div key="sos_outro" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="text-center space-y-8 max-w-sm w-full px-4">
-              <div className="text-slate-400">
-                <h2 className="text-2xl font-medium text-white mb-8">А теперь давайте заземлимся</h2>
-                <div className="bg-transparent/40 backdrop-blur-md border border-white/10/80 p-6 sm:p-8 rounded-[2rem] shadow-2xl relative overflow-hidden">
-                  <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-indigo-500/5 to-purple-500/5 pointer-events-none" />
-                  <p className="text-blue-100/80 font-medium leading-relaxed relative z-10">Найдите сейчас <span className="text-indigo-300">5 предметов</span>, которые видите вокруг себя, и назовите их про себя.</p>
-                  
-                  <div className="h-px w-full bg-gradient-to-r from-transparent via-neutral-700/50 to-transparent my-5 relative z-10" />
-                  
-                  <p className="text-blue-100/80 font-medium leading-relaxed relative z-10">После того, как сделаете это, прикоснитесь руками также к <span className="text-indigo-300">5 разным предметам</span>.</p>
-                </div>
+            <motion.div key="sos_outro" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full px-4 text-center">
+              <h2 className="text-2xl font-medium text-white mb-6">Скорая помощь завершена</h2>
+              <div className="text-lg font-light text-slate-300 leading-relaxed space-y-6 mb-12">
+                <p>Сделайте спокойный глубокий вдох и медленный выдох.</p>
+                <p>Вы можете возвращаться к этой практике столько раз в день, сколько потребуется вашему состоянию.</p>
               </div>
-              <button 
-                onClick={() => {
-                  if (anxietyBefore !== null && anxietyBefore !== undefined) {
-                    setEngineState('CHECKOUT');
-                  } else {
-                    const finalDuration = totalTime;
-                    addSession({
-                      sessionId: Date.now().toString(),
-                      date: new Date().toISOString(),
-                      endTime: new Date().toISOString(),
-                      practiceType: sessionData.practiceType as any,
-                      duration: finalDuration,
-                      anxietyBefore: sessionData.anxietyBefore,
-                      status: 'completed',
-                      completedRounds: (sessionData.completedRounds || 0),
-                      roundAnswers: sessionData.roundAnswers || [],
-                      usedGrounding: sessionData.usedGrounding || false,
-                      reducedMotion: sessionData.reducedMotion || false,
-                      validForOutcomeStats: false,
-                      schemaVersion: 2,
-                      isSOS: isSOS,
-                      courseDay: sessionData.courseDay
-                    });
-                    
-                    if (courseDay) {
-                      updateCourseTodayState('completed');
-                      navigate('/course');
-                    } else {
-                      navigate('/');
-                    }
-                  }
-                }}
-                className="w-full py-4 mt-8 rounded-full font-medium text-lg bg-gradient-to-b from-neutral-600 via-neutral-700 to-neutral-900 text-blue-100/80 border border-neutral-400/40 shadow-[inset_0_2px_4px_rgba(255,255,255,0.3),inset_0_-4px_6px_rgba(0,0,0,0.6),0_6px_12px_rgba(0,0,0,0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all"
-              >
-                Готово
-              </button>
+              <div className="mt-auto pb-8 w-full">
+                <button
+                  onClick={() => saveAndExit(null)}
+                  className="w-full bg-white text-slate-900 py-4 rounded-3xl font-medium hover:bg-slate-100 transition-colors text-lg"
+                >
+                  Завершить практику
+                </button>
+              </div>
             </motion.div>
           )}
 
           {engineState === 'CHECKOUT' && (
-            <motion.div key="checkout" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="max-w-sm w-full text-center space-y-8">
-              <h2 className="text-2xl font-medium">Оценка состояния</h2>
-              <p className="text-slate-400">Насколько сильное напряжение сейчас?</p>
+            <motion.div key="checkout" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full px-4">
+              <h2 className="text-2xl font-medium mb-2 text-white text-center">Как вы себя чувствуете сейчас?</h2>
+              <p className="text-slate-400 mb-12 text-center">Оцените уровень тревожности после практики</p>
               
-              <div className="px-2 pb-8">
-                <input 
-                  type="range" 
-                  min="0" 
-                  max="10" 
-                  value={anxietyAfter} 
-                  onChange={(e) => setAnxietyAfter(Number(e.target.value))}
-                  className="w-full h-2 rounded-lg appearance-none cursor-pointer bg-white/10 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6 [&::-webkit-slider-thumb]:bg-gradient-to-b [&::-webkit-slider-thumb]:from-gray-100 [&::-webkit-slider-thumb]:to-gray-300 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border [&::-webkit-slider-thumb]:border-white/50"
-                />
-                <div className="flex justify-between text-xs text-slate-500 mt-2 font-medium">
-                  <span>0</span>
-                  <span>10</span>
-                </div>
-                <div className="text-4xl font-light mt-6 mb-4">{anxietyAfter}</div>
-                <div className="p-4 bg-transparent/50 rounded-xl border border-white/10 text-slate-300 text-sm">
-                  {getDeltaText()}
-                </div>
+              <div className="text-6xl font-light mb-8 tabular-nums text-center text-white">
+                {anxietyAfter}
               </div>
-              
-              <button onClick={() => saveAndExit(anxietyAfter)} className="w-full py-4 bg-indigo-600 rounded-full font-medium text-white hover:bg-indigo-700 transition-colors">
-                Сохранить и выйти
-              </button>
+              <input 
+                type="range" 
+                min="1" 
+                max="10" 
+                value={anxietyAfter} 
+                onChange={(e) => {
+                  const newValue = parseInt(e.target.value);
+                  if (newValue !== anxietyAfter) {
+                    setAnxietyAfter(newValue);
+                    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+                      navigator.vibrate(15);
+                    }
+                  }
+                }}
+                className="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer mb-12 focus:outline-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6 [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:shadow-[0_0_10px_rgba(255,255,255,0.3)] [&::-moz-range-thumb]:w-6 [&::-moz-range-thumb]:h-6 [&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:border-none [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:shadow-[0_0_10px_rgba(255,255,255,0.3)]"
+              />
+              <div className="mt-auto pb-8 w-full">
+                <button 
+                  onClick={() => setEngineState('SOS_SUMMARY')} 
+                  className="w-full bg-blue-600/20 backdrop-blur-md border border-blue-500/30 hover:bg-blue-600/30 shadow-[0_0_20px_rgba(59,130,246,0.15)] text-white py-4 rounded-3xl font-medium transition-all text-lg flex items-center justify-center gap-2"
+                >
+                  Продолжить
+                </button>
+              </div>
             </motion.div>
           )}
 
