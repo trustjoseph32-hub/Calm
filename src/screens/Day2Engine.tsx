@@ -165,7 +165,6 @@ export function Day2Engine() {
                   className="bg-white text-slate-900 px-6 py-3 rounded-full font-medium hover:bg-neutral-100 transition-colors flex items-center gap-2"
                 >
                   Далее
-                  <ArrowRight className="w-5 h-5" />
                 </button>
               </div>
             </motion.div>

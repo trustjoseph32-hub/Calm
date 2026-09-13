@@ -402,18 +402,18 @@ export function Course() {
                 <button 
                   onClick={handleStartDay}
                   disabled={!isAvailable}
-                  className={`w-full flex items-center justify-between px-8 py-5 rounded-[1.5rem] font-medium text-lg transition-all duration-300 group active:scale-[0.98] ${
+                  className={`w-full flex items-center justify-center px-8 py-5 rounded-[1.5rem] font-medium text-lg transition-all duration-300 group active:scale-[0.98] ${
                     isAvailable 
-                      ? 'bg-gradient-to-r from-[#1E40AF] to-[#38BDF8] text-white shadow-[0_0_30px_rgba(56,189,248,0.3)] hover:shadow-[0_0_40px_rgba(56,189,248,0.5)] border border-blue-400/30' 
+                      ? 'bg-gradient-to-r from-[#1E40AF] to-[#38BDF8] text-white shadow-[0_0_30px_rgba(56,189,248,0.3)] hover:shadow-[0_0_40px_rgba(56,189,248,0.5)]' 
                       : 'bg-white/5 text-white/30 border border-white/10'
                   }`}
                 >
                   {isCompleted ? (
-                    <>Практика завершена <CheckCircle2 className="w-6 h-6" /></>
+                    <>Практика завершена <CheckCircle2 className="w-6 h-6 ml-3" /></>
                   ) : isAvailable ? (
-                    <>Начать практику <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" /></>
+                    <>Начать практику</>
                   ) : (
-                    <><Lock className="w-5 h-5 mr-1" /> Откроется позже</>
+                    <><Lock className="w-5 h-5 mr-2" /> Откроется позже</>
                   )}
                 </button>
                 

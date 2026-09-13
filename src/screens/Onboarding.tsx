@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAppStore } from '../store/AppProvider';
 import { motion, AnimatePresence } from 'motion/react';
-import { Wind, Activity, Maximize, ArrowRight } from 'lucide-react';
+import { Wind, Activity, Maximize, Check } from 'lucide-react';
 
 export function Onboarding() {
   const { completeOnboarding } = useAppStore();
@@ -72,7 +72,7 @@ export function Onboarding() {
                       onChange={(e) => setAgreed(e.target.checked)}
                     />
                     <div className={`w-6 h-6 rounded border-2 transition-colors flex items-center justify-center ${agreed ? 'bg-white/10 border-white/10' : 'border-neutral-600 group-hover:border-neutral-400'}`}>
-                      {agreed && <ArrowRight className="w-4 h-4 text-white" />}
+                      {agreed && <Check className="w-4 h-4 text-white" />}
                     </div>
                   </div>
                   <span className="text-slate-500 leading-relaxed text-sm">
