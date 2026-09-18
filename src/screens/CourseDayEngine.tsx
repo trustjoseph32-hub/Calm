@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { X, ArrowRight, Play, Pause, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useAppStore } from '../store/AppProvider';
-import { BODY_LOCATIONS, BodyLocation } from '../data/courseData';
+import { COURSE_DAYS_DATA, BODY_LOCATIONS, BodyLocation, getExposureDurationSec } from '../data/courseData';
 
 type Step = 
   | 'card1' 
@@ -11,50 +11,28 @@ type Step =
   | 'pre-thought' 
   | 'pre-location' 
   | 'pre-intensity' 
-  | 'stage-intro' 
-  | 'stage-practice' 
-  | 'consolidation-intro' 
-  | 'consolidation-practice' 
+  | 'practice' 
   | 'exposure-tail' 
   | 'post-thought' 
   | 'post-location' 
   | 'post-intensity' 
-  | 'summary' 
-  | 'sos-reveal';
+  | 'summary';
 
-const STAGE_INTROS: Record<number, { title: string; subtitle: string; text: string; action: string }> = {
-  1: {
-    title: 'Дыхание',
-    subtitle: 'Практика A — Шаг 1 из 3',
-    text: 'Осваиваем физиологический вздох: два вдоха носом (обычный вдох и сразу короткий довдох) и после долгий плавный выдох через рот.',
-    action: 'Начать'
-  },
-  2: {
-    title: 'Движение глаз',
-    subtitle: 'Практика A — Шаг 2 из 3',
-    text: 'Не поворачивая головы, плавно ведите взгляд за светящейся точкой от края до края экрана. Старайтесь доводить движение глаз до конца, ощущая небольшое напряжение в мышцах глаз.\n\nЭто действие снижает фиксацию на тревожности.',
-    action: 'Начать'
-  },
-  3: {
-    title: 'Работа тела',
-    subtitle: 'Практика A — Шаг 3 из 3',
-    text: 'Соединяем дыхание, движение глаз и сброс напряжения:\nна вдохе мягко сжимайте ладони в кулаки,\nна выдохе полностью расслабляйте пальцы, сбрасывая мышечный зажим.',
-    action: 'Начать'
-  },
-  4: {
-    title: 'Знакомство с Практикой B',
-    subtitle: 'Вторая практика курса',
-    text: 'В этой практике будем делать:\nмягкий поочередный тэппинг по плечам скрещенными руками и в верхней части груди, а так же длинный выдох с тихим гудением («мммм» или «аааа»).\nЭто приводит к системному понижению телесного и эмоционального напряжения.',
-    action: 'Попробовать Практику B'
-  }
-};
-
-export function Day1Engine() {
+export function CourseDayEngine() {
   const navigate = useNavigate();
+  const { day: dayParam } = useParams<{ day: string }>();
+  const currentDay = Math.max(1, Math.min(14, parseInt(dayParam || '2', 10)));
   const { addSession, markCourseDayCompleted } = useAppStore();
 
+  const dayData = COURSE_DAYS_DATA.find(d => d.day === currentDay) || COURSE_DAYS_DATA[1];
+
   const [step, setStep] = useState<Step>('card1');
-  
+
+  // For Day 14: choice between Practice A and Practice B
+  const [selectedPracticeCategory, setSelectedPracticeCategory] = useState<'A' | 'B'>(
+    dayData.practiceType === 'choice' ? 'A' : (dayData.practiceType as 'A' | 'B')
+  );
+
   // Pre-check state
   const [situationText, setSituationText] = useState('');
   const [thoughtTimer, setThoughtTimer] = useState(10);
@@ -62,20 +40,21 @@ export function Day1Engine() {
   const [customLocation, setCustomLocation] = useState('');
   const [preAnxiety, setPreAnxiety] = useState<number>(6);
 
-  // Learning stages state (1: breath, 2: eyes, 3: hands, 4: practice B preview)
-  const [practiceStage, setPracticeStage] = useState(1);
-  const [stageTimeLeft, setStageTimeLeft] = useState(45); // 45s per learning stage
-  const [isStageActive, setIsStageActive] = useState(false);
-  const [phase, setPhase] = useState<'inhale1' | 'inhale2' | 'hold' | 'exhale'>('inhale1');
-  const [tappingSide, setTappingSide] = useState<'left' | 'right'>('left');
-
-  // Consolidation practice state (Practice A combined)
-  const [consolidationTimeLeft, setConsolidationTimeLeft] = useState(150); // 2.5 min
-  const [isConsolidationActive, setIsConsolidationActive] = useState(false);
+  // Practice state
+  const [practiceTimeLeft, setPracticeTimeLeft] = useState(dayData.practiceDurationSec || 240);
+  const [isPracticeActive, setIsPracticeActive] = useState(false);
   const [showMidpointNotice, setShowMidpointNotice] = useState(false);
 
+  // Practice A animation state
+  const [phaseA, setPhaseA] = useState<'inhale1' | 'inhale2' | 'hold' | 'exhale'>('inhale1');
+
+  // Practice B animation state
+  const [tappingSide, setTappingSide] = useState<'left' | 'right'>('left');
+  const [phaseB, setPhaseB] = useState<'inhale' | 'exhale'>('inhale');
+
   // Exposure tail state
-  const [exposureTimeLeft, setExposureTimeLeft] = useState(60); // 1 min (60s)
+  const exposureTotalSec = getExposureDurationSec(currentDay);
+  const [exposureTimeLeft, setExposureTimeLeft] = useState(exposureTotalSec);
 
   // Post-check state
   const [postThoughtTimer, setPostThoughtTimer] = useState(6);
@@ -83,7 +62,7 @@ export function Day1Engine() {
   const [isRelocated, setIsRelocated] = useState(false);
   const [postAnxiety, setPostAnxiety] = useState<number>(4);
 
-  // Synchronize postLocation with preLocation initially
+  // Synchronize postLocation initially
   useEffect(() => {
     setPostLocation(selectedLocation === 'Другое' && customLocation ? customLocation : selectedLocation);
   }, [selectedLocation, customLocation]);
@@ -104,70 +83,64 @@ export function Day1Engine() {
     }
   }, [step, postThoughtTimer]);
 
-  // Stage learning practice timer
+  // Practice A breathing cycle
   useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (step === 'stage-practice' && isStageActive && stageTimeLeft > 0) {
-      interval = setInterval(() => {
-        setStageTimeLeft(prev => prev - 1);
-      }, 1000);
-    } else if (stageTimeLeft === 0 && step === 'stage-practice') {
-      setIsStageActive(false);
-      if (practiceStage < 4) {
-        setPracticeStage(prev => prev + 1);
-        setStep('stage-intro');
-      } else {
-        setStep('consolidation-intro');
-      }
-    }
-    return () => clearInterval(interval);
-  }, [step, isStageActive, stageTimeLeft, practiceStage]);
-
-  // Stage 4 Tapping pulse
-  useEffect(() => {
-    if (step === 'stage-practice' && isStageActive && practiceStage === 4) {
-      const tapInterval = setInterval(() => {
-        setTappingSide(prev => (prev === 'left' ? 'right' : 'left'));
-        if (typeof navigator !== 'undefined' && navigator.vibrate) {
-          navigator.vibrate(30);
-        }
-      }, 1100);
-      return () => clearInterval(tapInterval);
-    }
-  }, [step, isStageActive, practiceStage]);
-
-  // Breathing cycle for stages 1-3 & consolidation
-  useEffect(() => {
-    const isPracticeActive = (step === 'stage-practice' && isStageActive && practiceStage <= 3) || 
-                             (step === 'consolidation-practice' && isConsolidationActive);
-    if (!isPracticeActive) return;
+    if (step !== 'practice' || !isPracticeActive || selectedPracticeCategory !== 'A') return;
 
     let timeout: NodeJS.Timeout;
-    if (phase === 'inhale1') {
-      timeout = setTimeout(() => setPhase('inhale2'), 1700);
-    } else if (phase === 'inhale2') {
+    if (phaseA === 'inhale1') {
+      timeout = setTimeout(() => setPhaseA('inhale2'), 1700);
+    } else if (phaseA === 'inhale2') {
       if (typeof navigator !== 'undefined' && navigator.vibrate) {
-        navigator.vibrate([40, 40]);
+        navigator.vibrate([30, 30]);
       }
-      timeout = setTimeout(() => setPhase('hold'), 1700);
-    } else if (phase === 'hold') {
-      timeout = setTimeout(() => setPhase('exhale'), 800);
-    } else if (phase === 'exhale') {
-      timeout = setTimeout(() => setPhase('inhale1'), 5000);
+      timeout = setTimeout(() => setPhaseA('hold'), 1700);
+    } else if (phaseA === 'hold') {
+      timeout = setTimeout(() => setPhaseA('exhale'), 800);
+    } else if (phaseA === 'exhale') {
+      timeout = setTimeout(() => setPhaseA('inhale1'), 5000);
     }
 
     return () => clearTimeout(timeout);
-  }, [phase, isStageActive, isConsolidationActive, step, practiceStage]);
+  }, [phaseA, isPracticeActive, step, selectedPracticeCategory]);
 
-  // Consolidation practice timer
+  // Practice B cycle: Inhale (4s) -> Long Exhale with Vocalization (6s) + Tapping
+  useEffect(() => {
+    if (step !== 'practice' || !isPracticeActive || selectedPracticeCategory !== 'B') return;
+
+    let breathTimeout: NodeJS.Timeout;
+    if (phaseB === 'inhale') {
+      breathTimeout = setTimeout(() => setPhaseB('exhale'), 4000);
+    } else {
+      breathTimeout = setTimeout(() => setPhaseB('inhale'), 6000);
+    }
+
+    return () => clearTimeout(breathTimeout);
+  }, [phaseB, isPracticeActive, step, selectedPracticeCategory]);
+
+  // Practice B Tapping pulse
+  useEffect(() => {
+    if (step !== 'practice' || !isPracticeActive || selectedPracticeCategory !== 'B') return;
+
+    const tapInterval = setInterval(() => {
+      setTappingSide(prev => (prev === 'left' ? 'right' : 'left'));
+      if (typeof navigator !== 'undefined' && navigator.vibrate) {
+        navigator.vibrate(25);
+      }
+    }, 1100);
+
+    return () => clearInterval(tapInterval);
+  }, [isPracticeActive, step, selectedPracticeCategory]);
+
+  // Main practice timer & Midpoint Notice trigger
+  const midpointTriggerSec = Math.floor(dayData.practiceDurationSec / 2);
   useEffect(() => {
     let interval: NodeJS.Timeout;
-    if (step === 'consolidation-practice' && isConsolidationActive && consolidationTimeLeft > 0) {
+    if (step === 'practice' && isPracticeActive && practiceTimeLeft > 0) {
       interval = setInterval(() => {
-        setConsolidationTimeLeft(prev => {
+        setPracticeTimeLeft(prev => {
           const next = prev - 1;
-          // Trigger midpoint prompt around half time (75s) for 6 seconds
-          if (next <= 80 && next >= 74) {
+          if (next <= midpointTriggerSec + 3 && next >= midpointTriggerSec - 3) {
             setShowMidpointNotice(true);
           } else {
             setShowMidpointNotice(false);
@@ -175,12 +148,13 @@ export function Day1Engine() {
           return next;
         });
       }, 1000);
-    } else if (consolidationTimeLeft === 0 && step === 'consolidation-practice') {
-      setIsConsolidationActive(false);
+    } else if (practiceTimeLeft === 0 && step === 'practice') {
+      setIsPracticeActive(false);
+      setExposureTimeLeft(exposureTotalSec);
       setStep('exposure-tail');
     }
     return () => clearInterval(interval);
-  }, [step, isConsolidationActive, consolidationTimeLeft]);
+  }, [step, isPracticeActive, practiceTimeLeft, midpointTriggerSec, exposureTotalSec]);
 
   // Exposure tail timer
   useEffect(() => {
@@ -199,16 +173,16 @@ export function Day1Engine() {
     ? customLocation 
     : (selectedLocation === 'Трудно определить' ? 'тело' : selectedLocation.toLowerCase());
 
-  const handleCompleteDay1 = () => {
+  const handleFinishCourseDay = () => {
     const finalLocation = isRelocated ? postLocation : (selectedLocation === 'Другое' && customLocation ? customLocation : selectedLocation);
     addSession({
-      sessionId: `day1-${Date.now()}`,
+      sessionId: `day${currentDay}-${Date.now()}`,
       date: new Date().toISOString(),
       practiceType: 'course',
-      practiceCategory: 'A',
-      courseDay: 1,
-      duration: 360,
-      exposureDuration: 60,
+      practiceCategory: selectedPracticeCategory,
+      courseDay: currentDay,
+      duration: dayData.practiceDurationSec + exposureTotalSec,
+      exposureDuration: exposureTotalSec,
       anxietySituation: situationText.trim() || undefined,
       bodyLocationBefore: selectedLocation === 'Другое' && customLocation ? customLocation : selectedLocation,
       bodyLocationAfter: finalLocation,
@@ -223,7 +197,7 @@ export function Day1Engine() {
       validForOutcomeStats: true,
       schemaVersion: 2,
     });
-    markCourseDayCompleted(1);
+    markCourseDayCompleted(currentDay);
     navigate('/course');
   };
 
@@ -235,11 +209,16 @@ export function Day1Engine() {
     exhale: { x: '-40vw', opacity: 1, transition: { duration: 5.0, ease: 'easeInOut' } }
   };
 
-  const circleVariants = {
+  const circleVariantsA = {
     exhale: { scale: 0.35, opacity: 0.2, transition: { duration: 5.0, ease: 'easeInOut' } },
     inhale1: { scale: 0.80, opacity: 0.65, transition: { duration: 1.7, ease: 'linear' } },
     inhale2: { scale: 1.25, opacity: 0.95, transition: { duration: 1.7, ease: 'easeOut' } },
     hold: { scale: 1.25, opacity: 0.95, transition: { duration: 0.8, ease: 'linear' } }
+  };
+
+  const circleVariantsB = {
+    inhale: { scale: 1.15, opacity: 0.8, transition: { duration: 4.0, ease: 'easeInOut' } },
+    exhale: { scale: 0.45, opacity: 0.25, transition: { duration: 6.0, ease: 'easeInOut' } }
   };
 
   return (
@@ -249,8 +228,12 @@ export function Day1Engine() {
       {/* Header */}
       <header className="px-4 py-5 w-full flex items-center justify-between relative z-20 sm:max-w-xl mx-auto">
         <div className="flex flex-col">
-          <span className="text-xs text-[#38bdf8] font-medium tracking-wider uppercase">День 1 из 14</span>
-          <span className="text-sm text-white/60">Обучение техникам</span>
+          <span className="text-xs text-[#38bdf8] font-medium tracking-wider uppercase">
+            День {currentDay} из 14
+          </span>
+          <span className="text-sm text-white/60">
+            {selectedPracticeCategory === 'A' ? 'Практика A: Дыхание + взгляд + тело' : 'Практика B: Ритм + дыхание + голос'}
+          </span>
         </div>
         <button 
           onClick={() => navigate('/course')}
@@ -273,11 +256,9 @@ export function Day1Engine() {
               className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full py-4"
             >
               <div className="text-[#38bdf8] text-xs uppercase tracking-widest font-medium mb-2">1/2 • Фокус дня</div>
-              <h1 className="text-3xl font-light text-white mb-4">Связь мысли и тела</h1>
+              <h1 className="text-3xl font-light text-white mb-4">{dayData.focusTitle}</h1>
               <div className="bg-white/5 border border-white/10 rounded-3xl p-6 mb-8 text-left leading-relaxed text-white/80 text-base">
-                Сегодня мы знакомимся с базовыми техниками курса.
-                <br /><br />
-                Учимся замечать как тревожная мысль откликается в теле и пробуем делать первые практики.
+                {dayData.focusText}
               </div>
               <button
                 onClick={() => setStep('card2')}
@@ -289,7 +270,7 @@ export function Day1Engine() {
             </motion.div>
           )}
 
-          {/* CARD 2: ИНСТРУКЦИЯ */}
+          {/* CARD 2: ИНСТРУКЦИЯ К ПРАКТИКЕ */}
           {step === 'card2' && (
             <motion.div
               key="card2"
@@ -299,12 +280,60 @@ export function Day1Engine() {
               className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full py-4"
             >
               <div className="text-[#38bdf8] text-xs uppercase tracking-widest font-medium mb-2">2/2 • Инструкция</div>
-              <h1 className="text-3xl font-light text-white mb-4">Обучение элементам</h1>
-              <div className="bg-white/5 border border-white/10 rounded-3xl p-6 mb-8 text-left leading-relaxed text-white/80 text-sm flex flex-col gap-3">
-                <p>1. <strong>Практика A:</strong> пошагово соединяем двойной вдох, терапевтическое движение глаз и сброс напряжения.</p>
-                <p>2. <strong>Практика B:</strong> Применяем телесную вибрацию и дыхание в голос.</p>
-                <p>3. <strong>Сканирование:</strong> 1 минута тихого наблюдения за своим состоянием после практик.</p>
+              <h1 className="text-3xl font-light text-white mb-4">{dayData.instructionTitle}</h1>
+
+              {dayData.practiceType === 'choice' && (
+                <div className="grid grid-cols-2 gap-3 mb-4">
+                  <button
+                    onClick={() => setSelectedPracticeCategory('A')}
+                    className={`p-4 rounded-2xl border text-sm font-medium transition-all ${
+                      selectedPracticeCategory === 'A' 
+                        ? 'bg-[#38bdf8]/20 border-[#38bdf8] text-white shadow-[0_0_15px_rgba(56,189,248,0.3)]' 
+                        : 'bg-white/5 border-white/10 text-white/60'
+                    }`}
+                  >
+                    Практика A<br />
+                    <span className="text-xs font-normal text-white/60">Взгляд и дыхание</span>
+                  </button>
+                  <button
+                    onClick={() => setSelectedPracticeCategory('B')}
+                    className={`p-4 rounded-2xl border text-sm font-medium transition-all ${
+                      selectedPracticeCategory === 'B' 
+                        ? 'bg-[#38bdf8]/20 border-[#38bdf8] text-white shadow-[0_0_15px_rgba(56,189,248,0.3)]' 
+                        : 'bg-white/5 border-white/10 text-white/60'
+                    }`}
+                  >
+                    Практика B<br />
+                    <span className="text-xs font-normal text-white/60">Тэппинг и голос</span>
+                  </button>
+                </div>
+              )}
+
+              <div className="bg-white/5 border border-white/10 rounded-3xl p-6 mb-8 text-left leading-relaxed text-white/80 text-sm whitespace-pre-wrap">
+                {selectedPracticeCategory === 'A' ? (
+                  <>
+                    <p className="font-medium text-white mb-2">Практика A: Дыхание + взгляд + тело</p>
+                    <ul className="list-disc pl-5 space-y-1.5 text-white/70">
+                      <li>Двойной вдох носом + легкое сжатие ладоней</li>
+                      <li>Долгий выдох ртом + расслабление ладоней</li>
+                      <li>Взгляд неотрывно следует за движением точки</li>
+                    </ul>
+                  </>
+                ) : (
+                  <>
+                    <p className="font-medium text-white mb-2">Практика B: Ритм + дыхание + голос</p>
+                    <ul className="list-disc pl-5 space-y-1.5 text-white/70">
+                      <li>Руки скрещены на груди, мягкий поочередный тэппинг по плечам</li>
+                      <li>Спокойный вдох носом (4 сек)</li>
+                      <li>Длинный выдох со звуком «мммм» или «аааа» (6 сек)</li>
+                    </ul>
+                  </>
+                )}
+                <div className="mt-4 pt-4 border-t border-white/10 text-xs text-white/50">
+                  В конце практики: период наблюдения без техники ({exposureTotalSec / 60} мин).
+                </div>
               </div>
+
               <button
                 onClick={() => setStep('pre-thought')}
                 className="w-full bg-gradient-to-r from-blue-600 to-[#38bdf8] text-white py-4 rounded-3xl font-medium text-lg flex items-center justify-center gap-2 shadow-[0_0_25px_rgba(56,189,248,0.3)] hover:opacity-95 active:scale-[0.99] transition-all"
@@ -407,7 +436,7 @@ export function Day1Engine() {
             </motion.div>
           )}
 
-          {/* PRE-CHECK 3: ИНТЕНСИВНОСТЬ (0-10) */}
+          {/* PRE-CHECK 3: ИНТЕНСИВНОСТЬ 0-10 */}
           {step === 'pre-intensity' && (
             <motion.div
               key="pre-intensity"
@@ -438,186 +467,42 @@ export function Day1Engine() {
               />
 
               <button
-                onClick={() => setStep('stage-intro')}
-                className="w-full bg-gradient-to-r from-blue-600 to-[#38bdf8] text-white py-4 rounded-3xl font-medium text-lg flex items-center justify-center gap-2 shadow-[0_0_25px_rgba(56,189,248,0.3)] hover:opacity-95 transition-all"
-              >
-                Дальше
-                <ArrowRight className="w-5 h-5" />
-              </button>
-            </motion.div>
-          )}
-
-          {/* STAGE INTRO (1 to 4) */}
-          {step === 'stage-intro' && (
-            <motion.div
-              key={`stage-intro-${practiceStage}`}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full py-4"
-            >
-              <div className="text-[#38bdf8] text-xs font-medium tracking-wider uppercase mb-1">
-                {STAGE_INTROS[practiceStage].subtitle}
-              </div>
-              <h2 className="text-3xl font-light mb-3 text-white">
-                {STAGE_INTROS[practiceStage].title}
-              </h2>
-              <div className="bg-white/5 border border-white/10 rounded-3xl p-5 mb-8 text-white/80 text-sm leading-relaxed whitespace-pre-wrap">
-                {STAGE_INTROS[practiceStage].text}
-              </div>
-
-              <button
                 onClick={() => {
-                  setStageTimeLeft(45);
-                  setStep('stage-practice');
-                  setIsStageActive(true);
-                  setPhase('inhale1');
+                  setStep('practice');
+                  setIsPracticeActive(true);
+                  if (selectedPracticeCategory === 'A') setPhaseA('inhale1');
+                  else setPhaseB('inhale');
                 }}
                 className="w-full bg-gradient-to-r from-blue-600 to-[#38bdf8] text-white py-4 rounded-3xl font-medium text-lg flex items-center justify-center gap-2 shadow-[0_0_25px_rgba(56,189,248,0.3)] hover:opacity-95 transition-all"
               >
-                {STAGE_INTROS[practiceStage].action}
+                Начать практику
                 <Play className="w-5 h-5 fill-current ml-1" />
               </button>
             </motion.div>
           )}
 
-          {/* STAGE PRACTICE PLAYER */}
-          {step === 'stage-practice' && (
+          {/* MAIN PRACTICE: A or B */}
+          {step === 'practice' && (
             <motion.div
-              key="stage-practice"
+              key="practice"
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 1.05 }}
               className="w-full flex flex-col items-center justify-between flex-1 py-4 min-h-0 relative"
             >
               <div className="flex justify-between w-full max-w-sm items-center text-xs text-white/50 font-mono">
-                <span>Этап {practiceStage} из 4</span>
-                <span>00:{stageTimeLeft.toString().padStart(2, '0')}</span>
+                <span>{selectedPracticeCategory === 'A' ? 'Практика A' : 'Практика B'}</span>
+                <span>{Math.floor(practiceTimeLeft / 60)}:{(practiceTimeLeft % 60).toString().padStart(2, '0')}</span>
               </div>
 
-              <div className="relative w-full flex-1 flex items-center justify-center min-h-[300px]">
-                {/* Visual circle */}
-                <motion.div
-                  variants={circleVariants}
-                  animate={isStageActive ? phase : 'exhale'}
-                  className="absolute w-[70vw] h-[70vw] max-w-[420px] max-h-[420px] rounded-full bg-sky-300/40 blur-[50px] mix-blend-screen pointer-events-none"
-                />
-
-                {/* Eye dot for stage 2 and 3 */}
-                {(practiceStage === 2 || practiceStage === 3) && (
-                  <motion.div 
-                    className="absolute w-7 h-7 rounded-full bg-white shadow-[0_0_25px_8px_rgba(255,255,255,0.7)] z-20 pointer-events-none"
-                    variants={dotVariants}
-                    animate={isStageActive ? phase : 'initial'}
-                  />
-                )}
-
-                {/* Practice B preview visual */}
-                {practiceStage === 4 && (
-                  <div className="flex gap-12 z-20 items-center">
-                    <div className={`w-20 h-20 rounded-full border-2 flex flex-col items-center justify-center transition-all ${
-                      tappingSide === 'left' ? 'border-[#38bdf8] bg-[#38bdf8]/30 scale-110 shadow-[0_0_25px_rgba(56,189,248,0.5)]' : 'border-white/20 bg-white/5 opacity-50'
-                    }`}>
-                      <span className="text-xs text-white/80 font-medium">Левое</span>
-                      <span className="text-[10px] text-white/50">плечо</span>
-                    </div>
-                    <div className={`w-20 h-20 rounded-full border-2 flex flex-col items-center justify-center transition-all ${
-                      tappingSide === 'right' ? 'border-[#38bdf8] bg-[#38bdf8]/30 scale-110 shadow-[0_0_25px_rgba(56,189,248,0.5)]' : 'border-white/20 bg-white/5 opacity-50'
-                    }`}>
-                      <span className="text-xs text-white/80 font-medium">Правое</span>
-                      <span className="text-[10px] text-white/50">плечо</span>
-                    </div>
-                  </div>
-                )}
-
-                {/* Prompt text */}
-                <div className="absolute flex flex-col items-center text-center z-30 pointer-events-none drop-shadow-md">
-                  {practiceStage <= 3 && (
-                    <>
-                      <div className="text-2xl font-light tracking-[0.2em] uppercase text-white">
-                        {phase === 'inhale1' ? 'Вдох' : phase === 'inhale2' ? 'Довдох' : phase === 'hold' ? ' ' : 'Выдох'}
-                      </div>
-                      {practiceStage === 3 && (
-                        <div className="text-sm font-medium tracking-wider uppercase text-blue-200 mt-2">
-                          {(phase === 'inhale1' || phase === 'inhale2') ? 'Сжимаем ладони' : phase === 'exhale' ? 'Расслабляем ладони' : ''}
-                        </div>
-                      )}
-                    </>
-                  )}
-                  {practiceStage === 4 && (
-                    <div className="text-lg font-light tracking-wide text-white/90 max-w-[260px]">
-                      Поочередный тэппинг + выдох со звуком «мммм»
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <button
-                onClick={() => setIsStageActive(!isStageActive)}
-                className="p-4 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors z-20"
-              >
-                {isStageActive ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6 ml-0.5" />}
-              </button>
-            </motion.div>
-          )}
-
-          {/* CONSOLIDATION INTRO */}
-          {step === 'consolidation-intro' && (
-            <motion.div
-              key="consolidation-intro"
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -15 }}
-              className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full py-4 text-center"
-            >
-              <div className="text-[#38bdf8] text-xs font-medium tracking-wider uppercase mb-2">Финальный блок Дня 1</div>
-              <h2 className="text-3xl font-light mb-4 text-white">Основная практика</h2>
-              <div className="bg-white/5 border border-white/10 rounded-3xl p-6 mb-8 text-left text-white/80 text-sm leading-relaxed flex flex-col gap-3">
-                <p>Сейчас мы соединяем все элементы Практики A вместе на 2.5 минуты:</p>
-                <ul className="list-disc pl-5 space-y-1.5 text-white/70">
-                  <li>Двойной вдох носом + сжатие ладоней</li>
-                  <li>Длинный выдох ртом + расслабление ладоней</li>
-                  <li>Взгляд неотрывно следует за точкой</li>
-                </ul>
-              </div>
-
-              <button
-                onClick={() => {
-                  setConsolidationTimeLeft(150);
-                  setStep('consolidation-practice');
-                  setIsConsolidationActive(true);
-                  setPhase('inhale1');
-                }}
-                className="w-full bg-gradient-to-r from-blue-600 to-[#38bdf8] text-white py-4 rounded-3xl font-medium text-lg flex items-center justify-center gap-2 shadow-[0_0_25px_rgba(56,189,248,0.3)] hover:opacity-95 transition-all"
-              >
-                Начать сессию
-                <Play className="w-5 h-5 fill-current ml-1" />
-              </button>
-            </motion.div>
-          )}
-
-          {/* CONSOLIDATION PRACTICE */}
-          {step === 'consolidation-practice' && (
-            <motion.div
-              key="consolidation-practice"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 1.05 }}
-              className="w-full flex flex-col items-center justify-between flex-1 py-4 min-h-0 relative"
-            >
-              <div className="flex justify-between w-full max-w-sm items-center text-xs text-white/50 font-mono">
-                <span>Практика A • Консолидация</span>
-                <span>{Math.floor(consolidationTimeLeft / 60)}:{(consolidationTimeLeft % 60).toString().padStart(2, '0')}</span>
-              </div>
-
-              {/* Midpoint subtle notice */}
+              {/* Midpoint notice (shown once for ~6 seconds) */}
               <AnimatePresence>
                 {showMidpointNotice && (
                   <motion.div
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    className="absolute top-12 z-40 bg-[#0A1325]/90 border border-[#38bdf8]/40 px-5 py-3 rounded-2xl text-xs text-center text-white shadow-xl max-w-xs"
+                    className="absolute top-12 z-40 bg-[#0A1325]/95 border border-[#38bdf8]/40 px-5 py-3 rounded-2xl text-xs text-center text-white shadow-xl max-w-xs leading-relaxed"
                   >
                     На несколько секунд заметьте {activeBodyAreaText}. Не оценивайте его. Просто продолжайте упражнение.
                   </motion.div>
@@ -625,41 +510,81 @@ export function Day1Engine() {
               </AnimatePresence>
 
               <div className="relative w-full flex-1 flex items-center justify-center min-h-[300px]">
-                {/* Circle */}
-                <motion.div
-                  variants={circleVariants}
-                  animate={isConsolidationActive ? phase : 'exhale'}
-                  className="absolute w-[75vw] h-[75vw] max-w-[450px] max-h-[450px] rounded-full bg-sky-200/50 blur-[60px] mix-blend-screen pointer-events-none"
-                />
+                {/* Practice A Visuals */}
+                {selectedPracticeCategory === 'A' && (
+                  <>
+                    <motion.div
+                      variants={circleVariantsA}
+                      animate={isPracticeActive ? phaseA : 'exhale'}
+                      className="absolute w-[75vw] h-[75vw] max-w-[450px] max-h-[450px] rounded-full bg-sky-200/50 blur-[60px] mix-blend-screen pointer-events-none"
+                    />
+                    <motion.div 
+                      className="absolute w-7 h-7 rounded-full bg-white shadow-[0_0_30px_10px_rgba(255,255,255,0.6)] z-20 pointer-events-none"
+                      variants={dotVariants}
+                      animate={isPracticeActive ? phaseA : 'initial'}
+                    />
+                    <div className="absolute flex flex-col items-center text-center z-30 pointer-events-none drop-shadow-md">
+                      <div className="text-2xl font-light tracking-[0.2em] uppercase text-white">
+                        {phaseA === 'inhale1' ? 'Вдох' : phaseA === 'inhale2' ? 'Довдох' : phaseA === 'hold' ? ' ' : 'Выдох'}
+                      </div>
+                      <div className="text-xs font-medium tracking-wider uppercase text-blue-200 mt-2">
+                        {(phaseA === 'inhale1' || phaseA === 'inhale2') ? 'Сжимаем ладони' : phaseA === 'exhale' ? 'Расслабляем ладони' : ''}
+                      </div>
+                    </div>
+                  </>
+                )}
 
-                {/* Dot */}
-                <motion.div 
-                  className="absolute w-7 h-7 rounded-full bg-white shadow-[0_0_30px_10px_rgba(255,255,255,0.6)] z-20 pointer-events-none"
-                  variants={dotVariants}
-                  animate={isConsolidationActive ? phase : 'initial'}
-                />
+                {/* Practice B Visuals */}
+                {selectedPracticeCategory === 'B' && (
+                  <>
+                    <motion.div
+                      variants={circleVariantsB}
+                      animate={isPracticeActive ? phaseB : 'exhale'}
+                      className="absolute w-[75vw] h-[75vw] max-w-[450px] max-h-[450px] rounded-full bg-blue-300/40 blur-[60px] mix-blend-screen pointer-events-none"
+                    />
 
-                {/* Text */}
-                <div className="absolute flex flex-col items-center text-center z-30 pointer-events-none drop-shadow-md">
-                  <div className="text-2xl font-light tracking-[0.2em] uppercase text-white">
-                    {phase === 'inhale1' ? 'Вдох' : phase === 'inhale2' ? 'Довдох' : phase === 'hold' ? ' ' : 'Выдох'}
-                  </div>
-                  <div className="text-xs font-medium tracking-wider uppercase text-blue-200 mt-2">
-                    {(phase === 'inhale1' || phase === 'inhale2') ? 'Сжимаем ладони' : phase === 'exhale' ? 'Расслабляем ладони' : ''}
-                  </div>
-                </div>
+                    {/* Butterfly tapping indicators */}
+                    <div className="flex gap-12 z-20 items-center mb-16">
+                      <div className={`w-20 h-20 rounded-full border-2 flex flex-col items-center justify-center transition-all duration-300 ${
+                        tappingSide === 'left' 
+                          ? 'border-[#38bdf8] bg-[#38bdf8]/30 scale-110 shadow-[0_0_25px_rgba(56,189,248,0.6)]' 
+                          : 'border-white/20 bg-white/5 opacity-50'
+                      }`}>
+                        <span className="text-xs text-white/80 font-medium">Левое</span>
+                        <span className="text-[10px] text-white/50">плечо</span>
+                      </div>
+                      <div className={`w-20 h-20 rounded-full border-2 flex flex-col items-center justify-center transition-all duration-300 ${
+                        tappingSide === 'right' 
+                          ? 'border-[#38bdf8] bg-[#38bdf8]/30 scale-110 shadow-[0_0_25px_rgba(56,189,248,0.6)]' 
+                          : 'border-white/20 bg-white/5 opacity-50'
+                      }`}>
+                        <span className="text-xs text-white/80 font-medium">Правое</span>
+                        <span className="text-[10px] text-white/50">плечо</span>
+                      </div>
+                    </div>
+
+                    <div className="absolute bottom-6 flex flex-col items-center text-center z-30 pointer-events-none drop-shadow-md">
+                      <div className="text-2xl font-light tracking-[0.2em] uppercase text-white">
+                        {phaseB === 'inhale' ? 'Вдох носом' : 'Выдох: «мммм»'}
+                      </div>
+                      <div className="text-xs font-medium tracking-wider text-blue-200 mt-1">
+                        {phaseB === 'inhale' ? 'Спокойный вдох' : 'Долгий выдох со звуком'}
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
 
               <button
-                onClick={() => setIsConsolidationActive(!isConsolidationActive)}
+                onClick={() => setIsPracticeActive(!isPracticeActive)}
                 className="p-4 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors z-20"
               >
-                {isConsolidationActive ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6 ml-0.5" />}
+                {isPracticeActive ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6 ml-0.5" />}
               </button>
             </motion.div>
           )}
 
-          {/* EXPOSURE TAIL (60 seconds) */}
+          {/* EXPOSURE TAIL */}
           {step === 'exposure-tail' && (
             <motion.div
               key="exposure-tail"
@@ -685,12 +610,12 @@ export function Day1Engine() {
                     strokeWidth="4" 
                     fill="none" 
                     strokeDasharray={377}
-                    strokeDashoffset={377 - (377 * (60 - exposureTimeLeft)) / 60}
+                    strokeDashoffset={377 - (377 * (exposureTotalSec - exposureTimeLeft)) / exposureTotalSec}
                     className="transition-all duration-1000 ease-linear"
                   />
                 </svg>
                 <div className="absolute text-3xl font-light font-mono text-white">
-                  00:{exposureTimeLeft.toString().padStart(2, '0')}
+                  {Math.floor(exposureTimeLeft / 60)}:{(exposureTimeLeft % 60).toString().padStart(2, '0')}
                 </div>
               </div>
 
@@ -830,7 +755,7 @@ export function Day1Engine() {
             </motion.div>
           )}
 
-          {/* SUMMARY: НЕЙТРАЛЬНЫЙ ИТОГ */}
+          {/* SUMMARY: НЕЙТРАЛЬНЫЙ ИТОГ ДНЯ */}
           {step === 'summary' && (
             <motion.div
               key="summary"
@@ -839,7 +764,7 @@ export function Day1Engine() {
               exit={{ opacity: 0, y: -15 }}
               className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full py-4 text-center"
             >
-              <div className="text-[#38bdf8] text-xs font-medium tracking-wider uppercase mb-3">Практика завершена</div>
+              <div className="text-[#38bdf8] text-xs font-medium tracking-wider uppercase mb-3">Итог Дня {currentDay}</div>
               
               <div className="text-lg text-white font-medium mb-6">
                 {isRelocated ? postLocation : (selectedLocation === 'Другое' && customLocation ? customLocation : selectedLocation)}
@@ -870,41 +795,11 @@ export function Day1Engine() {
               </div>
 
               <button
-                onClick={() => setStep('sos-reveal')}
+                onClick={handleFinishCourseDay}
                 className="w-full bg-gradient-to-r from-blue-600 to-[#38bdf8] text-white py-4 rounded-3xl font-medium text-lg flex items-center justify-center gap-2 shadow-[0_0_25px_rgba(56,189,248,0.3)] hover:opacity-95 transition-all"
               >
-                Далее
+                Завершить практику
                 <ArrowRight className="w-5 h-5" />
-              </button>
-            </motion.div>
-          )}
-
-          {/* SOS REVEAL (Unlocked SOS after Day 1) */}
-          {step === 'sos-reveal' && (
-            <motion.div
-              key="sos-reveal"
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full py-4 text-center items-center"
-            >
-              <div className="w-16 h-16 rounded-full border border-dashed border-red-500/50 bg-red-500/10 text-red-400 flex items-center justify-center mb-6 relative">
-                <div className="absolute inset-0 rounded-full bg-red-500/20 animate-ping" />
-                <span className="text-lg font-bold">SOS</span>
-              </div>
-              
-              <h2 className="text-2xl font-light mb-3 text-white">
-                Скорая помощь разблокирована
-              </h2>
-
-              <p className="text-sm text-white/70 leading-relaxed mb-6">
-                Вы освоили базовый механизм. Теперь на главном экране вам всегда доступен быстрый режим саморегуляции на случай сильного приступа тревоги.
-              </p>
-
-              <button
-                onClick={handleCompleteDay1}
-                className="w-full bg-gradient-to-r from-blue-600 to-[#38bdf8] text-white py-4 rounded-3xl font-medium text-lg shadow-[0_0_25px_rgba(56,189,248,0.3)] hover:opacity-95 transition-all"
-              >
-                Завершить День 1
               </button>
             </motion.div>
           )}

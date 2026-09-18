@@ -25,6 +25,11 @@ export interface PracticeSession {
   schemaVersion: number;
   isSOS?: boolean; // Keep track if it was an SOS session
   courseDay?: number; // Keep track if it was a course day
+  practiceCategory?: 'A' | 'B';
+  bodyLocationBefore?: string;
+  bodyLocationAfter?: string;
+  anxietySituation?: string;
+  exposureDuration?: number;
 
   // Legacy/other fields
   soundMode?: string;

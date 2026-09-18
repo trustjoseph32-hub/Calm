@@ -211,18 +211,18 @@ export function SynchronizedEngine() {
         mappedProgress = 0.5 * (1 - Math.cos(Math.PI * progress));
         
         if (isSOS) {
-          // 30% time for first inhale, 70% time for second inhale (довдох)
-          if (progress < 0.30) {
-            // First inhale (0 to 30% of time, grows to ~40% of max expansion)
-            const localProgress = progress / 0.30;
-            circleMappedProgress = 0.40 * Math.sin(localProgress * (Math.PI / 2));
+          // 50% time for first inhale, 50% time for second inhale (довдох)
+          if (progress < 0.50) {
+            // First inhale (0 to 50% of time, grows to ~50% of max expansion)
+            const localProgress = progress / 0.50;
+            circleMappedProgress = 0.50 * Math.sin(localProgress * (Math.PI / 2));
             setIsSecondInhale(false);
           } else {
-            // Second inhale (30% to 100% of time). Grows from 40% to 100%
-            const localProgress = (progress - 0.30) / 0.70;
+            // Second inhale (50% to 100% of time). Grows from 50% to 100%
+            const localProgress = (progress - 0.50) / 0.50;
             // Smooth ease-in-out ensures the circle accelerates from the pause and decelerates perfectly in sync with the ball at the end
             const easeInOut = 0.5 * (1 - Math.cos(Math.PI * localProgress));
-            circleMappedProgress = 0.40 + 0.60 * easeInOut;
+            circleMappedProgress = 0.50 + 0.50 * easeInOut;
             setIsSecondInhale(true);
           }
         } else {
@@ -488,7 +488,7 @@ export function SynchronizedEngine() {
               {/* Text overlay for breathing */}
               {settings.showText && (
                 <div className="absolute text-2xl font-light tracking-[0.2em] uppercase text-white pointer-events-none z-20 drop-shadow-[0_2px_10px_rgba(0,0,0,1)] transition-opacity duration-500">
-                  {isExpanding ? (isSOS && isSecondInhale ? 'До-вдох' : 'Вдох') : 'Выдох'}
+                  {isExpanding ? (isSOS && isSecondInhale ? 'Довдох' : 'Вдох') : 'Выдох'}
                 </div>
               )}
 

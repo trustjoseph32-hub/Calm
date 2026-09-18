@@ -1,126 +1,185 @@
 import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Activity, Calendar, Clock } from 'lucide-react';
+import { ArrowLeft, Activity, Calendar, Clock, TrendingDown } from 'lucide-react';
 import { useAppStore } from '../store/AppProvider';
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip } from 'recharts';
 
 export function Progress() {
   const navigate = useNavigate();
-  const { sessions } = useAppStore();
+  const { sessions, courseProgress } = useAppStore();
 
-  const courseSessions = useMemo(() => sessions.filter(s => !s.isSOS), [sessions]);
+  const courseSessions = useMemo(() => {
+    return sessions
+      .filter(s => s.practiceType === 'course' || (!s.isSOS && s.courseDay))
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }, [sessions]);
 
   const stats = useMemo(() => {
     if (courseSessions.length === 0) return null;
     
-    // Only use valid sessions for outcome stats
-    const validOutcomes = courseSessions.filter(s => s.validForOutcomeStats && s.anxietyBefore !== undefined && s.anxietyAfter !== undefined);
-    const avgBefore = validOutcomes.length ? validOutcomes.reduce((sum, s) => sum + (s.anxietyBefore || 0), 0) / validOutcomes.length : 0;
-    const avgAfter = validOutcomes.length ? validOutcomes.reduce((sum, s) => sum + (s.anxietyAfter || 0), 0) / validOutcomes.length : 0;
+    const validOutcomes = courseSessions.filter(
+      s => s.anxietyBefore !== undefined && s.anxietyAfter !== undefined
+    );
+    const avgBefore = validOutcomes.length 
+      ? validOutcomes.reduce((sum, s) => sum + (s.anxietyBefore || 0), 0) / validOutcomes.length 
+      : 0;
+    const avgAfter = validOutcomes.length 
+      ? validOutcomes.reduce((sum, s) => sum + (s.anxietyAfter || 0), 0) / validOutcomes.length 
+      : 0;
     
-    // Total minutes can include all course sessions, maybe except 'not_started'
-    const totalMinutes = courseSessions.filter(s => s.status !== 'not_started').reduce((sum, s) => sum + s.duration, 0) / 60;
-    
-    const uniqueDays = new Set(courseSessions.map(s => new Date(s.date).toDateString())).size;
+    const totalMinutes = courseSessions.reduce((sum, s) => sum + (s.duration || 0), 0) / 60;
+    const completedDaysCount = courseProgress.completedDays.length;
 
     return {
       totalPractices: courseSessions.length,
-      uniqueDays,
+      completedDaysCount,
       avgBefore: avgBefore.toFixed(1),
       avgAfter: avgAfter.toFixed(1),
-      avgDelta: (avgAfter - avgBefore).toFixed(1),
+      avgDelta: (avgBefore - avgAfter).toFixed(1),
       totalMinutes: Math.round(totalMinutes),
       hasValidOutcomes: validOutcomes.length > 0
     };
-  }, [courseSessions]);
+  }, [courseSessions, courseProgress]);
 
   const chartData = useMemo(() => {
-    const validOutcomes = courseSessions.filter(s => s.validForOutcomeStats && s.anxietyBefore !== undefined && s.anxietyAfter !== undefined);
-    // Take last 14 practices
-    return validOutcomes.slice(-14).map((s, i) => ({
-      index: i + 1,
+    const validOutcomes = [...courseSessions]
+      .reverse()
+      .filter(s => s.anxietyBefore !== undefined && s.anxietyAfter !== undefined);
+    
+    return validOutcomes.map((s, i) => ({
+      index: s.courseDay ? `День ${s.courseDay}` : `#${i + 1}`,
       before: s.anxietyBefore,
       after: s.anxietyAfter,
+      day: s.courseDay || i + 1,
     }));
   }, [courseSessions]);
 
   return (
-    <div className="flex-1 flex flex-col px-4 py-8 max-w-2xl mx-auto w-full">
+    <div className="flex-1 flex flex-col px-4 py-8 max-w-2xl mx-auto w-full min-h-[100svh] bg-[#050B14] text-white">
       <header className="flex items-center mb-8">
         <button 
           onClick={() => navigate(-1)}
-          className="w-10 h-10 rounded-full bg-gradient-to-b from-neutral-600 via-neutral-700 to-neutral-900 text-blue-100/80 flex items-center justify-center shrink-0 border border-neutral-400/40 shadow-[inset_0_2px_4px_rgba(255,255,255,0.3),inset_0_-4px_6px_rgba(0,0,0,0.6),0_6px_12px_rgba(0,0,0,0.3)] hover:scale-105 active:scale-95 transition-all"
+          className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 transition-all"
         >
-          <ArrowLeft className="w-5 h-5 drop-shadow-md" />
+          <ArrowLeft className="w-5 h-5" />
         </button>
-        <h1 className="text-xl font-medium ml-2 text-neutral-100">
+        <h1 className="text-xl font-light ml-3 text-white">
           Мой прогресс
         </h1>
       </header>
 
       <main className="flex-1 flex flex-col gap-6">
         {!stats ? (
-          <div className="bg-white/10 p-12 rounded-3xl shadow-sm border border-white/10 flex flex-col items-center justify-center text-center">
-            <Activity className="w-12 h-12 text-slate-500 mb-4" strokeWidth={1} />
-            <h2 className="text-xl font-medium text-neutral-100 mb-2">Пока нет данных</h2>
-            <p className="text-slate-500">Заверши свою первую практику, чтобы увидеть статистику.</p>
+          <div className="bg-white/5 p-12 rounded-3xl border border-white/10 flex flex-col items-center justify-center text-center">
+            <Activity className="w-12 h-12 text-white/30 mb-4" strokeWidth={1} />
+            <h2 className="text-xl font-light text-white mb-2">Пока нет данных</h2>
+            <p className="text-white/50 text-sm">Завершите первую практику курса, чтобы увидеть динамику наблюдений.</p>
           </div>
         ) : (
           <>
             <div className="grid grid-cols-2 gap-4">
-              <div className="bg-white/10 p-6 rounded-3xl shadow-sm border border-white/10 flex flex-col items-start">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-b from-indigo-400 via-indigo-600 to-indigo-800 text-white flex items-center justify-center border border-indigo-300/40 shadow-[inset_0_2px_4px_rgba(255,255,255,0.5),inset_0_-4px_6px_rgba(0,0,0,0.5),0_6px_12px_rgba(79,70,229,0.4)] mb-4">
-                  <Activity className="w-5 h-5 drop-shadow-md text-indigo-50" />
+              <div className="bg-white/5 p-5 rounded-3xl border border-white/10 flex flex-col items-start">
+                <div className="w-10 h-10 rounded-2xl bg-[#38bdf8]/10 text-[#38bdf8] flex items-center justify-center mb-3">
+                  <Calendar className="w-5 h-5" />
                 </div>
-                <span className="text-3xl font-light text-neutral-100">{stats.totalPractices}</span>
-                <span className="text-sm text-slate-500 mt-1">Всего практик</span>
+                <span className="text-3xl font-light text-white">{stats.completedDaysCount} / 14</span>
+                <span className="text-xs text-white/50 mt-1">Пройдено дней курса</span>
               </div>
-              <div className="bg-white/10 p-6 rounded-3xl shadow-sm border border-white/10 flex flex-col items-start">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-b from-emerald-400 via-emerald-600 to-emerald-800 text-white flex items-center justify-center border border-emerald-300/40 shadow-[inset_0_2px_4px_rgba(255,255,255,0.5),inset_0_-4px_6px_rgba(0,0,0,0.5),0_6px_12px_rgba(16,185,129,0.4)] mb-4">
-                  <Calendar className="w-5 h-5 drop-shadow-md text-emerald-50" />
+
+              <div className="bg-white/5 p-5 rounded-3xl border border-white/10 flex flex-col items-start">
+                <div className="w-10 h-10 rounded-2xl bg-blue-500/10 text-blue-400 flex items-center justify-center mb-3">
+                  <Clock className="w-5 h-5" />
                 </div>
-                <span className="text-3xl font-light text-neutral-100">{stats.uniqueDays}</span>
-                <span className="text-sm text-slate-500 mt-1">Дней с практикой</span>
+                <span className="text-3xl font-light text-white">{stats.totalMinutes} мин</span>
+                <span className="text-xs text-white/50 mt-1">Время в практике</span>
               </div>
-              <div className="col-span-2 bg-white/10 p-6 rounded-3xl shadow-sm border border-white/10 flex flex-col">
-                <h3 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-6">Среднее изменение</h3>
+
+              <div className="col-span-2 bg-white/5 p-6 rounded-3xl border border-white/10 flex flex-col">
+                <h3 className="text-xs font-medium text-white/50 uppercase tracking-wider mb-5">
+                  Средний балл ощущения в теле
+                </h3>
                 <div className="flex items-center justify-around w-full">
                   <div className="flex flex-col items-center">
-                    <span className="text-sm text-slate-500 mb-1">До</span>
-                    <span className="text-3xl font-light">{stats.avgBefore}</span>
+                    <span className="text-xs text-white/40 mb-1">До</span>
+                    <span className="text-3xl font-light text-white/80">{stats.avgBefore}</span>
                   </div>
-                  <ArrowLeft className="w-6 h-6 text-slate-500 rotate-180" />
+                  <div className="text-white/20">→</div>
                   <div className="flex flex-col items-center">
-                    <span className="text-sm text-slate-500 mb-1">После</span>
-                    <span className="text-3xl font-light">{stats.avgAfter}</span>
+                    <span className="text-xs text-white/40 mb-1">После</span>
+                    <span className="text-3xl font-light text-[#38bdf8]">{stats.avgAfter}</span>
                   </div>
                   <div className="flex flex-col items-center pl-4 border-l border-white/10">
-                    <span className="text-sm text-slate-500 mb-1">Дельта</span>
-                    <span className="text-3xl font-medium text-neutral-100">{stats.avgDelta}</span>
+                    <span className="text-xs text-white/40 mb-1 flex items-center gap-1">
+                      <TrendingDown className="w-3.5 h-3.5 text-[#38bdf8]" />
+                      Изменение
+                    </span>
+                    <span className="text-3xl font-medium text-[#38bdf8]">{stats.avgDelta}</span>
                   </div>
                 </div>
               </div>
             </div>
 
-            {chartData.length > 1 && (
-              <div className="bg-white/10 p-6 rounded-3xl shadow-sm border border-white/10 flex flex-col h-[300px]">
-                <h3 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-6">Уровень тревоги (последние)</h3>
+            {chartData.length > 0 && (
+              <div className="bg-white/5 p-6 rounded-3xl border border-white/10 flex flex-col h-[280px]">
+                <h3 className="text-xs font-medium text-white/50 uppercase tracking-wider mb-4">
+                  Динамика ощущений (по дням)
+                </h3>
                 <div className="flex-1 w-full min-h-0">
                   <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={chartData} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
-                      <XAxis dataKey="index" tick={false} axisLine={false} tickLine={false} />
-                      <YAxis domain={[0, 10]} axisLine={false} tickLine={false} tick={{fill: '#a3a3a3', fontSize: 12}} />
+                    <LineChart data={chartData} margin={{ top: 10, right: 10, left: -25, bottom: 5 }}>
+                      <XAxis dataKey="index" tick={{ fill: '#64748b', fontSize: 11 }} axisLine={false} tickLine={false} />
+                      <YAxis domain={[0, 10]} axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 11 }} />
                       <Tooltip 
-                        contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                        itemStyle={{ fontSize: '14px' }}
+                        contentStyle={{ backgroundColor: '#0A1325', borderColor: 'rgba(255,255,255,0.1)', borderRadius: '16px', color: '#fff' }}
+                        itemStyle={{ fontSize: '13px' }}
                       />
-                      <Line type="monotone" name="До" dataKey="before" stroke="#a3a3a3" strokeWidth={2} strokeDasharray="5 5" dot={false} />
-                      <Line type="monotone" name="После" dataKey="after" stroke="#171717" strokeWidth={3} dot={{r: 4, fill: '#171717'}} />
+                      <Line type="monotone" name="До" dataKey="before" stroke="#64748b" strokeWidth={2} strokeDasharray="4 4" dot={{ r: 3, fill: '#64748b' }} />
+                      <Line type="monotone" name="После" dataKey="after" stroke="#38bdf8" strokeWidth={2.5} dot={{ r: 4, fill: '#38bdf8' }} />
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
               </div>
             )}
+
+            {/* Course History List */}
+            <div className="flex flex-col gap-3 mt-2">
+              <h3 className="text-xs font-medium text-white/50 uppercase tracking-wider px-1">
+                История дней курса
+              </h3>
+              {courseSessions.map((session) => (
+                <div 
+                  key={session.sessionId}
+                  className="bg-white/5 border border-white/10 rounded-2xl p-4 flex items-center justify-between gap-3"
+                >
+                  <div className="flex flex-col gap-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium text-white">
+                        День {session.courseDay || 1}
+                      </span>
+                      {session.practiceCategory && (
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/10 text-white/70">
+                          Практика {session.practiceCategory}
+                        </span>
+                      )}
+                      <span className="text-xs text-[#38bdf8]">
+                        {session.bodyLocationBefore || 'Тело'}
+                      </span>
+                    </div>
+                    {session.anxietySituation && (
+                      <p className="text-xs text-white/50 truncate max-w-[240px] italic">
+                        «{session.anxietySituation}»
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="text-base text-white/50 font-light">{session.anxietyBefore ?? '-'}</span>
+                    <span className="text-xs text-white/30">→</span>
+                    <span className="text-base text-[#38bdf8] font-medium">{session.anxietyAfter ?? '-'}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
           </>
         )}
       </main>
