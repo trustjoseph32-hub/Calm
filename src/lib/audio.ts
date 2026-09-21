@@ -245,3 +245,65 @@ export class BilateralAudioEngine {
     }
   }
 }
+
+// Global shared helper for soft, calming bilateral / extreme-point beep
+let globalAudioCtx: AudioContext | null = null;
+
+export function playSoftBeep(side?: 'left' | 'right' | number, volume: number = 0.16) {
+  try {
+    if (!globalAudioCtx) {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioCtx) return;
+      globalAudioCtx = new AudioCtx();
+    }
+    if (globalAudioCtx.state === 'suspended') {
+      globalAudioCtx.resume();
+    }
+
+    const ctx = globalAudioCtx;
+    const now = ctx.currentTime;
+
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    const panner = ctx.createStereoPanner();
+    
+    // Lowpass biquad filter for warm, rounded cutoff without harsh high frequencies
+    const lowpass = ctx.createBiquadFilter();
+    lowpass.type = 'lowpass';
+    lowpass.frequency.setValueAtTime(450, now);
+    lowpass.frequency.exponentialRampToValueAtTime(220, now + 0.28);
+    lowpass.Q.value = 1.0;
+
+    osc.type = 'sine';
+    // Warm, deep, non-piercing baseline tone (210Hz gliding smoothly to 175Hz - calming deep chime)
+    osc.frequency.setValueAtTime(210, now);
+    osc.frequency.exponentialRampToValueAtTime(175, now + 0.24);
+
+    let panVal = 0;
+    if (typeof side === 'number') {
+      panVal = Math.max(-1, Math.min(1, side));
+    } else if (side === 'left') {
+      panVal = -0.7;
+    } else if (side === 'right') {
+      panVal = 0.7;
+    }
+    panner.pan.value = panVal;
+
+    // Very soft and gentle bell-like cushion envelope (soft 35ms attack, gradual smooth decay)
+    const targetGain = Math.min(0.12, volume);
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(targetGain, now + 0.035);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.28);
+
+    // Audio graph: osc -> lowpass cutoff -> panner -> gain -> destination
+    osc.connect(lowpass);
+    lowpass.connect(panner);
+    panner.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start(now);
+    osc.stop(now + 0.3);
+  } catch (e) {
+    // AudioContext might be blocked until user interaction
+  }
+}

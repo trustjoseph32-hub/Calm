@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { Pause, Play, X, AlertTriangle, ArrowRight } from 'lucide-react';
+import { Pause, Play, X, AlertTriangle } from 'lucide-react';
 import { useAppStore } from '../store/AppProvider';
 import { PracticeSession, SessionStatus } from '../types';
 import { BilateralAudioEngine } from '../lib/audio';

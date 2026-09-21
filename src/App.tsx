@@ -17,6 +17,7 @@ import { Progress } from './screens/Progress';
 import { Course } from './screens/Course';
 import { Checkin } from './screens/Checkin';
 import { Day1Engine } from './screens/Day1Engine';
+import { Day2Engine } from './screens/Day2Engine';
 import { CourseDayEngine } from './screens/CourseDayEngine';
 
 function PracticeSetupRouter() {
@@ -60,7 +61,7 @@ function AppRouter() {
       <Route path="/practice/setup/:type" element={<PracticeSetupRouter />} />
       <Route path="/practice/active" element={<PracticeEngineWrapper />} />
       <Route path="/practice/day1" element={<Day1Engine />} />
-      <Route path="/practice/day2" element={<Navigate to="/practice/course-day/2" replace />} />
+      <Route path="/practice/day2" element={<Day2Engine />} />
       <Route path="/practice/day3" element={<Navigate to="/practice/course-day/3" replace />} />
       <Route path="/practice/course-day/:day" element={<CourseDayEngine />} />
       <Route path="/progress" element={<Progress />} />

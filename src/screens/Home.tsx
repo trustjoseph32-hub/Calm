@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { Activity, BookOpen, Lock, ArrowRight, Play, Check } from 'lucide-react';
+import { Activity, BookOpen, Lock, Play, Check } from 'lucide-react';
 import { useAppStore } from '../store/AppProvider';
 
 export function Home() {

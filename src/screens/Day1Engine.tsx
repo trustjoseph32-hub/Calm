@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { X, ArrowRight, Play, Pause, ChevronRight } from 'lucide-react';
+import { X, ArrowRight, Play, Pause } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useAppStore } from '../store/AppProvider';
-import { BODY_LOCATIONS, BodyLocation } from '../data/courseData';
+import { BODY_LOCATIONS, BodyLocation, getBodyLocationInPrepositional } from '../data/courseData';
+import { playSoftBeep } from '../lib/audio';
 
 type Step = 
   | 'card1' 
@@ -22,30 +23,42 @@ type Step =
   | 'summary' 
   | 'sos-reveal';
 
-const STAGE_INTROS: Record<number, { title: string; subtitle: string; text: string; action: string }> = {
+const STAGE_INTROS: Record<number, { 
+  title: string; 
+  subtitle: string; 
+  lead?: string; 
+  text?: string; 
+  bullets?: string[]; 
+  action: string 
+}> = {
   1: {
+    subtitle: 'Внимание + дыхание — Шаг 1 из 3',
     title: 'Дыхание',
-    subtitle: 'Практика A — Шаг 1 из 3',
-    text: 'Осваиваем физиологический вздох: два вдоха носом (обычный вдох и сразу короткий довдох) и после долгий плавный выдох через рот.',
+    lead: 'Осваиваем физиологический вздох:',
+    bullets: [
+      'Два вдоха носом (обычный вдох и сразу короткий довдох) и после долгий плавный выдох через рот.'
+    ],
     action: 'Начать'
   },
   2: {
+    subtitle: 'Внимание + дыхание — Шаг 2 из 3',
     title: 'Движение глаз',
-    subtitle: 'Практика A — Шаг 2 из 3',
-    text: 'Не поворачивая головы, плавно ведите взгляд за светящейся точкой от края до края экрана. Старайтесь доводить движение глаз до конца, ощущая небольшое напряжение в мышцах глаз.\n\nЭто действие снижает фиксацию на тревожности.',
+    bullets: [
+      'Не поворачивая головы, плавно ведите взгляд за светящейся точкой от края до края экрана.',
+      'Старайтесь доводить движение глаз до конца, ощущая небольшое напряжение в мышцах глаз.'
+    ],
+    text: 'Это действие снижает фиксацию на тревожности.',
     action: 'Начать'
   },
   3: {
-    title: 'Работа тела',
-    subtitle: 'Практика A — Шаг 3 из 3',
-    text: 'Соединяем дыхание, движение глаз и сброс напряжения:\nна вдохе мягко сжимайте ладони в кулаки,\nна выдохе полностью расслабляйте пальцы, сбрасывая мышечный зажим.',
+    subtitle: 'Внимание + дыхание — Шаг 3 из 3',
+    title: 'Добавим телесное напряжение и расслабление',
+    lead: 'Соединяем дыхание, движение глаз и сброс напряжения:',
+    bullets: [
+      'на вдохе мягко сжимайте ладони в кулаки',
+      'на выдохе полностью расслабляйте пальцы, сбрасывая мышечный зажим'
+    ],
     action: 'Начать'
-  },
-  4: {
-    title: 'Знакомство с Практикой B',
-    subtitle: 'Вторая практика курса',
-    text: 'В этой практике будем делать:\nмягкий поочередный тэппинг по плечам скрещенными руками и в верхней части груди, а так же длинный выдох с тихим гудением («мммм» или «аааа»).\nЭто приводит к системному понижению телесного и эмоционального напряжения.',
-    action: 'Попробовать Практику B'
   }
 };
 
@@ -53,7 +66,7 @@ export function Day1Engine() {
   const navigate = useNavigate();
   const { addSession, markCourseDayCompleted } = useAppStore();
 
-  const [step, setStep] = useState<Step>('card1');
+  const [step, setStep] = useState<Step>('card2');
   
   // Pre-check state
   const [situationText, setSituationText] = useState('');
@@ -62,17 +75,15 @@ export function Day1Engine() {
   const [customLocation, setCustomLocation] = useState('');
   const [preAnxiety, setPreAnxiety] = useState<number>(6);
 
-  // Learning stages state (1: breath, 2: eyes, 3: hands, 4: practice B preview)
+  // Learning stages state (1: breath, 2: eyes, 3: hands)
   const [practiceStage, setPracticeStage] = useState(1);
   const [stageTimeLeft, setStageTimeLeft] = useState(45); // 45s per learning stage
   const [isStageActive, setIsStageActive] = useState(false);
   const [phase, setPhase] = useState<'inhale1' | 'inhale2' | 'hold' | 'exhale'>('inhale1');
-  const [tappingSide, setTappingSide] = useState<'left' | 'right'>('left');
 
   // Consolidation practice state (Practice A combined)
   const [consolidationTimeLeft, setConsolidationTimeLeft] = useState(150); // 2.5 min
   const [isConsolidationActive, setIsConsolidationActive] = useState(false);
-  const [showMidpointNotice, setShowMidpointNotice] = useState(false);
 
   // Exposure tail state
   const [exposureTimeLeft, setExposureTimeLeft] = useState(60); // 1 min (60s)
@@ -113,7 +124,7 @@ export function Day1Engine() {
       }, 1000);
     } else if (stageTimeLeft === 0 && step === 'stage-practice') {
       setIsStageActive(false);
-      if (practiceStage < 4) {
+      if (practiceStage < 3) {
         setPracticeStage(prev => prev + 1);
         setStep('stage-intro');
       } else {
@@ -123,19 +134,6 @@ export function Day1Engine() {
     return () => clearInterval(interval);
   }, [step, isStageActive, stageTimeLeft, practiceStage]);
 
-  // Stage 4 Tapping pulse
-  useEffect(() => {
-    if (step === 'stage-practice' && isStageActive && practiceStage === 4) {
-      const tapInterval = setInterval(() => {
-        setTappingSide(prev => (prev === 'left' ? 'right' : 'left'));
-        if (typeof navigator !== 'undefined' && navigator.vibrate) {
-          navigator.vibrate(30);
-        }
-      }, 1100);
-      return () => clearInterval(tapInterval);
-    }
-  }, [step, isStageActive, practiceStage]);
-
   // Breathing cycle for stages 1-3 & consolidation
   useEffect(() => {
     const isPracticeActive = (step === 'stage-practice' && isStageActive && practiceStage <= 3) || 
@@ -143,17 +141,28 @@ export function Day1Engine() {
     if (!isPracticeActive) return;
 
     let timeout: NodeJS.Timeout;
+    const hasMovingDot = (step === 'stage-practice' && (practiceStage === 2 || practiceStage === 3)) ||
+                         (step === 'consolidation-practice');
+
     if (phase === 'inhale1') {
-      timeout = setTimeout(() => setPhase('inhale2'), 1700);
+      timeout = setTimeout(() => setPhase('inhale2'), 1800);
     } else if (phase === 'inhale2') {
       if (typeof navigator !== 'undefined' && navigator.vibrate) {
         navigator.vibrate([40, 40]);
       }
-      timeout = setTimeout(() => setPhase('hold'), 1700);
-    } else if (phase === 'hold') {
-      timeout = setTimeout(() => setPhase('exhale'), 800);
+      timeout = setTimeout(() => {
+        setPhase('exhale');
+        if (hasMovingDot) {
+          playSoftBeep('right');
+        }
+      }, 1800);
     } else if (phase === 'exhale') {
-      timeout = setTimeout(() => setPhase('inhale1'), 5000);
+      timeout = setTimeout(() => {
+        setPhase('inhale1');
+        if (hasMovingDot) {
+          playSoftBeep('left');
+        }
+      }, 3600);
     }
 
     return () => clearTimeout(timeout);
@@ -164,16 +173,7 @@ export function Day1Engine() {
     let interval: NodeJS.Timeout;
     if (step === 'consolidation-practice' && isConsolidationActive && consolidationTimeLeft > 0) {
       interval = setInterval(() => {
-        setConsolidationTimeLeft(prev => {
-          const next = prev - 1;
-          // Trigger midpoint prompt around half time (75s) for 6 seconds
-          if (next <= 80 && next >= 74) {
-            setShowMidpointNotice(true);
-          } else {
-            setShowMidpointNotice(false);
-          }
-          return next;
-        });
+        setConsolidationTimeLeft(prev => prev - 1);
       }, 1000);
     } else if (consolidationTimeLeft === 0 && step === 'consolidation-practice') {
       setIsConsolidationActive(false);
@@ -228,18 +228,16 @@ export function Day1Engine() {
   };
 
   const dotVariants = {
-    initial: { x: '-40vw', opacity: 0 },
-    inhale1: { x: '0vw', opacity: 1, transition: { duration: 1.7, ease: 'linear' } }, 
-    inhale2: { x: '40vw', opacity: 1, transition: { duration: 1.7, ease: 'linear' } }, 
-    hold: { x: '40vw', opacity: 1, transition: { duration: 0.8, ease: 'linear' } },
-    exhale: { x: '-40vw', opacity: 1, transition: { duration: 5.0, ease: 'easeInOut' } }
+    initial: { x: '-38vw', opacity: 1 },
+    inhale: { x: '38vw', opacity: 1, transition: { duration: 3.6, ease: 'easeInOut' } },
+    exhale: { x: '-38vw', opacity: 1, transition: { duration: 3.6, ease: 'easeInOut' } }
   };
 
   const circleVariants = {
-    exhale: { scale: 0.35, opacity: 0.2, transition: { duration: 5.0, ease: 'easeInOut' } },
-    inhale1: { scale: 0.80, opacity: 0.65, transition: { duration: 1.7, ease: 'linear' } },
-    inhale2: { scale: 1.25, opacity: 0.95, transition: { duration: 1.7, ease: 'easeOut' } },
-    hold: { scale: 1.25, opacity: 0.95, transition: { duration: 0.8, ease: 'linear' } }
+    initial: { scale: 0, opacity: 0 },
+    inhale1: { scale: 0.75, opacity: 0.65, transition: { duration: 1.8, ease: 'easeOut' } },
+    inhale2: { scale: 1.25, opacity: 0.95, transition: { duration: 1.8, ease: 'easeOut' } },
+    exhale: { scale: 0.25, opacity: 0.2, transition: { duration: 3.6, ease: 'easeInOut' } }
   };
 
   return (
@@ -250,7 +248,7 @@ export function Day1Engine() {
       <header className="px-4 py-5 w-full flex items-center justify-between relative z-20 sm:max-w-xl mx-auto">
         <div className="flex flex-col">
           <span className="text-xs text-[#38bdf8] font-medium tracking-wider uppercase">День 1 из 14</span>
-          <span className="text-sm text-white/60">Обучение техникам</span>
+          <span className="text-sm text-white/60">Освоение «Внимание + дыхание»</span>
         </div>
         <button 
           onClick={() => navigate('/course')}
@@ -263,33 +261,7 @@ export function Day1Engine() {
       <main className="flex-1 flex flex-col w-full relative z-10 px-4 sm:max-w-xl mx-auto justify-center">
         <AnimatePresence mode="wait">
 
-          {/* CARD 1: ФОКУС ДНЯ */}
-          {step === 'card1' && (
-            <motion.div
-              key="card1"
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -15 }}
-              className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full py-4"
-            >
-              <div className="text-[#38bdf8] text-xs uppercase tracking-widest font-medium mb-2">1/2 • Фокус дня</div>
-              <h1 className="text-3xl font-light text-white mb-4">Связь мысли и тела</h1>
-              <div className="bg-white/5 border border-white/10 rounded-3xl p-6 mb-8 text-left leading-relaxed text-white/80 text-base">
-                Сегодня мы знакомимся с базовыми техниками курса.
-                <br /><br />
-                Учимся замечать как тревожная мысль откликается в теле и пробуем делать первые практики.
-              </div>
-              <button
-                onClick={() => setStep('card2')}
-                className="w-full bg-gradient-to-r from-blue-600 to-[#38bdf8] text-white py-4 rounded-3xl font-medium text-lg flex items-center justify-center gap-2 shadow-[0_0_25px_rgba(56,189,248,0.3)] hover:opacity-95 active:scale-[0.99] transition-all"
-              >
-                Далее: Инструкция
-                <ArrowRight className="w-5 h-5" />
-              </button>
-            </motion.div>
-          )}
-
-          {/* CARD 2: ИНСТРУКЦИЯ */}
+          {/* INSTRUCTION CARD */}
           {step === 'card2' && (
             <motion.div
               key="card2"
@@ -298,19 +270,19 @@ export function Day1Engine() {
               exit={{ opacity: 0, y: -15 }}
               className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full py-4"
             >
-              <div className="text-[#38bdf8] text-xs uppercase tracking-widest font-medium mb-2">2/2 • Инструкция</div>
+              <div className="text-[#38bdf8] text-xs uppercase tracking-widest font-medium mb-2">Инструкция</div>
               <h1 className="text-3xl font-light text-white mb-4">Обучение элементам</h1>
               <div className="bg-white/5 border border-white/10 rounded-3xl p-6 mb-8 text-left leading-relaxed text-white/80 text-sm flex flex-col gap-3">
-                <p>1. <strong>Практика A:</strong> пошагово соединяем двойной вдох, терапевтическое движение глаз и сброс напряжения.</p>
-                <p>2. <strong>Практика B:</strong> Применяем телесную вибрацию и дыхание в голос.</p>
-                <p>3. <strong>Сканирование:</strong> 1 минута тихого наблюдения за своим состоянием после практик.</p>
+                <p>1. <strong>Дыхание:</strong> физиологический вздох — два вдоха носом и долгий плавный выдох через рот.</p>
+                <p>2. <strong>Взгляд:</strong> непрерывное слежение глазами за точкой от края до края.</p>
+                <p>3. <strong>Тело:</strong> мягкое сжатие ладоней на вдохе и полный сброс мышечного зажима на выдохе.</p>
+                <p>4. <strong>Закрепление:</strong> соединяем все три элемента в общую практику на 2.5 минуты + 1 минута тишины.</p>
               </div>
               <button
                 onClick={() => setStep('pre-thought')}
-                className="w-full bg-gradient-to-r from-blue-600 to-[#38bdf8] text-white py-4 rounded-3xl font-medium text-lg flex items-center justify-center gap-2 shadow-[0_0_25px_rgba(56,189,248,0.3)] hover:opacity-95 active:scale-[0.99] transition-all"
+                className="w-full bg-gradient-to-r from-blue-600 to-[#38bdf8] text-white py-4 rounded-3xl font-medium text-lg flex items-center justify-center shadow-[0_0_25px_rgba(56,189,248,0.3)] hover:opacity-95 active:scale-[0.99] transition-all"
               >
-                Перейти к замеру
-                <ArrowRight className="w-5 h-5" />
+                Дальше
               </button>
             </motion.div>
           )}
@@ -324,15 +296,19 @@ export function Day1Engine() {
               exit={{ opacity: 0, y: -15 }}
               className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full py-4"
             >
-              <div className="text-xs text-white/40 uppercase tracking-widest mb-2 font-mono">Шаг 1 из 3 • Ситуация</div>
+              <div className="text-xs text-white/40 uppercase tracking-widest mb-2 font-mono">
+                Шаг 1 из 3 • Ситуация
+              </div>
+
               <h2 className="text-2xl font-light text-white mb-3 leading-snug">
                 Вспомните ситуацию или мысль, которая сейчас вызывает у вас тревогу
               </h2>
+
               <p className="text-white/60 text-sm leading-relaxed mb-6">
                 Не нужно специально усиливать тревогу. Просто удерживайте эту ситуацию в уме несколько секунд.
               </p>
 
-              <div className="mb-8 text-left">
+              <div className="mb-6 text-left">
                 <div className="text-xs text-white/40 mb-3 uppercase tracking-wider font-medium">Например:</div>
                 <ul className="space-y-2.5 text-sm text-white/70">
                   <li className="flex items-start gap-2.5">
@@ -352,10 +328,9 @@ export function Day1Engine() {
 
               <button
                 onClick={() => setStep('pre-location')}
-                className="w-full bg-blue-600/30 border border-blue-500/40 hover:bg-blue-600/40 text-white py-4 rounded-3xl font-medium text-lg flex items-center justify-center gap-2 transition-all shadow-[0_0_20px_rgba(56,189,248,0.2)]"
+                className="w-full bg-blue-600/30 border border-blue-500/40 hover:bg-blue-600/40 text-white py-4 rounded-3xl font-medium text-lg flex items-center justify-center transition-all shadow-[0_0_20px_rgba(56,189,248,0.2)]"
               >
                 Далее
-                <ChevronRight className="w-5 h-5" />
               </button>
             </motion.div>
           )}
@@ -399,15 +374,14 @@ export function Day1Engine() {
 
               <button
                 onClick={() => setStep('pre-intensity')}
-                className="w-full bg-blue-600/30 border border-blue-500/40 hover:bg-blue-600/40 text-white py-4 rounded-3xl font-medium text-lg flex items-center justify-center gap-2 transition-all shadow-[0_0_20px_rgba(56,189,248,0.2)]"
+                className="w-full bg-blue-600/30 border border-blue-500/40 hover:bg-blue-600/40 text-white py-4 rounded-3xl font-medium text-lg flex items-center justify-center transition-all shadow-[0_0_20px_rgba(56,189,248,0.2)]"
               >
                 Далее
-                <ChevronRight className="w-5 h-5" />
               </button>
             </motion.div>
           )}
 
-          {/* PRE-CHECK 3: ИНТЕНСИВНОСТЬ (0-10) */}
+          {/* PRE-CHECK 3: ИНТЕНСИВНОСТЬ ТРЕВОЖНОСТИ (0-10) */}
           {step === 'pre-intensity' && (
             <motion.div
               key="pre-intensity"
@@ -418,10 +392,10 @@ export function Day1Engine() {
             >
               <div className="text-xs text-white/40 uppercase tracking-widest mb-2 font-mono">Шаг 3 из 3 • Оценка</div>
               <h2 className="text-2xl font-light text-white mb-2">
-                Насколько сильно это ощущение сейчас?
+                Оцените силу тревожности прямо сейчас
               </h2>
               <p className="text-white/60 text-xs mb-8">
-                0 — почти не ощущается, 10 — максимально сильно
+                0 — полное спокойствие, 10 — максимальная тревожность
               </p>
 
               <div className="w-24 h-24 mx-auto rounded-3xl bg-[#0A1325] border border-[#38bdf8]/30 flex items-center justify-center text-5xl font-light text-[#38bdf8] mb-8 shadow-[0_0_25px_rgba(56,189,248,0.2)]">
@@ -439,32 +413,54 @@ export function Day1Engine() {
 
               <button
                 onClick={() => setStep('stage-intro')}
-                className="w-full bg-gradient-to-r from-blue-600 to-[#38bdf8] text-white py-4 rounded-3xl font-medium text-lg flex items-center justify-center gap-2 shadow-[0_0_25px_rgba(56,189,248,0.3)] hover:opacity-95 transition-all"
+                className="w-full bg-gradient-to-r from-blue-600 to-[#38bdf8] text-white py-4 rounded-3xl font-medium text-lg flex items-center justify-center shadow-[0_0_25px_rgba(56,189,248,0.3)] hover:opacity-95 transition-all"
               >
                 Дальше
-                <ArrowRight className="w-5 h-5" />
               </button>
             </motion.div>
           )}
 
-          {/* STAGE INTRO (1 to 4) */}
+          {/* STAGE INTRO (1 to 3) */}
           {step === 'stage-intro' && (
             <motion.div
               key={`stage-intro-${practiceStage}`}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
               className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full py-4"
             >
-              <div className="text-[#38bdf8] text-xs font-medium tracking-wider uppercase mb-1">
+              <div className="text-xs text-white/40 uppercase tracking-widest mb-2 font-mono">
                 {STAGE_INTROS[practiceStage].subtitle}
               </div>
-              <h2 className="text-3xl font-light mb-3 text-white">
+
+              <h2 className="text-2xl sm:text-3xl font-light mb-3 text-white leading-snug">
                 {STAGE_INTROS[practiceStage].title}
               </h2>
-              <div className="bg-white/5 border border-white/10 rounded-3xl p-5 mb-8 text-white/80 text-sm leading-relaxed whitespace-pre-wrap">
-                {STAGE_INTROS[practiceStage].text}
-              </div>
+
+              {STAGE_INTROS[practiceStage].lead && (
+                <p className="text-white/60 text-sm leading-relaxed mb-5 whitespace-pre-line">
+                  {STAGE_INTROS[practiceStage].lead}
+                </p>
+              )}
+
+              {STAGE_INTROS[practiceStage].bullets && (
+                <div className="mb-6 text-left">
+                  <ul className="space-y-3 text-sm sm:text-base text-white/80 leading-relaxed">
+                    {STAGE_INTROS[practiceStage].bullets.map((bullet, idx) => (
+                      <li key={idx} className="flex items-start gap-2.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#38bdf8] mt-2 flex-shrink-0" />
+                        <span>{bullet}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {STAGE_INTROS[practiceStage].text && (
+                <p className="text-white/60 text-sm sm:text-base leading-relaxed mb-8 whitespace-pre-line">
+                  {STAGE_INTROS[practiceStage].text}
+                </p>
+              )}
 
               <button
                 onClick={() => {
@@ -473,10 +469,9 @@ export function Day1Engine() {
                   setIsStageActive(true);
                   setPhase('inhale1');
                 }}
-                className="w-full bg-gradient-to-r from-blue-600 to-[#38bdf8] text-white py-4 rounded-3xl font-medium text-lg flex items-center justify-center gap-2 shadow-[0_0_25px_rgba(56,189,248,0.3)] hover:opacity-95 transition-all"
+                className="w-full bg-blue-600/30 border border-blue-500/40 hover:bg-blue-600/40 text-white py-4 rounded-3xl font-medium text-lg flex items-center justify-center transition-all shadow-[0_0_20px_rgba(56,189,248,0.2)]"
               >
                 {STAGE_INTROS[practiceStage].action}
-                <Play className="w-5 h-5 fill-current ml-1" />
               </button>
             </motion.div>
           )}
@@ -484,69 +479,46 @@ export function Day1Engine() {
           {/* STAGE PRACTICE PLAYER */}
           {step === 'stage-practice' && (
             <motion.div
-              key="stage-practice"
+              key={`stage-practice-${practiceStage}`}
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 1.05 }}
               className="w-full flex flex-col items-center justify-between flex-1 py-4 min-h-0 relative"
             >
               <div className="flex justify-between w-full max-w-sm items-center text-xs text-white/50 font-mono">
-                <span>Этап {practiceStage} из 4</span>
+                <span>Элемент {practiceStage} из 3</span>
                 <span>00:{stageTimeLeft.toString().padStart(2, '0')}</span>
               </div>
 
               <div className="relative w-full flex-1 flex items-center justify-center min-h-[300px]">
                 {/* Visual circle */}
                 <motion.div
+                  key={`circle-stage-${practiceStage}`}
                   variants={circleVariants}
-                  animate={isStageActive ? phase : 'exhale'}
+                  initial="initial"
+                  animate={isStageActive ? phase : 'initial'}
                   className="absolute w-[70vw] h-[70vw] max-w-[420px] max-h-[420px] rounded-full bg-sky-300/40 blur-[50px] mix-blend-screen pointer-events-none"
                 />
 
                 {/* Eye dot for stage 2 and 3 */}
                 {(practiceStage === 2 || practiceStage === 3) && (
                   <motion.div 
+                    key={`dot-stage-${practiceStage}`}
                     className="absolute w-7 h-7 rounded-full bg-white shadow-[0_0_25px_8px_rgba(255,255,255,0.7)] z-20 pointer-events-none"
                     variants={dotVariants}
-                    animate={isStageActive ? phase : 'initial'}
+                    initial="initial"
+                    animate={isStageActive ? (phase === 'exhale' ? 'exhale' : 'inhale') : 'initial'}
                   />
                 )}
 
-                {/* Practice B preview visual */}
-                {practiceStage === 4 && (
-                  <div className="flex gap-12 z-20 items-center">
-                    <div className={`w-20 h-20 rounded-full border-2 flex flex-col items-center justify-center transition-all ${
-                      tappingSide === 'left' ? 'border-[#38bdf8] bg-[#38bdf8]/30 scale-110 shadow-[0_0_25px_rgba(56,189,248,0.5)]' : 'border-white/20 bg-white/5 opacity-50'
-                    }`}>
-                      <span className="text-xs text-white/80 font-medium">Левое</span>
-                      <span className="text-[10px] text-white/50">плечо</span>
-                    </div>
-                    <div className={`w-20 h-20 rounded-full border-2 flex flex-col items-center justify-center transition-all ${
-                      tappingSide === 'right' ? 'border-[#38bdf8] bg-[#38bdf8]/30 scale-110 shadow-[0_0_25px_rgba(56,189,248,0.5)]' : 'border-white/20 bg-white/5 opacity-50'
-                    }`}>
-                      <span className="text-xs text-white/80 font-medium">Правое</span>
-                      <span className="text-[10px] text-white/50">плечо</span>
-                    </div>
-                  </div>
-                )}
-
-                {/* Prompt text */}
+                {/* Prompt text for stages 1-3 */}
                 <div className="absolute flex flex-col items-center text-center z-30 pointer-events-none drop-shadow-md">
-                  {practiceStage <= 3 && (
-                    <>
-                      <div className="text-2xl font-light tracking-[0.2em] uppercase text-white">
-                        {phase === 'inhale1' ? 'Вдох' : phase === 'inhale2' ? 'Довдох' : phase === 'hold' ? ' ' : 'Выдох'}
-                      </div>
-                      {practiceStage === 3 && (
-                        <div className="text-sm font-medium tracking-wider uppercase text-blue-200 mt-2">
-                          {(phase === 'inhale1' || phase === 'inhale2') ? 'Сжимаем ладони' : phase === 'exhale' ? 'Расслабляем ладони' : ''}
-                        </div>
-                      )}
-                    </>
-                  )}
-                  {practiceStage === 4 && (
-                    <div className="text-lg font-light tracking-wide text-white/90 max-w-[260px]">
-                      Поочередный тэппинг + выдох со звуком «мммм»
+                  <div className="text-2xl font-light tracking-[0.2em] uppercase text-white">
+                    {phase === 'inhale1' ? 'Вдох' : phase === 'inhale2' ? 'Довдох' : 'Выдох'}
+                  </div>
+                  {practiceStage === 3 && (
+                    <div className="text-sm font-medium tracking-wider uppercase text-blue-200 mt-2">
+                      {(phase === 'inhale1' || phase === 'inhale2') ? 'Сжимаем ладони' : 'Расслабляем ладони'}
                     </div>
                   )}
                 </div>
@@ -568,16 +540,31 @@ export function Day1Engine() {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -15 }}
-              className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full py-4 text-center"
+              className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full py-4 text-left"
             >
-              <div className="text-[#38bdf8] text-xs font-medium tracking-wider uppercase mb-2">Финальный блок Дня 1</div>
-              <h2 className="text-3xl font-light mb-4 text-white">Основная практика</h2>
-              <div className="bg-white/5 border border-white/10 rounded-3xl p-6 mb-8 text-left text-white/80 text-sm leading-relaxed flex flex-col gap-3">
-                <p>Сейчас мы соединяем все элементы Практики A вместе на 2.5 минуты:</p>
-                <ul className="list-disc pl-5 space-y-1.5 text-white/70">
-                  <li>Двойной вдох носом + сжатие ладоней</li>
-                  <li>Длинный выдох ртом + расслабление ладоней</li>
-                  <li>Взгляд неотрывно следует за точкой</li>
+              <div className="text-xs text-white/40 uppercase tracking-widest mb-2 font-mono">
+                Финальный блок Дня 1
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-light mb-3 text-white leading-snug">
+                Основная практика
+              </h2>
+              <p className="text-white/60 text-sm leading-relaxed mb-5">
+                Сейчас мы соединяем все элементы практики «Внимание + дыхание» вместе на 2.5 минуты:
+              </p>
+              <div className="mb-8 text-left">
+                <ul className="space-y-2.5 text-sm text-white/70">
+                  <li className="flex items-start gap-2.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#38bdf8] mt-2 flex-shrink-0" />
+                    <span>Двойной вдох носом + сжатие ладоней</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#38bdf8] mt-2 flex-shrink-0" />
+                    <span>Длинный выдох ртом + расслабление ладоней</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#38bdf8] mt-2 flex-shrink-0" />
+                    <span>Взгляд неотрывно следует за точкой, без движения головы</span>
+                  </li>
                 </ul>
               </div>
 
@@ -588,10 +575,9 @@ export function Day1Engine() {
                   setIsConsolidationActive(true);
                   setPhase('inhale1');
                 }}
-                className="w-full bg-gradient-to-r from-blue-600 to-[#38bdf8] text-white py-4 rounded-3xl font-medium text-lg flex items-center justify-center gap-2 shadow-[0_0_25px_rgba(56,189,248,0.3)] hover:opacity-95 transition-all"
+                className="w-full bg-blue-600/30 border border-blue-500/40 hover:bg-blue-600/40 text-white py-4 rounded-3xl font-medium text-lg flex items-center justify-center transition-all shadow-[0_0_20px_rgba(56,189,248,0.2)]"
               >
                 Начать сессию
-                <Play className="w-5 h-5 fill-current ml-1" />
               </button>
             </motion.div>
           )}
@@ -606,46 +592,36 @@ export function Day1Engine() {
               className="w-full flex flex-col items-center justify-between flex-1 py-4 min-h-0 relative"
             >
               <div className="flex justify-between w-full max-w-sm items-center text-xs text-white/50 font-mono">
-                <span>Практика A • Консолидация</span>
+                <span>Внимание + дыхание • Сессия</span>
                 <span>{Math.floor(consolidationTimeLeft / 60)}:{(consolidationTimeLeft % 60).toString().padStart(2, '0')}</span>
               </div>
-
-              {/* Midpoint subtle notice */}
-              <AnimatePresence>
-                {showMidpointNotice && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    className="absolute top-12 z-40 bg-[#0A1325]/90 border border-[#38bdf8]/40 px-5 py-3 rounded-2xl text-xs text-center text-white shadow-xl max-w-xs"
-                  >
-                    На несколько секунд заметьте {activeBodyAreaText}. Не оценивайте его. Просто продолжайте упражнение.
-                  </motion.div>
-                )}
-              </AnimatePresence>
 
               <div className="relative w-full flex-1 flex items-center justify-center min-h-[300px]">
                 {/* Circle */}
                 <motion.div
+                  key="consolidation-circle"
                   variants={circleVariants}
-                  animate={isConsolidationActive ? phase : 'exhale'}
+                  initial="initial"
+                  animate={isConsolidationActive ? phase : 'initial'}
                   className="absolute w-[75vw] h-[75vw] max-w-[450px] max-h-[450px] rounded-full bg-sky-200/50 blur-[60px] mix-blend-screen pointer-events-none"
                 />
 
                 {/* Dot */}
                 <motion.div 
+                  key="consolidation-dot"
                   className="absolute w-7 h-7 rounded-full bg-white shadow-[0_0_30px_10px_rgba(255,255,255,0.6)] z-20 pointer-events-none"
                   variants={dotVariants}
-                  animate={isConsolidationActive ? phase : 'initial'}
+                  initial="initial"
+                  animate={isConsolidationActive ? (phase === 'exhale' ? 'exhale' : 'inhale') : 'initial'}
                 />
 
                 {/* Text */}
                 <div className="absolute flex flex-col items-center text-center z-30 pointer-events-none drop-shadow-md">
                   <div className="text-2xl font-light tracking-[0.2em] uppercase text-white">
-                    {phase === 'inhale1' ? 'Вдох' : phase === 'inhale2' ? 'Довдох' : phase === 'hold' ? ' ' : 'Выдох'}
+                    {phase === 'inhale1' ? 'Вдох' : phase === 'inhale2' ? 'Довдох' : 'Выдох'}
                   </div>
                   <div className="text-xs font-medium tracking-wider uppercase text-blue-200 mt-2">
-                    {(phase === 'inhale1' || phase === 'inhale2') ? 'Сжимаем ладони' : phase === 'exhale' ? 'Расслабляем ладони' : ''}
+                    {(phase === 'inhale1' || phase === 'inhale2') ? 'Сжимаем ладони' : 'Расслабляем ладони'}
                   </div>
                 </div>
               </div>
@@ -671,7 +647,7 @@ export function Day1Engine() {
               <h2 className="text-3xl font-light text-white mb-4">Теперь остановитесь</h2>
               
               <div className="bg-white/5 border border-white/10 rounded-3xl p-6 mb-8 text-white/80 text-sm leading-relaxed">
-                Снова обратите внимание на {activeBodyAreaText}, которое отмечали в начале.
+                Обратите внимание на ощущения {getBodyLocationInPrepositional(selectedLocation, customLocation)}.
                 <br /><br />
                 Ничего специально не меняйте. Просто побудьте с этим ощущением.
               </div>
@@ -700,7 +676,7 @@ export function Day1Engine() {
             </motion.div>
           )}
 
-          {/* POST-CHECK 1: РЕАКТИВАЦИЯ МЫСЛИ */}
+          {/* POST-CHECK 1: ТРЕВОЖНАЯ МЫСЛЬ */}
           {step === 'post-thought' && (
             <motion.div
               key="post-thought"
@@ -710,24 +686,15 @@ export function Day1Engine() {
               className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full py-4 text-center"
             >
               <div className="text-xs text-white/40 uppercase tracking-widest mb-2 font-mono">Повторный замер</div>
-              <h2 className="text-2xl font-light text-white mb-4 leading-snug">
+              <h2 className="text-2xl font-light text-white mb-6 leading-snug">
                 Снова на несколько секунд вспомните ту же ситуацию или мысль
               </h2>
-              {situationText && (
-                <div className="p-4 rounded-2xl bg-white/5 border border-white/10 text-white/70 text-sm mb-6 italic">
-                  «{situationText}»
-                </div>
-              )}
-              <div className="text-xs text-white/40 mb-8 font-mono">
-                {postThoughtTimer > 0 ? `Фокус: ${postThoughtTimer} сек` : 'Готово'}
-              </div>
 
               <button
                 onClick={() => setStep('post-location')}
-                className="w-full bg-blue-600/30 border border-blue-500/40 hover:bg-blue-600/40 text-white py-4 rounded-3xl font-medium text-lg flex items-center justify-center gap-2 transition-all shadow-[0_0_20px_rgba(56,189,248,0.2)]"
+                className="w-full bg-blue-600/30 border border-blue-500/40 hover:bg-blue-600/40 text-white py-4 rounded-3xl font-medium text-lg flex items-center justify-center transition-all shadow-[0_0_20px_rgba(56,189,248,0.2)]"
               >
                 Далее
-                <ChevronRight className="w-5 h-5" />
               </button>
             </motion.div>
           )}
@@ -741,17 +708,17 @@ export function Day1Engine() {
               exit={{ opacity: 0, y: -15 }}
               className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full py-4"
             >
-              <div className="text-xs text-white/40 uppercase tracking-widest mb-2 font-mono">Повторный замер</div>
+              <div className="text-xs text-white/40 uppercase tracking-widest mb-2 font-mono">Повторный замер • Тело</div>
               <h2 className="text-2xl font-light text-white mb-2 leading-snug">
                 Где тревога ощущается сейчас?
               </h2>
               <p className="text-white/60 text-xs mb-6">
-                По умолчанию выбрано исходное место
+                По умолчанию выбран исходный участок
               </p>
 
               {!isRelocated ? (
                 <div className="bg-white/5 border border-white/10 rounded-3xl p-5 mb-6 text-center">
-                  <div className="text-xs text-white/40 uppercase tracking-wide mb-1">Текущий участок</div>
+                  <div className="text-xs text-white/40 uppercase tracking-wide mb-1">Исходный участок</div>
                   <div className="text-2xl font-light text-[#38bdf8] mb-4">
                     {selectedLocation === 'Другое' && customLocation ? customLocation : selectedLocation}
                   </div>
@@ -759,7 +726,7 @@ export function Day1Engine() {
                     onClick={() => setIsRelocated(true)}
                     className="text-xs text-white/60 hover:text-white underline underline-offset-4"
                   >
-                    Ощущение переместилось
+                    Внимание переместилось на другой участок
                   </button>
                 </div>
               ) : (
@@ -782,10 +749,9 @@ export function Day1Engine() {
 
               <button
                 onClick={() => setStep('post-intensity')}
-                className="w-full bg-blue-600/30 border border-blue-500/40 hover:bg-blue-600/40 text-white py-4 rounded-3xl font-medium text-lg flex items-center justify-center gap-2 transition-all shadow-[0_0_20px_rgba(56,189,248,0.2)]"
+                className="w-full bg-blue-600/30 border border-blue-500/40 hover:bg-blue-600/40 text-white py-4 rounded-3xl font-medium text-lg flex items-center justify-center transition-all shadow-[0_0_20px_rgba(56,189,248,0.2)]"
               >
                 Далее
-                <ChevronRight className="w-5 h-5" />
               </button>
             </motion.div>
           )}
@@ -799,12 +765,12 @@ export function Day1Engine() {
               exit={{ opacity: 0, y: -15 }}
               className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full py-4 text-center"
             >
-              <div className="text-xs text-white/40 uppercase tracking-widest mb-2 font-mono">Повторный замер</div>
+              <div className="text-xs text-white/40 uppercase tracking-widest mb-2 font-mono">Повторный замер • Оценка</div>
               <h2 className="text-2xl font-light text-white mb-2">
-                Насколько сильно это ощущение сейчас?
+                Оцените силу тревожности сейчас
               </h2>
               <p className="text-white/60 text-xs mb-8">
-                0 — почти не ощущается, 10 — максимально сильно
+                0 — полное спокойствие, 10 — максимальная тревожность
               </p>
 
               <div className="w-24 h-24 mx-auto rounded-3xl bg-[#0A1325] border border-[#38bdf8]/30 flex items-center justify-center text-5xl font-light text-[#38bdf8] mb-8 shadow-[0_0_25px_rgba(56,189,248,0.2)]">
@@ -822,10 +788,9 @@ export function Day1Engine() {
 
               <button
                 onClick={() => setStep('summary')}
-                className="w-full bg-gradient-to-r from-blue-600 to-[#38bdf8] text-white py-4 rounded-3xl font-medium text-lg flex items-center justify-center gap-2 shadow-[0_0_25px_rgba(56,189,248,0.3)] hover:opacity-95 transition-all"
+                className="w-full bg-gradient-to-r from-blue-600 to-[#38bdf8] text-white py-4 rounded-3xl font-medium text-lg flex items-center justify-center shadow-[0_0_25px_rgba(56,189,248,0.3)] hover:opacity-95 transition-all"
               >
                 Увидеть результат
-                <ArrowRight className="w-5 h-5" />
               </button>
             </motion.div>
           )}
@@ -871,10 +836,9 @@ export function Day1Engine() {
 
               <button
                 onClick={() => setStep('sos-reveal')}
-                className="w-full bg-gradient-to-r from-blue-600 to-[#38bdf8] text-white py-4 rounded-3xl font-medium text-lg flex items-center justify-center gap-2 shadow-[0_0_25px_rgba(56,189,248,0.3)] hover:opacity-95 transition-all"
+                className="w-full bg-gradient-to-r from-blue-600 to-[#38bdf8] text-white py-4 rounded-3xl font-medium text-lg flex items-center justify-center shadow-[0_0_25px_rgba(56,189,248,0.3)] hover:opacity-95 transition-all"
               >
                 Далее
-                <ArrowRight className="w-5 h-5" />
               </button>
             </motion.div>
           )}

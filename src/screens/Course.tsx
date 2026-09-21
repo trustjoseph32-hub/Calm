@@ -78,6 +78,8 @@ export function Course() {
     if (!isAvailable) return;
     if (viewingDay === 1) {
       navigate('/practice/day1');
+    } else if (viewingDay === 2) {
+      navigate('/practice/day2');
     } else {
       navigate(`/practice/course-day/${viewingDay}`);
     }
@@ -143,16 +145,24 @@ export function Course() {
             transition={{ duration: 0.4 }}
             className="max-w-2xl w-full"
           >
-            <div className="flex items-center gap-2 mb-2">
+            <div className="flex items-center gap-2 mb-2 flex-wrap">
               <span className="text-[#38bdf8] text-xs md:text-sm font-medium tracking-wider uppercase">
                 День {lesson.day}
               </span>
+              {lesson.periodLabel && (
+                <>
+                  <span className="text-white/30">•</span>
+                  <span className="text-blue-300/80 text-xs md:text-sm font-medium">
+                    {lesson.periodLabel}
+                  </span>
+                </>
+              )}
               <span className="text-white/30">•</span>
               <span className="text-white/60 text-xs md:text-sm">
                 {lesson.practiceType === 'A' 
-                  ? 'Практика A: Дыхание + взгляд + тело' 
+                  ? 'Внимание + дыхание' 
                   : lesson.practiceType === 'B' 
-                    ? 'Практика B: Ритм + дыхание + голос' 
+                    ? 'Ритм + опора' 
                     : 'Выбор техники'}
               </span>
             </div>
@@ -161,7 +171,7 @@ export function Course() {
               {lesson.title}
             </h1>
 
-            <p className="text-white/70 font-light text-sm md:text-base leading-relaxed mb-6 max-w-xl">
+            <p className="text-white/70 font-light text-sm md:text-base leading-relaxed mb-6 max-w-xl whitespace-pre-line">
               {lesson.focusText}
             </p>
 
@@ -175,9 +185,9 @@ export function Course() {
                 <span className="w-1.5 h-1.5 rounded-full bg-[#38bdf8]/80 shrink-0" />
                 <span>
                   {lesson.practiceType === 'A' 
-                    ? 'Практика A: Дыхание, взгляд и ладони (~4 мин)' 
+                    ? '«Внимание + дыхание»: взгляд, вдох и сброс (~4 мин)' 
                     : lesson.practiceType === 'B' 
-                      ? 'Практика B: Тэппинг, вдох и голос (~4 мин)' 
+                      ? '«Ритм + опора»: тэппинг, вдох и голос (~4 мин)' 
                       : 'Практика на выбор (~4 мин)'}
                 </span>
               </div>
