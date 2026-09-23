@@ -146,7 +146,7 @@ export function Course() {
             className="max-w-2xl w-full"
           >
             <div className="flex items-center gap-2 mb-2 flex-wrap">
-              <span className="text-[#38bdf8] text-xs md:text-sm font-medium tracking-wider uppercase">
+              <span className="text-[#38bdf8] text-xs md:text-sm font-medium tracking-wider">
                 День {lesson.day}
               </span>
               {lesson.periodLabel && (
@@ -159,11 +159,13 @@ export function Course() {
               )}
               <span className="text-white/30">•</span>
               <span className="text-white/60 text-xs md:text-sm">
-                {lesson.practiceType === 'A' 
-                  ? 'Внимание + дыхание' 
-                  : lesson.practiceType === 'B' 
-                    ? 'Ритм + опора' 
-                    : 'Выбор техники'}
+                {lesson.day === 2
+                  ? 'техника Ритм + вибрация'
+                  : lesson.practiceType === 'A' 
+                    ? 'Внимание + дыхание' 
+                    : lesson.practiceType === 'B' 
+                      ? 'Ритм + вибрация' 
+                      : 'Выбор техники'}
               </span>
             </div>
 
@@ -187,7 +189,7 @@ export function Course() {
                   {lesson.practiceType === 'A' 
                     ? '«Внимание + дыхание»: взгляд, вдох и сброс (~4 мин)' 
                     : lesson.practiceType === 'B' 
-                      ? '«Ритм + опора»: тэппинг, вдох и голос (~4 мин)' 
+                      ? '«Ритм + вибрация»: тэппинг, вдох и голос (~4 мин)' 
                       : 'Практика на выбор (~4 мин)'}
                 </span>
               </div>

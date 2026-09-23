@@ -158,7 +158,7 @@ export function Progress() {
                       </span>
                       {session.practiceCategory && (
                         <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/10 text-white/70">
-                          {session.practiceCategory === 'A' ? 'Внимание + дыхание' : session.practiceCategory === 'B' ? 'Ритм + опора' : session.practiceCategory}
+                          {session.practiceCategory === 'A' ? 'Внимание + дыхание' : session.practiceCategory === 'B' ? 'Ритм + вибрация' : session.practiceCategory}
                         </span>
                       )}
                       <span className="text-xs text-[#38bdf8]">

@@ -121,15 +121,25 @@ function CourseDayEngineInternal({ currentDay }: { currentDay: number }) {
     return () => clearTimeout(timeout);
   }, [phaseA, isPracticeActive, step, selectedPracticeCategory]);
 
-  // Practice B cycle: Inhale (4s) -> Long Exhale with Vocalization (6s) + Tapping
+  // Practice B cycle: Inhale (4s) -> Exhale with Vocalization (6s) + Tapping (без довдоха)
   useEffect(() => {
     if (step !== 'practice' || !isPracticeActive || selectedPracticeCategory !== 'B') return;
 
     let breathTimeout: NodeJS.Timeout;
     if (phaseB === 'inhale') {
-      breathTimeout = setTimeout(() => setPhaseB('exhale'), 4000);
+      breathTimeout = setTimeout(() => {
+        setPhaseB('exhale');
+        if (typeof navigator !== 'undefined' && navigator.vibrate) {
+          navigator.vibrate(25);
+        }
+      }, 4000);
     } else {
-      breathTimeout = setTimeout(() => setPhaseB('inhale'), 6000);
+      breathTimeout = setTimeout(() => {
+        setPhaseB('inhale');
+        if (typeof navigator !== 'undefined' && navigator.vibrate) {
+          navigator.vibrate(20);
+        }
+      }, 6000);
     }
 
     return () => clearTimeout(breathTimeout);
@@ -227,8 +237,9 @@ function CourseDayEngineInternal({ currentDay }: { currentDay: number }) {
   };
 
   const circleVariantsB = {
-    inhale: { scale: 1.15, opacity: 0.8, transition: { duration: 4.0, ease: 'easeInOut' } },
-    exhale: { scale: 0.45, opacity: 0.25, transition: { duration: 6.0, ease: 'easeInOut' } }
+    initial: { scale: 0.35, opacity: 0.2 },
+    inhale: { scale: 1.25, opacity: 0.9, transition: { duration: 4.0, ease: 'easeInOut' } },
+    exhale: { scale: 0.35, opacity: 0.2, transition: { duration: 6.0, ease: 'easeInOut' } }
   };
 
   return (
@@ -242,7 +253,7 @@ function CourseDayEngineInternal({ currentDay }: { currentDay: number }) {
             День {currentDay} из 14
           </span>
           <span className="text-sm text-white/60">
-            {selectedPracticeCategory === 'A' ? 'Внимание + дыхание' : 'Ритм + опора'}
+            {selectedPracticeCategory === 'A' ? 'Внимание + дыхание' : 'Ритм + вибрация'}
           </span>
         </div>
         <button 
@@ -312,7 +323,7 @@ function CourseDayEngineInternal({ currentDay }: { currentDay: number }) {
                         : 'bg-white/5 border-white/10 text-white/60'
                     }`}
                   >
-                    Ритм + опора<br />
+                    Ритм + вибрация<br />
                     <span className="text-xs font-normal text-white/60">Тэппинг и выдох со звуком</span>
                   </button>
                 </div>
@@ -321,7 +332,7 @@ function CourseDayEngineInternal({ currentDay }: { currentDay: number }) {
               {/* Practice B Variant Selector for Day 6+ */}
               {selectedPracticeCategory === 'B' && currentDay >= 6 && (
                 <div className="mb-4 text-left">
-                  <div className="text-xs text-white/50 mb-2 uppercase tracking-wider font-medium">Зона тэппинга (техника Б):</div>
+                  <div className="text-xs text-white/50 mb-2 uppercase tracking-wider font-medium">Зона тэппинга («Ритм + вибрация»):</div>
                   <div className="grid grid-cols-2 gap-2.5">
                     <button
                       type="button"
@@ -363,7 +374,7 @@ function CourseDayEngineInternal({ currentDay }: { currentDay: number }) {
                   </>
                 ) : (
                   <>
-                    <p className="font-medium text-white mb-2">Ритм + опора</p>
+                    <p className="font-medium text-white mb-2">Ритм + вибрация</p>
                     <ul className="list-disc pl-5 space-y-1.5 text-white/70">
                       <li>
                         {tappingVariant === 'chest'
@@ -580,7 +591,7 @@ function CourseDayEngineInternal({ currentDay }: { currentDay: number }) {
               className="w-full flex flex-col items-center justify-between flex-1 py-4 min-h-0 relative"
             >
               <div className="flex justify-between w-full max-w-sm items-center text-xs text-white/50 font-mono">
-                <span>{selectedPracticeCategory === 'A' ? 'Внимание + дыхание' : 'Ритм + опора'}</span>
+                <span>{selectedPracticeCategory === 'A' ? 'Внимание + дыхание' : 'Ритм + вибрация'}</span>
                 <span>{Math.floor(practiceTimeLeft / 60)}:{(practiceTimeLeft % 60).toString().padStart(2, '0')}</span>
               </div>
 
@@ -644,46 +655,98 @@ function CourseDayEngineInternal({ currentDay }: { currentDay: number }) {
                       </div>
                     )}
 
+                    {/* Central Glowing Breathing Orb */}
                     <motion.div
                       variants={circleVariantsB}
-                      animate={isPracticeActive ? phaseB : 'exhale'}
-                      className="absolute w-[75vw] h-[75vw] max-w-[450px] max-h-[450px] rounded-full bg-blue-300/40 blur-[60px] mix-blend-screen pointer-events-none"
+                      initial="initial"
+                      animate={isPracticeActive ? phaseB : 'initial'}
+                      className="absolute w-[75vw] h-[75vw] max-w-[440px] max-h-[440px] rounded-full bg-sky-300/40 blur-[50px] mix-blend-screen pointer-events-none"
                     />
 
-                    {/* Butterfly / Shoulder tapping indicators */}
-                    <div className="flex gap-12 z-20 items-center mb-16">
-                      <div className={`w-20 h-20 rounded-full border-2 flex flex-col items-center justify-center transition-all duration-300 ${
-                        tappingSide === 'left' 
-                          ? 'border-[#38bdf8] bg-[#38bdf8]/30 scale-110 shadow-[0_0_25px_rgba(56,189,248,0.6)]' 
-                          : 'border-white/20 bg-white/5 opacity-50'
-                      }`}>
-                        <span className="text-xs text-white/80 font-medium">
-                          {tappingVariant === 'chest' ? 'Слева' : 'Левое'}
-                        </span>
-                        <span className="text-[10px] text-white/50">
-                          {tappingVariant === 'chest' ? 'под ключицей' : 'плечо'}
-                        </span>
-                      </div>
-                      <div className={`w-20 h-20 rounded-full border-2 flex flex-col items-center justify-center transition-all duration-300 ${
-                        tappingSide === 'right' 
-                          ? 'border-[#38bdf8] bg-[#38bdf8]/30 scale-110 shadow-[0_0_25px_rgba(56,189,248,0.6)]' 
-                          : 'border-white/20 bg-white/5 opacity-50'
-                      }`}>
-                        <span className="text-xs text-white/80 font-medium">
-                          {tappingVariant === 'chest' ? 'Справа' : 'Правое'}
-                        </span>
-                        <span className="text-[10px] text-white/50">
-                          {tappingVariant === 'chest' ? 'под ключицей' : 'плечо'}
-                        </span>
-                      </div>
-                    </div>
+                    {/* Concentric Breathing Wave Ring */}
+                    <motion.div
+                      variants={{
+                        initial: { scale: 0.45, opacity: 0.15 },
+                        inhale: { scale: 1.18, opacity: 0.45, transition: { duration: 4.0, ease: 'easeInOut' } },
+                        exhale: { scale: 0.48, opacity: 0.15, transition: { duration: 6.0, ease: 'easeInOut' } }
+                      }}
+                      initial="initial"
+                      animate={isPracticeActive ? phaseB : 'initial'}
+                      className="absolute w-[66vw] h-[66vw] max-w-[380px] max-h-[380px] rounded-full border border-sky-400/25 pointer-events-none"
+                    />
 
-                    <div className="absolute bottom-6 flex flex-col items-center text-center z-30 pointer-events-none drop-shadow-md">
-                      <div className="text-2xl font-light tracking-[0.2em] uppercase text-white">
-                        {phaseB === 'inhale' ? 'Вдох носом' : 'Выдох: «мммм»'}
+                    {/* Shoulder or Chest Blue Circular Tapping Indicators */}
+                    {tappingVariant === 'chest' ? (
+                      <div className="flex z-20 items-center justify-center mb-6">
+                        <motion.div
+                          animate={{
+                            scale: isPracticeActive ? 1.08 : 0.96,
+                            borderColor: '#38bdf8',
+                            backgroundColor: 'rgba(56,189,248,0.25)',
+                            boxShadow: '0 0 25px rgba(56,189,248,0.6)'
+                          }}
+                          className="w-22 h-22 sm:w-26 sm:h-26 rounded-full border-2 flex flex-col items-center justify-center relative backdrop-blur-md"
+                        >
+                          <span className="text-lg mb-0.5">✋</span>
+                          <span className="text-xs sm:text-sm text-white font-medium">Верх груди</span>
+                          <span className="text-[10px] text-sky-300/80">под ключицей</span>
+                        </motion.div>
                       </div>
-                      <div className="text-xs font-medium tracking-wider text-blue-200 mt-1">
-                        {phaseB === 'inhale' ? 'Спокойный вдох' : 'Долгий выдох со звуком'}
+                    ) : (
+                      <div className="flex gap-8 sm:gap-14 z-20 items-center justify-center mb-6">
+                        {/* Left shoulder */}
+                        <motion.div
+                          animate={{
+                            scale: tappingSide === 'left' ? 1.12 : 0.95,
+                            opacity: tappingSide === 'left' ? 1 : 0.5,
+                            borderColor: tappingSide === 'left' ? '#38bdf8' : 'rgba(56,189,248,0.3)',
+                            backgroundColor: tappingSide === 'left' ? 'rgba(56,189,248,0.25)' : 'rgba(10,19,37,0.7)',
+                            boxShadow: tappingSide === 'left' ? '0 0 25px rgba(56,189,248,0.6)' : '0 0 10px rgba(56,189,248,0.1)'
+                          }}
+                          transition={{ duration: 0.15 }}
+                          className="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-2 flex flex-col items-center justify-center relative backdrop-blur-md"
+                        >
+                          <span className="text-xs sm:text-sm text-white font-medium">Левое</span>
+                          <span className="text-[10px] text-sky-300/80">плечо</span>
+                          {tappingSide === 'left' && (
+                            <div className="absolute -top-1 -left-1 w-3.5 h-3.5 rounded-full bg-[#38bdf8] shadow-[0_0_12px_#38bdf8]" />
+                          )}
+                        </motion.div>
+
+                        {/* Right shoulder */}
+                        <motion.div
+                          animate={{
+                            scale: tappingSide === 'right' ? 1.12 : 0.95,
+                            opacity: tappingSide === 'right' ? 1 : 0.5,
+                            borderColor: tappingSide === 'right' ? '#38bdf8' : 'rgba(56,189,248,0.3)',
+                            backgroundColor: tappingSide === 'right' ? 'rgba(56,189,248,0.25)' : 'rgba(10,19,37,0.7)',
+                            boxShadow: tappingSide === 'right' ? '0 0 25px rgba(56,189,248,0.6)' : '0 0 10px rgba(56,189,248,0.1)'
+                          }}
+                          transition={{ duration: 0.15 }}
+                          className="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-2 flex flex-col items-center justify-center relative backdrop-blur-md"
+                        >
+                          <span className="text-xs sm:text-sm text-white font-medium">Правое</span>
+                          <span className="text-[10px] text-sky-300/80">плечо</span>
+                          {tappingSide === 'right' && (
+                            <div className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-[#38bdf8] shadow-[0_0_12px_#38bdf8]" />
+                          )}
+                        </motion.div>
+                      </div>
+                    )}
+
+                    {/* Centered Breathing Prompt with exact mathematical horizontal centering */}
+                    <div className="flex flex-col items-center justify-center text-center z-30 drop-shadow-md select-none">
+                      <div className="flex items-center justify-center gap-2.5 sm:gap-3.5 text-3xl sm:text-4xl font-light uppercase text-white">
+                        {(phaseB === 'inhale' ? ['В', 'Д', 'О', 'Х'] : ['В', 'Ы', 'Д', 'О', 'Х']).map((char, idx) => (
+                          <span key={idx} className="w-7 sm:w-9 text-center flex items-center justify-center">
+                            {char}
+                          </span>
+                        ))}
+                      </div>
+                      <div className="text-xs sm:text-sm font-medium tracking-wider uppercase text-blue-200 mt-2">
+                        {phaseB === 'exhale' 
+                          ? (tappingVariant === 'chest' ? 'Выдох «мммм» • Тэппинг груди' : 'Выдох «мммм» • Тэппинг плеч')
+                          : (tappingVariant === 'chest' ? 'Вдох носом • Тэппинг груди' : 'Вдох носом • Тэппинг плеч')}
                       </div>
                     </div>
                   </>
@@ -910,7 +973,7 @@ function CourseDayEngineInternal({ currentDay }: { currentDay: number }) {
               {currentDay === 14 && (
                 <div className="p-5 rounded-2xl bg-gradient-to-r from-blue-900/40 to-[#38bdf8]/20 border border-[#38bdf8]/40 text-white text-xs leading-relaxed mb-6 text-left">
                   <div className="text-sm font-medium text-[#38bdf8] mb-1">Поздравляем! 14-дневный курс завершён</div>
-                  Вы освоили обе базовые техники: «Внимание + дыхание» и «Ритм + опора». Теперь это ваш личный надежный инструмент саморегуляции в любых стрессовых ситуациях.
+                  Вы освоили обе базовые техники: «Внимание + дыхание» и «Ритм + вибрация». Теперь это ваш личный надежный инструмент саморегуляции в любых стрессовых ситуациях.
                 </div>
               )}
 

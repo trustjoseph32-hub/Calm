@@ -307,3 +307,54 @@ export function playSoftBeep(side?: 'left' | 'right' | number, volume: number = 
     // AudioContext might be blocked until user interaction
   }
 }
+
+// Soft muted tap click/knock with lowpass filter for gentle tactile tapping rhythm
+export function playSoftTap(side?: 'left' | 'right' | 'center', volume: number = 0.12) {
+  try {
+    if (!globalAudioCtx) {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioCtx) return;
+      globalAudioCtx = new AudioCtx();
+    }
+    if (globalAudioCtx.state === 'suspended') {
+      globalAudioCtx.resume();
+    }
+
+    const ctx = globalAudioCtx;
+    const now = ctx.currentTime;
+
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    const panner = ctx.createStereoPanner();
+    const lowpass = ctx.createBiquadFilter();
+
+    lowpass.type = 'lowpass';
+    lowpass.frequency.setValueAtTime(300, now);
+    lowpass.frequency.exponentialRampToValueAtTime(140, now + 0.08);
+
+    osc.type = 'sine';
+    // Very low warm woody thud (140Hz down to 80Hz)
+    osc.frequency.setValueAtTime(140, now);
+    osc.frequency.exponentialRampToValueAtTime(80, now + 0.07);
+
+    let panVal = 0;
+    if (side === 'left') panVal = -0.65;
+    else if (side === 'right') panVal = 0.65;
+    panner.pan.value = panVal;
+
+    const targetGain = Math.min(0.14, volume);
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.linearRampToValueAtTime(targetGain, now + 0.008);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.09);
+
+    osc.connect(lowpass);
+    lowpass.connect(panner);
+    panner.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start(now);
+    osc.stop(now + 0.1);
+  } catch (e) {
+    // audio context blocked
+  }
+}
