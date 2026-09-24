@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, ArrowRight, Play, Pause } from 'lucide-react';
+import { X, Play, Pause, ArrowRight } from 'lucide-react';
 import { useAppStore } from '../store/AppProvider';
 import { playSoftTap } from '../lib/audio';
 import { TappingIllustration } from '../components/TappingIllustration';
 import { BODY_LOCATIONS, BodyLocation } from '../data/courseData';
 
 type Step = 
-  | 'intro-card'            // Intro & outline of Day 2
+  | 'intro-card'            // Intro & outline of Day 2 (FIRST SCREEN)
   | 'pre-thought'           // Calibration 1: Ситуация
   | 'pre-location'          // Calibration 2: Тело
   | 'pre-intensity'         // Calibration 3: Оценка тревожности (0-10)
@@ -102,9 +102,9 @@ export function Day2Engine() {
   const navigate = useNavigate();
   const { addSession, markCourseDayCompleted } = useAppStore();
 
-  const [step, setStep] = useState<Step>('pre-thought');
+  const [step, setStep] = useState<Step>('intro-card');
 
-  // Pre-check state matching Day 1
+  // Pre-check state
   const [selectedLocation, setSelectedLocation] = useState<BodyLocation>('Грудь');
   const [preAnxiety, setPreAnxiety] = useState<number>(6);
 
@@ -245,6 +245,7 @@ export function Day2Engine() {
       status: 'completed',
       completedRounds: 1,
       roundAnswers: [],
+      targetLocation: selectedLocation,
       usedGrounding: true,
       reducedMotion: false,
       validForOutcomeStats: true,
@@ -284,6 +285,39 @@ export function Day2Engine() {
       <main className="flex-1 flex flex-col w-full relative z-10 px-4 sm:max-w-xl mx-auto justify-center">
         <AnimatePresence mode="wait">
           
+          {/* STEP 1: INSTRUCTION & PLAN FOR DAY 2 */}
+          {step === 'intro-card' && (
+            <motion.div
+              key="intro-card"
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full py-4"
+            >
+              <div className="text-[#38bdf8] text-xs uppercase tracking-widest font-medium mb-3">
+                Инструкция • День 2
+              </div>
+              <h2 className="text-2xl font-light text-white mb-4 leading-snug">
+                Практика «Ритм + вибрация»
+              </h2>
+              <div className="bg-white/5 border border-white/10 rounded-3xl p-5 mb-8 text-left leading-relaxed text-white/80 text-sm flex flex-col gap-3">
+                <p className="text-white/60 mb-1">
+                  Сегодня осваиваем снятие накопленного напряжения через телесный ритм в трёх ключевых зонах тела и соединяем его с дыханием и голосом:
+                </p>
+                <p>1. <strong>Уши:</strong> легкие ритмичные постукивания подушечками пальцев для мягкой стимуляции блуждающего нерва (60 сек).</p>
+                <p>2. <strong>Плечи:</strong> поочерёдные перекрёстные постукивания пальцами («прикосновения бабочки») для билатеральной регуляции (60 сек).</p>
+                <p>3. <strong>Верхняя часть грудины:</strong> мягкие постукивания ладонью чуть ниже ямки на шее для снятия накопленного напряжения (60 сек).</p>
+                <p>4. <strong>Закрепление:</strong> выполнение упражнения + выдох со звуком «мммм» (75 сек) и 1 минута тишины.</p>
+              </div>
+              <button
+                onClick={() => setStep('pre-thought')}
+                className="w-full bg-gradient-to-r from-blue-600 to-[#38bdf8] text-white py-4 rounded-3xl font-medium text-lg flex items-center justify-center shadow-[0_0_25px_rgba(56,189,248,0.3)] hover:opacity-95 active:scale-[0.99] transition-all"
+              >
+                Далее
+              </button>
+            </motion.div>
+          )}
+
           {/* PRE-CHECK 1: ТРЕВОЖНАЯ СИТУАЦИЯ / МЫСЛЬ */}
           {step === 'pre-thought' && (
             <motion.div
@@ -412,48 +446,13 @@ export function Day2Engine() {
 
               <button
                 onClick={() => {
-                  setStep('intro-card');
-                }}
-                className="w-full bg-gradient-to-r from-blue-600 to-[#38bdf8] text-white py-4 rounded-3xl font-medium text-lg flex items-center justify-center shadow-[0_0_25px_rgba(56,189,248,0.3)] hover:opacity-95 transition-all"
-              >
-                Дальше
-              </button>
-            </motion.div>
-          )}
-
-          {/* TRANSITION / INSTRUCTION: ДЕНЬ 2 ПЛАН ПРАКТИКИ (МЕЖДУ ШАГОМ 3 И ШАГОМ 1 ИЗ 4) */}
-          {step === 'intro-card' && (
-            <motion.div
-              key="intro-card"
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -15 }}
-              className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full py-4"
-            >
-              <div className="text-[#38bdf8] text-xs uppercase tracking-widest font-medium mb-3">
-                Инструкция • День 2
-              </div>
-              <h2 className="text-2xl font-light text-white mb-4 leading-snug">
-                Практика «Ритм + вибрация»
-              </h2>
-              <div className="bg-white/5 border border-white/10 rounded-3xl p-5 mb-8 text-left leading-relaxed text-white/80 text-sm flex flex-col gap-3">
-                <p className="text-white/60 mb-1">
-                  Сегодня осваиваем снятие накопленного напряжения через телесный ритм в трёх ключевых зонах тела и соединяем его с дыханием и голосом:
-                </p>
-                <p>1. <strong>Уши:</strong> легкие ритмичные постукивания подушечками пальцев для мягкой стимуляции блуждающего нерва (60 сек).</p>
-                <p>2. <strong>Плечи:</strong> поочерёдные перекрёстные постукивания пальцами («прикосновения бабочки») для билатеральной регуляции (60 сек).</p>
-                <p>3. <strong>Верхняя часть грудины:</strong> мягкие постукивания ладонью чуть ниже ямки на шее для снятия накопленного напряжения (60 сек).</p>
-                <p>4. <strong>Закрепление:</strong> выполнение упражнения + выдох со звуком «мммм» (75 сек) и 1 минута тишины.</p>
-              </div>
-              <button
-                onClick={() => {
                   setCurrentBStage(1);
                   setBStageTimeLeft(B_STAGES[1].duration);
                   setStep('b-stage-intro');
                 }}
-                className="w-full bg-gradient-to-r from-blue-600 to-[#38bdf8] text-white py-4 rounded-3xl font-medium text-lg flex items-center justify-center shadow-[0_0_25px_rgba(56,189,248,0.3)] hover:opacity-95 active:scale-[0.99] transition-all"
+                className="w-full bg-gradient-to-r from-blue-600 to-[#38bdf8] text-white py-4 rounded-3xl font-medium text-lg flex items-center justify-center shadow-[0_0_25px_rgba(56,189,248,0.3)] hover:opacity-95 transition-all"
               >
-                Перейти к первому шагу
+                Перейти к упражнению
               </button>
             </motion.div>
           )}
@@ -851,7 +850,7 @@ export function Day2Engine() {
             </motion.div>
           )}
 
-          {/* STEP 7: SUMMARY */}
+          {/* STEP 5: SUMMARY */}
           {step === 'summary' && (
             <motion.div
               key="summary"
@@ -864,7 +863,7 @@ export function Day2Engine() {
                 День 2 завершён
               </div>
               
-              <div className="text-lg text-white font-medium mb-6">
+              <div className="text-xl text-white font-medium mb-6">
                 «Ритм + вибрация» освоена
               </div>
 
@@ -880,15 +879,15 @@ export function Day2Engine() {
                 </div>
               </div>
 
-              <div className="bg-white/5 border border-white/10 rounded-3xl p-5 mb-8 text-white/80 text-sm leading-relaxed">
+              <div className="bg-white/5 border border-white/10 rounded-3xl p-5 mb-8 text-white/80 text-sm leading-relaxed text-left space-y-2">
                 {postAnxiety < preAnxiety && (
-                  <span>Вы освоили телесный ритм (тэппинг в трёх зонах + вокализированный выдох). Заметьте возникшее чувство заземления и опоры.</span>
+                  <p>Вы освоили телесный ритм в трёх зонах (уши, плечи, грудина) и соединили его с вибрацией голоса. Заметьте возникшее чувство заземления и опоры в теле.</p>
                 )}
                 {postAnxiety === preAnxiety && (
-                  <span>Ощущение в теле осталось на том же уровне. Это естественный этап знакомства с новым тактильным ритмом.</span>
+                  <p>Ощущение в теле осталось на том же уровне. Это естественный этап знакомства с новым тактильным ритмом.</p>
                 )}
                 {postAnxiety > preAnxiety && (
-                  <span>Тонус тела сейчас повышен. Не форсируйте расслабление — нервная система просто калибрует новый телесный опыт.</span>
+                  <p>Тонус тела сейчас повышен. Не форсируйте расслабление — нервная система просто калибрует новый телесный опыт.</p>
                 )}
               </div>
 
