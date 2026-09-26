@@ -276,21 +276,23 @@ function CourseDayEngineInternal({ currentDay }: { currentDay: number }) {
               exit={{ opacity: 0, y: -15 }}
               className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full py-4"
             >
-              <div className="text-[#38bdf8] text-xs uppercase tracking-widest font-medium mb-2">1/2 • Фокус дня</div>
-              <h1 className="text-3xl font-light text-white mb-4">{dayData.focusTitle}</h1>
-              <div className="bg-white/5 border border-white/10 rounded-3xl p-6 mb-8 text-left leading-relaxed text-white/80 text-base">
-                {dayData.focusText}
+              <div className="text-xs text-white/40 uppercase tracking-widest mb-2 font-mono">
+                День {currentDay} • Фокус дня
               </div>
+              <h2 className="text-2xl font-light text-white mb-3 leading-snug">{dayData.focusTitle}</h2>
+              <p className="text-white/60 text-sm leading-relaxed mb-8">
+                {dayData.focusText}
+              </p>
               <button
                 onClick={() => setStep('card2')}
-                className="w-full bg-gradient-to-r from-blue-600 to-[#38bdf8] text-white py-4 rounded-3xl font-medium text-lg flex items-center justify-center shadow-[0_0_25px_rgba(56,189,248,0.3)] hover:opacity-95 active:scale-[0.99] transition-all"
+                className="w-full bg-blue-600/30 border border-blue-500/40 hover:bg-blue-600/40 text-white py-4 rounded-3xl font-medium text-lg flex items-center justify-center transition-all shadow-[0_0_20px_rgba(56,189,248,0.2)]"
               >
-                Далее: Инструкция
+                Далее: План на сегодня
               </button>
             </motion.div>
           )}
 
-          {/* CARD 2: ИНСТРУКЦИЯ К ПРАКТИКЕ */}
+          {/* CARD 2: ПЛАН НА СЕГОДНЯ / ИНСТРУКЦИЯ К ПРАКТИКЕ */}
           {step === 'card2' && (
             <motion.div
               key="card2"
@@ -299,48 +301,57 @@ function CourseDayEngineInternal({ currentDay }: { currentDay: number }) {
               exit={{ opacity: 0, y: -15 }}
               className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full py-4"
             >
-              <div className="text-[#38bdf8] text-xs uppercase tracking-widest font-medium mb-2">2/2 • Инструкция</div>
-              <h1 className="text-3xl font-light text-white mb-4">{dayData.instructionTitle}</h1>
+              <div className="text-xs text-white/40 uppercase tracking-widest mb-2 font-mono">
+                День {currentDay} • План на сегодня
+              </div>
+
+              <h2 className="text-2xl font-light text-white mb-3 leading-snug">
+                {dayData.title}
+              </h2>
+
+              <p className="text-white/60 text-sm leading-relaxed mb-6">
+                {dayData.instructionTitle || 'План занятия'}:
+              </p>
 
               {dayData.practiceType === 'choice' && (
-                <div className="grid grid-cols-2 gap-3 mb-4">
+                <div className="grid grid-cols-2 gap-3 mb-6">
                   <button
                     onClick={() => setSelectedPracticeCategory('A')}
-                    className={`p-4 rounded-2xl border text-sm font-medium transition-all ${
+                    className={`p-3.5 rounded-2xl border text-sm font-medium transition-all text-left ${
                       selectedPracticeCategory === 'A' 
-                        ? 'bg-[#38bdf8]/20 border-[#38bdf8] text-white shadow-[0_0_15px_rgba(56,189,248,0.3)]' 
-                        : 'bg-white/5 border-white/10 text-white/60'
+                        ? 'bg-[#38bdf8]/15 border-[#38bdf8] text-white shadow-[0_0_15px_rgba(56,189,248,0.25)]' 
+                        : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10 hover:text-white'
                     }`}
                   >
                     Внимание + дыхание<br />
-                    <span className="text-xs font-normal text-white/60">Взгляд и двойной вдох</span>
+                    <span className="text-xs font-normal text-white/50">Взгляд и двойной вдох</span>
                   </button>
                   <button
                     onClick={() => setSelectedPracticeCategory('B')}
-                    className={`p-4 rounded-2xl border text-sm font-medium transition-all ${
+                    className={`p-3.5 rounded-2xl border text-sm font-medium transition-all text-left ${
                       selectedPracticeCategory === 'B' 
-                        ? 'bg-[#38bdf8]/20 border-[#38bdf8] text-white shadow-[0_0_15px_rgba(56,189,248,0.3)]' 
-                        : 'bg-white/5 border-white/10 text-white/60'
+                        ? 'bg-[#38bdf8]/15 border-[#38bdf8] text-white shadow-[0_0_15px_rgba(56,189,248,0.25)]' 
+                        : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10 hover:text-white'
                     }`}
                   >
                     Ритм + вибрация<br />
-                    <span className="text-xs font-normal text-white/60">Тэппинг и выдох со звуком</span>
+                    <span className="text-xs font-normal text-white/50">Тэппинг и звук «мммм»</span>
                   </button>
                 </div>
               )}
 
               {/* Practice B Variant Selector for Day 6+ */}
               {selectedPracticeCategory === 'B' && currentDay >= 6 && (
-                <div className="mb-4 text-left">
-                  <div className="text-xs text-white/50 mb-2 uppercase tracking-wider font-medium">Зона тэппинга («Ритм + вибрация»):</div>
+                <div className="mb-6 text-left">
+                  <div className="text-xs text-white/40 mb-2 uppercase tracking-wider font-medium">Зона тэппинга:</div>
                   <div className="grid grid-cols-2 gap-2.5">
                     <button
                       type="button"
                       onClick={() => setTappingVariant('shoulders')}
                       className={`p-3 rounded-2xl border text-xs font-medium transition-all text-left ${
                         tappingVariant === 'shoulders'
-                          ? 'bg-[#38bdf8]/20 border-[#38bdf8] text-white shadow-[0_0_12px_rgba(56,189,248,0.25)]'
-                          : 'bg-white/5 border-white/10 text-white/60 hover:text-white'
+                          ? 'bg-[#38bdf8]/15 border-[#38bdf8] text-white shadow-[0_0_12px_rgba(56,189,248,0.25)]'
+                          : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10 hover:text-white'
                       }`}
                     >
                       По плечам
@@ -351,8 +362,8 @@ function CourseDayEngineInternal({ currentDay }: { currentDay: number }) {
                       onClick={() => setTappingVariant('chest')}
                       className={`p-3 rounded-2xl border text-xs font-medium transition-all text-left ${
                         tappingVariant === 'chest'
-                          ? 'bg-[#38bdf8]/20 border-[#38bdf8] text-white shadow-[0_0_12px_rgba(56,189,248,0.25)]'
-                          : 'bg-white/5 border-white/10 text-white/60 hover:text-white'
+                          ? 'bg-[#38bdf8]/15 border-[#38bdf8] text-white shadow-[0_0_12px_rgba(56,189,248,0.25)]'
+                          : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10 hover:text-white'
                       }`}
                     >
                       Верх груди («бабочка»)
@@ -362,33 +373,46 @@ function CourseDayEngineInternal({ currentDay }: { currentDay: number }) {
                 </div>
               )}
 
-              <div className="bg-white/5 border border-white/10 rounded-3xl p-6 mb-8 text-left leading-relaxed text-white/80 text-sm whitespace-pre-wrap">
-                {selectedPracticeCategory === 'A' ? (
-                  <>
-                    <p className="font-medium text-white mb-2">Внимание + дыхание</p>
-                    <ul className="list-disc pl-5 space-y-1.5 text-white/70">
-                      <li>Двойной вдох носом + легкое сжатие ладоней</li>
-                      <li>Долгий выдох ртом + расслабление ладоней</li>
-                      <li>Взгляд неотрывно следует за движением точки</li>
-                    </ul>
-                  </>
-                ) : (
-                  <>
-                    <p className="font-medium text-white mb-2">Ритм + вибрация</p>
-                    <ul className="list-disc pl-5 space-y-1.5 text-white/70">
-                      <li>
-                        {tappingVariant === 'chest'
-                          ? 'Ладони на верхней части груди (под ключицами), мягкий поочередный тэппинг'
-                          : 'Руки скрещены на груди, мягкий поочередный тэппинг по плечам'}
+              <div className="mb-6 text-left">
+                <div className="text-xs text-white/40 mb-3 uppercase tracking-wider font-medium">Шаги практики:</div>
+                <ul className="space-y-2.5 text-sm text-white/70">
+                  {selectedPracticeCategory === 'A' ? (
+                    <>
+                      <li className="flex items-start gap-2.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#38bdf8] mt-2 flex-shrink-0" />
+                        <span><strong className="text-white font-medium">Дыхание:</strong> физиологический вздох — два вдоха носом и долгий плавный выдох через рот</span>
                       </li>
-                      <li>Спокойный вдох носом (4 сек)</li>
-                      <li>Длинный выдох со звуком «мммм» или «аааа» (6 сек)</li>
-                    </ul>
-                  </>
-                )}
-                <div className="mt-4 pt-4 border-t border-white/10 text-xs text-white/50">
-                  В конце практики: период наблюдения без техники ({exposureTotalSec / 60} мин).
-                </div>
+                      <li className="flex items-start gap-2.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#38bdf8] mt-2 flex-shrink-0" />
+                        <span><strong className="text-white font-medium">Взгляд:</strong> непрерывное слежение глазами за движущейся точкой от края до края</span>
+                      </li>
+                      <li className="flex items-start gap-2.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#38bdf8] mt-2 flex-shrink-0" />
+                        <span><strong className="text-white font-medium">Тело:</strong> мягкое сжатие ладоней на вдохе и полный сброс мышечного зажима на выдохе</span>
+                      </li>
+                    </>
+                  ) : (
+                    <>
+                      <li className="flex items-start gap-2.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#38bdf8] mt-2 flex-shrink-0" />
+                        <span>
+                          <strong className="text-white font-medium">Тэппинг:</strong>{' '}
+                          {tappingVariant === 'chest'
+                            ? 'ладони на верхней части груди (под ключицами), мягкий поочерёдный ритм'
+                            : 'руки скрещены на груди, мягкий поочерёдный ритм по плечам'}
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#38bdf8] mt-2 flex-shrink-0" />
+                        <span><strong className="text-white font-medium">Дыхание и голос:</strong> спокойный вдох носом (4 сек) и выдох с гудением «мммм» (6 сек)</span>
+                      </li>
+                    </>
+                  )}
+                  <li className="flex items-start gap-2.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#38bdf8] mt-2 flex-shrink-0" />
+                    <span><strong className="text-white font-medium">Тишина:</strong> период наблюдения за телесным откликом без регуляции ({exposureTotalSec / 60} мин)</span>
+                  </li>
+                </ul>
               </div>
 
               <button
@@ -399,9 +423,9 @@ function CourseDayEngineInternal({ currentDay }: { currentDay: number }) {
                     setStep('pre-thought');
                   }
                 }}
-                className="w-full bg-gradient-to-r from-blue-600 to-[#38bdf8] text-white py-4 rounded-3xl font-medium text-lg flex items-center justify-center shadow-[0_0_25px_rgba(56,189,248,0.3)] hover:opacity-95 active:scale-[0.99] transition-all"
+                className="w-full bg-blue-600/30 border border-blue-500/40 hover:bg-blue-600/40 text-white py-4 rounded-3xl font-medium text-lg flex items-center justify-center transition-all shadow-[0_0_20px_rgba(56,189,248,0.2)]"
               >
-                {currentDay === 2 ? 'Оценить текущее состояние' : 'Перейти к замеру'}
+                {currentDay === 2 ? 'Оценить текущее состояние' : 'Далее'}
               </button>
             </motion.div>
           )}
@@ -541,12 +565,10 @@ function CourseDayEngineInternal({ currentDay }: { currentDay: number }) {
               className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full py-4 text-center"
             >
               <div className="text-xs text-white/40 uppercase tracking-widest mb-2 font-mono">
-                {currentDay === 2 ? 'Шаг 2 из 2 • Оценка напряжения' : 'Шаг 3 из 3 • Оценка'}
+                Шаг 3 из 3 • Оценка
               </div>
               <h2 className="text-2xl font-light text-white mb-2">
-                {currentDay === 2 
-                  ? 'Уровень физического напряжения прямо сейчас' 
-                  : 'Насколько сильно это ощущение сейчас?'}
+                Оцените силу тревожности и телесного напряжения прямо сейчас
               </h2>
               <p className="text-white/60 text-xs mb-8">
                 {currentDay === 2 
@@ -779,7 +801,7 @@ function CourseDayEngineInternal({ currentDay }: { currentDay: number }) {
             >
               <h2 className="text-3xl font-light text-white mb-4">Теперь остановитесь</h2>
               
-              <div className="bg-white/5 border border-white/10 rounded-3xl p-6 mb-8 text-white/80 text-sm leading-relaxed">
+              <div className="mb-8 text-white/70 text-sm leading-relaxed max-w-sm mx-auto">
                 Обратите внимание на ощущения {getBodyLocationInPrepositional(selectedLocation, customLocation)}.
                 <br /><br />
                 Ничего специально не меняйте. Просто побудьте с этим ощущением.
@@ -823,7 +845,7 @@ function CourseDayEngineInternal({ currentDay }: { currentDay: number }) {
                 Снова на несколько секунд вспомните ту же ситуацию или мысль
               </h2>
               {situationText && (
-                <div className="p-4 rounded-2xl bg-white/5 border border-white/10 text-white/70 text-sm mb-6 italic">
+                <div className="text-white/70 text-sm mb-6 italic text-center">
                   «{situationText}»
                 </div>
               )}
@@ -857,7 +879,7 @@ function CourseDayEngineInternal({ currentDay }: { currentDay: number }) {
               </p>
 
               {!isRelocated ? (
-                <div className="bg-white/5 border border-white/10 rounded-3xl p-5 mb-6 text-center">
+                <div className="mb-6 text-center py-2">
                   <div className="text-xs text-white/40 uppercase tracking-wide mb-1">Текущий участок</div>
                   <div className="text-2xl font-light text-[#38bdf8] mb-4">
                     {selectedLocation === 'Другое' && customLocation ? customLocation : selectedLocation}
@@ -965,19 +987,19 @@ function CourseDayEngineInternal({ currentDay }: { currentDay: number }) {
               </div>
 
               {currentDay === 2 && (
-                <div className="p-4 rounded-2xl bg-[#38bdf8]/10 border border-[#38bdf8]/30 text-white text-xs leading-relaxed mb-6 text-left">
+                <div className="text-white/70 text-sm leading-relaxed mb-6 text-center max-w-sm mx-auto">
                   День 2 завершён: вы закрепили знакомое упражнение на текущем состоянии тела. С 3-го дня мы начнем плавно подключать лёгкие реальные ситуации.
                 </div>
               )}
 
               {currentDay === 14 && (
-                <div className="p-5 rounded-2xl bg-gradient-to-r from-blue-900/40 to-[#38bdf8]/20 border border-[#38bdf8]/40 text-white text-xs leading-relaxed mb-6 text-left">
-                  <div className="text-sm font-medium text-[#38bdf8] mb-1">Поздравляем! 14-дневный курс завершён</div>
-                  Вы освоили обе базовые техники: «Внимание + дыхание» и «Ритм + вибрация». Теперь это ваш личный надежный инструмент саморегуляции в любых стрессовых ситуациях.
+                <div className="text-white/70 text-sm leading-relaxed mb-6 text-center max-w-sm mx-auto space-y-1">
+                  <div className="text-sm font-medium text-[#38bdf8]">Поздравляем! 14-дневный курс завершён</div>
+                  <p>Вы освоили обе базовые техники: «Внимание + дыхание» и «Ритм + вибрация». Теперь это ваш личный надежный инструмент саморегуляции в любых стрессовых ситуациях.</p>
                 </div>
               )}
 
-              <div className="bg-white/5 border border-white/10 rounded-3xl p-5 mb-8 text-white/80 text-sm leading-relaxed">
+              <div className="mb-8 text-white/70 text-sm sm:text-base leading-relaxed text-center max-w-sm mx-auto">
                 {postAnxiety < preAnxiety && (
                   <span>Просто заметьте эту разницу.</span>
                 )}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Play, Pause, ArrowRight } from 'lucide-react';
@@ -39,9 +39,7 @@ const B_STAGES: Record<number, BStageConfig> = {
     title: 'Зона ушей',
     lead: 'Подушечками пальцев делайте легкие ритмичные постукивания по хрящу перед ушным каналом (козелку) и мочке уха:',
     bullets: [
-      'Частота постукивания: ровно 1 раз в секунду (в такт световому индикатору).',
-      'Ощутите, как расслабляется зажим в области челюстей, височных мышц и затылка.',
-      'Ровное дыхание: спокойный вдох носом (4 сек) → длинный плавный выдох (6 сек).'
+      'В процессе практики ощутите как расслабляется зажим в области челюстей, височных мышц и затылка.'
     ],
     action: 'Начать',
     duration: 60, // 1 min
@@ -56,8 +54,7 @@ const B_STAGES: Record<number, BStageConfig> = {
     lead: 'Скрестите руки на груди, положив ладони или подушечки пальцев на плечи («прикосновения бабочки»):',
     bullets: [
       'Поочерёдно мягко похлопывайте пальцами: левое плечо ↔ правое плечо в спокойном темпе.',
-      'Билатеральная стимуляция гармонизирует работу обоих полушарий и восстанавливает чувство защищенности.',
-      'Дышите в такт светового круга: мягкий вдох носом (4 сек) → плавный длинный выдох (6 сек).'
+      'Практика гармонизирует работу обоих полушарий и восстанавливает чувство защищенности.'
     ],
     action: 'Начать',
     duration: 60, // 1 min
@@ -83,16 +80,16 @@ const B_STAGES: Record<number, BStageConfig> = {
   4: {
     id: 4,
     subtitle: 'Ритм + вибрация • Шаг 4 из 4',
-    title: 'Закрепление: тэппинг + выдох с голосом',
-    lead: 'Выберите ту зону, которая сейчас даёт больше тепла и заземления (уши, плечи или грудина):',
+    title: 'Закрепление: телесный ритм + выдох с голосом',
+    lead: 'Последовательно проходим 3 части упражнения одним прогоном на 210 секунд:',
     bullets: [
-      'Уши (козелок), плечи («бабочка») либо верхняя часть грудины.',
+      'Поочерёдно 3 зоны по 70 секунд: уши (козелок) → плечи («бабочка») → верх грудины.',
       'Спокойный вдох носом (4 сек) → долгий выдох через сомкнутые губы со звуком «мммм» (6 сек).',
       'Ритмичный мягкий тэппинг передает вибрацию голоса вглубь тела, укореняя спокойствие.'
     ],
     action: 'Начать сессию',
-    duration: 75, // 1 min 15 sec
-    tapMode: 'shoulders',
+    duration: 210, // 210 sec (3 части по 70 сек)
+    tapMode: 'ears',
     hasBreath: true,
     hasVocal: true
   }
@@ -116,7 +113,35 @@ export function Day2Engine() {
   const [chestTapPulse, setChestTapPulse] = useState(false);
   const [earsTapPulse, setEarsTapPulse] = useState(false);
   const [phaseB, setPhaseB] = useState<'inhale' | 'exhale'>('inhale');
-  const [selectedTapModeStage4, setSelectedTapModeStage4] = useState<'ears' | 'shoulders' | 'chest'>('ears');
+
+  // Stage 4 consolidation runs 3 zones sequentially in a single 210-second run (70s each):
+  // 1. Ears (210 - 141 sec left)
+  // 2. Shoulders (140 - 71 sec left)
+  // 3. Sternum / chest (70 - 0 sec left)
+  const activePracticeMode: 'ears' | 'shoulders' | 'chest' = 
+    currentBStage === 4 
+      ? (bStageTimeLeft > 140 ? 'ears' : bStageTimeLeft > 70 ? 'shoulders' : 'chest')
+      : B_STAGES[currentBStage].tapMode;
+
+  const stage4PartIndex = bStageTimeLeft > 140 ? 1 : bStageTimeLeft > 70 ? 2 : 3;
+  const stage4PartName = 
+    stage4PartIndex === 1 ? 'Уши (козелок)' : 
+    stage4PartIndex === 2 ? 'Плечи («бабочка»)' : 
+    'Верх грудины';
+
+  const prevModeRef = useRef<'ears' | 'shoulders' | 'chest'>(activePracticeMode);
+  useEffect(() => {
+    if (step === 'b-stage-practice' && currentBStage === 4 && isBStageActive) {
+      if (prevModeRef.current !== activePracticeMode) {
+        prevModeRef.current = activePracticeMode;
+        if (typeof navigator !== 'undefined' && navigator.vibrate) {
+          navigator.vibrate([40, 50, 40]);
+        }
+      }
+    } else {
+      prevModeRef.current = activePracticeMode;
+    }
+  }, [step, currentBStage, isBStageActive, activePracticeMode]);
 
   // Silence / Integration (1 min)
   const [silenceTimeLeft, setSilenceTimeLeft] = useState(60);
@@ -153,14 +178,11 @@ export function Day2Engine() {
   useEffect(() => {
     if (step !== 'b-stage-practice' || !isBStageActive) return;
 
-    const currentConfig = B_STAGES[currentBStage];
-    const activeMode = currentBStage === 4 ? selectedTapModeStage4 : currentConfig.tapMode;
-
     // Tragus & earlobe activation: precisely 1 tap per second (1000ms = 1 Hz)
-    const tapIntervalMs = activeMode === 'ears' ? 1000 : 1050;
+    const tapIntervalMs = activePracticeMode === 'ears' ? 1000 : 1050;
 
     const tapInterval = setInterval(() => {
-      if (activeMode === 'shoulders') {
+      if (activePracticeMode === 'shoulders') {
         setTapSide(prev => {
           const next = prev === 'left' ? 'right' : 'left';
           playSoftTap(next);
@@ -169,7 +191,7 @@ export function Day2Engine() {
           }
           return next;
         });
-      } else if (activeMode === 'ears') {
+      } else if (activePracticeMode === 'ears') {
         // Exactly 1 tap per second on tragus and earlobes
         setEarsTapPulse(true);
         setTimeout(() => setEarsTapPulse(false), 240);
@@ -189,7 +211,7 @@ export function Day2Engine() {
     }, tapIntervalMs);
 
     return () => clearInterval(tapInterval);
-  }, [step, isBStageActive, currentBStage, selectedTapModeStage4]);
+  }, [step, isBStageActive, activePracticeMode]);
 
   // Breathing cycle: smooth Inhale (4s) -> Exhale (6s) without second inhale (без довдоха)
   useEffect(() => {
@@ -237,7 +259,7 @@ export function Day2Engine() {
       practiceType: 'course',
       practiceCategory: 'B',
       courseDay: 2,
-      duration: 330, // ~5.5 mins total
+      duration: 450, // 390s practice + 60s silence
       exposureDuration: 60,
       anxietyBefore: preAnxiety,
       anxietyAfter: postAnxiety,
@@ -294,24 +316,43 @@ export function Day2Engine() {
               exit={{ opacity: 0, y: -15 }}
               className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full py-4"
             >
-              <div className="text-[#38bdf8] text-xs uppercase tracking-widest font-medium mb-3">
-                Инструкция • День 2
+              <div className="text-xs text-white/40 uppercase tracking-widest mb-2 font-mono">
+                День 2 • План на сегодня
               </div>
-              <h2 className="text-2xl font-light text-white mb-4 leading-snug">
-                Практика «Ритм + вибрация»
+
+              <h2 className="text-2xl font-light text-white mb-3 leading-snug">
+                Телесный ритм и дыхание с голосом
               </h2>
-              <div className="bg-white/5 border border-white/10 rounded-3xl p-5 mb-8 text-left leading-relaxed text-white/80 text-sm flex flex-col gap-3">
-                <p className="text-white/60 mb-1">
-                  Сегодня осваиваем снятие накопленного напряжения через телесный ритм в трёх ключевых зонах тела и соединяем его с дыханием и голосом:
-                </p>
-                <p>1. <strong>Уши:</strong> легкие ритмичные постукивания подушечками пальцев для мягкой стимуляции блуждающего нерва (60 сек).</p>
-                <p>2. <strong>Плечи:</strong> поочерёдные перекрёстные постукивания пальцами («прикосновения бабочки») для билатеральной регуляции (60 сек).</p>
-                <p>3. <strong>Верхняя часть грудины:</strong> мягкие постукивания ладонью чуть ниже ямки на шее для снятия накопленного напряжения (60 сек).</p>
-                <p>4. <strong>Закрепление:</strong> выполнение упражнения + выдох со звуком «мммм» (75 сек) и 1 минута тишины.</p>
+
+              <p className="text-white/60 text-sm leading-relaxed mb-6">
+                Сегодня осваиваем снятие накопленного напряжения через ритм в трёх ключевых зонах тела и соединяем его с дыханием и голосом:
+              </p>
+
+              <div className="mb-6 text-left">
+                <div className="text-xs text-white/40 mb-3 uppercase tracking-wider font-medium">Шаги практики:</div>
+                <ul className="space-y-2.5 text-sm text-white/70">
+                  <li className="flex items-start gap-2.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#38bdf8] mt-2 flex-shrink-0" />
+                    <span><strong className="text-white font-medium">Уши (60 сек):</strong> легкие ритмичные постукивания подушечками пальцев для стимуляции блуждающего нерва</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#38bdf8] mt-2 flex-shrink-0" />
+                    <span><strong className="text-white font-medium">Плечи (60 сек):</strong> поочерёдные перекрёстные постукивания («бабочка») для билатеральной регуляции</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#38bdf8] mt-2 flex-shrink-0" />
+                    <span><strong className="text-white font-medium">Верх грудины (60 сек):</strong> мягкие постукивания ладонью чуть ниже ямки на шее для снятия зажима</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#38bdf8] mt-2 flex-shrink-0" />
+                    <span><strong className="text-white font-medium">Закрепление (210 сек):</strong> все 3 части последовательно единым прогоном с выдохом «мммм» и 1 минута тишины</span>
+                  </li>
+                </ul>
               </div>
+
               <button
                 onClick={() => setStep('pre-thought')}
-                className="w-full bg-gradient-to-r from-blue-600 to-[#38bdf8] text-white py-4 rounded-3xl font-medium text-lg flex items-center justify-center shadow-[0_0_25px_rgba(56,189,248,0.3)] hover:opacity-95 active:scale-[0.99] transition-all"
+                className="w-full bg-blue-600/30 border border-blue-500/40 hover:bg-blue-600/40 text-white py-4 rounded-3xl font-medium text-lg flex items-center justify-center transition-all shadow-[0_0_20px_rgba(56,189,248,0.2)]"
               >
                 Далее
               </button>
@@ -425,7 +466,7 @@ export function Day2Engine() {
                 Шаг 3 из 3 • Оценка
               </div>
               <h2 className="text-2xl font-light text-white mb-2">
-                Оцените силу тревожности прямо сейчас
+                Оцените силу тревожности и телесного напряжения прямо сейчас
               </h2>
               <p className="text-white/60 text-xs mb-8">
                 0 — полное спокойствие, 10 — максимальная тревожность
@@ -491,43 +532,58 @@ export function Day2Engine() {
                 <TappingIllustration mode="chest" />
               )}
               {currentBStage === 4 && (
-                <div className="my-2">
-                  <div className="flex gap-1.5 mb-1.5">
-                    <button
-                      type="button"
-                      onClick={() => setSelectedTapModeStage4('ears')}
-                      className={`flex-1 py-1.5 px-2 rounded-xl text-[11px] font-medium transition-all ${
-                        selectedTapModeStage4 === 'ears'
-                          ? 'bg-sky-500/25 border border-sky-400 text-sky-200 shadow-[0_0_12px_rgba(56,189,248,0.25)]'
-                          : 'bg-white/5 border border-white/10 text-white/50 hover:bg-white/10'
-                      }`}
-                    >
-                      Уши (козелок)
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setSelectedTapModeStage4('shoulders')}
-                      className={`flex-1 py-1.5 px-2 rounded-xl text-[11px] font-medium transition-all ${
-                        selectedTapModeStage4 === 'shoulders'
-                          ? 'bg-sky-500/25 border border-sky-400 text-sky-200 shadow-[0_0_12px_rgba(56,189,248,0.25)]'
-                          : 'bg-white/5 border border-white/10 text-white/50 hover:bg-white/10'
-                      }`}
-                    >
-                      Плечи («бабочка»)
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setSelectedTapModeStage4('chest')}
-                      className={`flex-1 py-1.5 px-2 rounded-xl text-[11px] font-medium transition-all ${
-                        selectedTapModeStage4 === 'chest'
-                          ? 'bg-sky-500/25 border border-sky-400 text-sky-200 shadow-[0_0_12px_rgba(56,189,248,0.25)]'
-                          : 'bg-white/5 border border-white/10 text-white/50 hover:bg-white/10'
-                      }`}
-                    >
-                      Верх грудины
-                    </button>
+                <div className="my-3 grid grid-cols-3 gap-2">
+                  <div className="flex flex-col items-center">
+                    <div className="w-full rounded-xl overflow-hidden border border-white/10 shadow-sm aspect-[4/3] bg-black/40">
+                      <img 
+                        src="/ear_tapping.webp?v=7" 
+                        alt="Уши" 
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          const img = e.currentTarget as HTMLImageElement;
+                          if (!img.src.endsWith('ear_tapping.jpg?v=7')) {
+                            img.src = '/ear_tapping.jpg?v=7';
+                          }
+                        }}
+                      />
+                    </div>
+                    <span className="text-[11px] text-white/80 mt-1.5 text-center font-medium">1. Уши</span>
+                    <span className="text-[10px] text-[#38bdf8] font-mono">70 сек</span>
                   </div>
-                  <TappingIllustration mode={selectedTapModeStage4} />
+                  <div className="flex flex-col items-center">
+                    <div className="w-full rounded-xl overflow-hidden border border-white/10 shadow-sm aspect-[4/3] bg-black/40">
+                      <img 
+                        src="/butterfly_hug_front.webp" 
+                        alt="Плечи" 
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          const img = e.currentTarget as HTMLImageElement;
+                          if (!img.src.endsWith('butterfly_hug_front.jpg')) {
+                            img.src = '/butterfly_hug_front.jpg';
+                          }
+                        }}
+                      />
+                    </div>
+                    <span className="text-[11px] text-white/80 mt-1.5 text-center font-medium">2. Плечи</span>
+                    <span className="text-[10px] text-[#38bdf8] font-mono">70 сек</span>
+                  </div>
+                  <div className="flex flex-col items-center">
+                    <div className="w-full rounded-xl overflow-hidden border border-white/10 shadow-sm aspect-[4/3] bg-black/40">
+                      <img 
+                        src="/chest_hand.webp?v=2" 
+                        alt="Грудина" 
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          const img = e.currentTarget as HTMLImageElement;
+                          if (!img.src.includes('chest_hand.jpg')) {
+                            img.src = '/chest_hand.jpg?v=2';
+                          }
+                        }}
+                      />
+                    </div>
+                    <span className="text-[11px] text-white/80 mt-1.5 text-center font-medium">3. Грудина</span>
+                    <span className="text-[10px] text-[#38bdf8] font-mono">70 сек</span>
+                  </div>
                 </div>
               )}
 
@@ -567,9 +623,25 @@ export function Day2Engine() {
               className="w-full flex flex-col items-center justify-between flex-1 py-4 min-h-0 relative"
             >
               {/* Header Timer matching screenshot */}
-              <div className="flex justify-between w-full max-w-sm items-center text-xs text-white/50 font-mono">
-                <span>Элемент {currentBStage} из 4</span>
-                <span>00:{bStageTimeLeft.toString().padStart(2, '0')}</span>
+              <div className="w-full max-w-sm flex flex-col gap-1.5">
+                <div className="flex justify-between w-full items-center text-xs text-white/50 font-mono">
+                  {currentBStage === 4 ? (
+                    <span>Закрепление • Часть {stage4PartIndex} из 3 ({stage4PartName})</span>
+                  ) : (
+                    <span>Элемент {currentBStage} из 4 • {B_STAGES[currentBStage].title}</span>
+                  )}
+                  <span>
+                    {Math.floor(bStageTimeLeft / 60)}:{(bStageTimeLeft % 60).toString().padStart(2, '0')}
+                  </span>
+                </div>
+
+                {currentBStage === 4 && (
+                  <div className="w-full flex items-center gap-1.5">
+                    <div className={`h-1 flex-1 rounded-full transition-all duration-300 ${stage4PartIndex === 1 ? 'bg-[#38bdf8] shadow-[0_0_8px_rgba(56,189,248,0.8)]' : stage4PartIndex > 1 ? 'bg-[#38bdf8]/40' : 'bg-white/10'}`} />
+                    <div className={`h-1 flex-1 rounded-full transition-all duration-300 ${stage4PartIndex === 2 ? 'bg-[#38bdf8] shadow-[0_0_8px_rgba(56,189,248,0.8)]' : stage4PartIndex > 2 ? 'bg-[#38bdf8]/40' : 'bg-white/10'}`} />
+                    <div className={`h-1 flex-1 rounded-full transition-all duration-300 ${stage4PartIndex === 3 ? 'bg-[#38bdf8] shadow-[0_0_8px_rgba(56,189,248,0.8)]' : 'bg-white/10'}`} />
+                  </div>
+                )}
               </div>
 
               {/* Central Breathing Aura & Text with Tapping Indicator Circles */}
@@ -596,8 +668,8 @@ export function Day2Engine() {
                   className="absolute w-[66vw] h-[66vw] max-w-[380px] max-h-[380px] rounded-full border border-sky-400/25 pointer-events-none"
                 />
 
-                {/* Stage 1 & Ears mode: Two blue circles for left and right ear signalling every second */}
-                {(currentBStage === 1 || (currentBStage === 4 && selectedTapModeStage4 === 'ears')) && (
+                {/* Ears mode: Two blue circles for left and right ear signalling every second */}
+                {activePracticeMode === 'ears' && (
                   <div className="flex gap-8 sm:gap-14 z-20 items-center justify-center mb-6">
                     {/* Left ear */}
                     <motion.div
@@ -639,8 +711,8 @@ export function Day2Engine() {
                   </div>
                 )}
 
-                {/* Stage 2 & Shoulders mode: Two blue circles for left and right shoulder alternating */}
-                {(currentBStage === 2 || (currentBStage === 4 && selectedTapModeStage4 === 'shoulders')) && (
+                {/* Shoulders mode: Two blue circles for left and right shoulder alternating */}
+                {activePracticeMode === 'shoulders' && (
                   <div className="flex gap-8 sm:gap-14 z-20 items-center justify-center mb-6">
                     {/* Left shoulder */}
                     <motion.div
@@ -682,8 +754,8 @@ export function Day2Engine() {
                   </div>
                 )}
 
-                {/* Stage 3 & Chest mode: Upper Sternum tapping circle */}
-                {(currentBStage === 3 || (currentBStage === 4 && selectedTapModeStage4 === 'chest')) && (
+                {/* Chest mode: Upper Sternum tapping circle */}
+                {activePracticeMode === 'chest' && (
                   <div className="flex z-20 items-center justify-center mb-6">
                     <motion.div
                       animate={{
@@ -715,47 +787,16 @@ export function Day2Engine() {
                       </span>
                     ))}
                   </div>
+                  {currentBStage === 4 && (
+                    <div className="text-xs font-medium tracking-wider uppercase text-sky-200/90 mt-2">
+                      {phaseB === 'inhale' ? 'Вдох носом (4 сек)' : 'Выдох со звуком «мммм» (6 сек)'}
+                    </div>
+                  )}
                 </div>
               </div>
 
-              {/* Bottom controls: minimal switcher for stage 4 + Play/Pause button matching screenshot */}
+              {/* Bottom controls: Play/Pause button */}
               <div className="flex flex-col items-center gap-3 z-30">
-                {currentBStage === 4 && (
-                  <div className="flex items-center justify-center gap-1.5 p-1 rounded-2xl bg-white/5 border border-white/10">
-                    <button
-                      onClick={() => setSelectedTapModeStage4('ears')}
-                      className={`px-3 py-1 rounded-xl text-xs font-medium transition-all ${
-                        selectedTapModeStage4 === 'ears'
-                          ? 'bg-[#38bdf8] text-[#050B14]'
-                          : 'text-white/60 hover:text-white'
-                      }`}
-                    >
-                      По ушам
-                    </button>
-                    <button
-                      onClick={() => setSelectedTapModeStage4('shoulders')}
-                      className={`px-3 py-1 rounded-xl text-xs font-medium transition-all ${
-                        selectedTapModeStage4 === 'shoulders'
-                          ? 'bg-[#38bdf8] text-[#050B14]'
-                          : 'text-white/60 hover:text-white'
-                      }`}
-                    >
-                      По плечам
-                    </button>
-                    <button
-                      onClick={() => setSelectedTapModeStage4('chest')}
-                      className={`px-3 py-1 rounded-xl text-xs font-medium transition-all ${
-                        selectedTapModeStage4 === 'chest'
-                          ? 'bg-[#38bdf8] text-[#050B14]'
-                          : 'text-white/60 hover:text-white'
-                      }`}
-                    >
-                      По грудине
-                    </button>
-                  </div>
-                )}
-
-                {/* Play / Pause Toggle Button */}
                 <button
                   onClick={() => setIsBStageActive(!isBStageActive)}
                   className="p-4 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors z-20 shadow-lg border border-white/10"
@@ -879,7 +920,7 @@ export function Day2Engine() {
                 </div>
               </div>
 
-              <div className="bg-white/5 border border-white/10 rounded-3xl p-5 mb-8 text-white/80 text-sm leading-relaxed text-left space-y-2">
+              <div className="mb-8 text-white/70 text-sm sm:text-base leading-relaxed text-center space-y-2">
                 {postAnxiety < preAnxiety && (
                   <p>Вы освоили телесный ритм в трёх зонах (уши, плечи, грудина) и соединили его с вибрацией голоса. Заметьте возникшее чувство заземления и опоры в теле.</p>
                 )}

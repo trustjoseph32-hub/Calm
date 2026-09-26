@@ -329,11 +329,9 @@ export function Day3Engine() {
                 Практика завершена
               </h2>
 
-              <div className="bg-white/5 rounded-2xl p-6 mb-8 w-full border border-white/10 text-left">
-                <p className="text-slate-300 leading-relaxed text-center">
-                  Заметили, как тревожная мысль стала более тусклой и далёкой? Так работает наша биология. Рабочая память не может одновременно ярко визуализировать страх и следить за внешним стимулом.
-                </p>
-              </div>
+              <p className="text-slate-300/80 text-sm sm:text-base leading-relaxed text-center mb-8 max-w-sm mx-auto">
+                Заметили, как тревожная мысль стала более тусклой и далёкой? Так работает наша биология. Рабочая память не может одновременно ярко визуализировать страх и следить за внешним стимулом.
+              </p>
 
               <button
                 onClick={handleComplete}

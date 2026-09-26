@@ -248,7 +248,7 @@ export function Day1Engine() {
       <header className="px-4 py-5 w-full flex items-center justify-between relative z-20 sm:max-w-xl mx-auto">
         <div className="flex flex-col">
           <span className="text-xs text-[#38bdf8] font-medium tracking-wider uppercase">День 1 из 14</span>
-          <span className="text-sm text-white/60">Освоение «Внимание + дыхание»</span>
+          <span className="text-sm text-white/60">Освоение техники «Внимание + дыхание»</span>
         </div>
         <button 
           onClick={() => navigate('/course')}
@@ -270,19 +270,45 @@ export function Day1Engine() {
               exit={{ opacity: 0, y: -15 }}
               className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full py-4"
             >
-              <div className="text-[#38bdf8] text-xs uppercase tracking-widest font-medium mb-2">Инструкция</div>
-              <h1 className="text-3xl font-light text-white mb-4">Обучение элементам</h1>
-              <div className="bg-white/5 border border-white/10 rounded-3xl p-6 mb-8 text-left leading-relaxed text-white/80 text-sm flex flex-col gap-3">
-                <p>1. <strong>Дыхание:</strong> физиологический вздох — два вдоха носом и долгий плавный выдох через рот.</p>
-                <p>2. <strong>Взгляд:</strong> непрерывное слежение глазами за точкой от края до края.</p>
-                <p>3. <strong>Тело:</strong> мягкое сжатие ладоней на вдохе и полный сброс мышечного зажима на выдохе.</p>
-                <p>4. <strong>Закрепление:</strong> соединяем все три элемента в общую практику на 2.5 минуты + 1 минута тишины.</p>
+              <div className="text-xs text-white/40 uppercase tracking-widest mb-2 font-mono">
+                День 1 • План на сегодня
               </div>
+
+              <h2 className="text-2xl font-light text-white mb-3 leading-snug">
+                Освоение техники «Внимание + дыхание»
+              </h2>
+
+              <p className="text-white/60 text-sm leading-relaxed mb-6">
+                Сегодня осваиваем базовую синхронизацию взгляда, дыхания и мышечного тонуса:
+              </p>
+
+              <div className="mb-6 text-left">
+                <div className="text-xs text-white/40 mb-3 uppercase tracking-wider font-medium">Шаги практики:</div>
+                <ul className="space-y-2.5 text-sm text-white/70">
+                  <li className="flex items-start gap-2.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#38bdf8] mt-2 flex-shrink-0" />
+                    <span><strong className="text-white font-medium">Дыхание:</strong> физиологический вздох — два вдоха носом и долгий плавный выдох через рот</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#38bdf8] mt-2 flex-shrink-0" />
+                    <span><strong className="text-white font-medium">Взгляд:</strong> непрерывное слежение глазами за движущейся точкой от края до края</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#38bdf8] mt-2 flex-shrink-0" />
+                    <span><strong className="text-white font-medium">Тело:</strong> мягкое сжатие ладоней на вдохе и полный сброс мышечного зажима на выдохе</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#38bdf8] mt-2 flex-shrink-0" />
+                    <span><strong className="text-white font-medium">Закрепление:</strong> соединяем все элементы в общую практику на 2.5 минуты и 1 минута тишины</span>
+                  </li>
+                </ul>
+              </div>
+
               <button
                 onClick={() => setStep('pre-thought')}
-                className="w-full bg-gradient-to-r from-blue-600 to-[#38bdf8] text-white py-4 rounded-3xl font-medium text-lg flex items-center justify-center shadow-[0_0_25px_rgba(56,189,248,0.3)] hover:opacity-95 active:scale-[0.99] transition-all"
+                className="w-full bg-blue-600/30 border border-blue-500/40 hover:bg-blue-600/40 text-white py-4 rounded-3xl font-medium text-lg flex items-center justify-center transition-all shadow-[0_0_20px_rgba(56,189,248,0.2)]"
               >
-                Дальше
+                Далее
               </button>
             </motion.div>
           )}
@@ -392,7 +418,7 @@ export function Day1Engine() {
             >
               <div className="text-xs text-white/40 uppercase tracking-widest mb-2 font-mono">Шаг 3 из 3 • Оценка</div>
               <h2 className="text-2xl font-light text-white mb-2">
-                Оцените силу тревожности прямо сейчас
+                Оцените силу тревожности и телесного напряжения прямо сейчас
               </h2>
               <p className="text-white/60 text-xs mb-8">
                 0 — полное спокойствие, 10 — максимальная тревожность
@@ -646,7 +672,7 @@ export function Day1Engine() {
             >
               <h2 className="text-3xl font-light text-white mb-4">Теперь остановитесь</h2>
               
-              <div className="bg-white/5 border border-white/10 rounded-3xl p-6 mb-8 text-white/80 text-sm leading-relaxed">
+              <div className="mb-8 text-white/70 text-sm leading-relaxed max-w-sm mx-auto">
                 Обратите внимание на ощущения {getBodyLocationInPrepositional(selectedLocation, customLocation)}.
                 <br /><br />
                 Ничего специально не меняйте. Просто побудьте с этим ощущением.
@@ -717,7 +743,7 @@ export function Day1Engine() {
               </p>
 
               {!isRelocated ? (
-                <div className="bg-white/5 border border-white/10 rounded-3xl p-5 mb-6 text-center">
+                <div className="mb-6 text-center py-2">
                   <div className="text-xs text-white/40 uppercase tracking-wide mb-1">Исходный участок</div>
                   <div className="text-2xl font-light text-[#38bdf8] mb-4">
                     {selectedLocation === 'Другое' && customLocation ? customLocation : selectedLocation}
@@ -822,7 +848,7 @@ export function Day1Engine() {
                 </div>
               </div>
 
-              <div className="bg-white/5 border border-white/10 rounded-3xl p-5 mb-8 text-white/80 text-sm leading-relaxed">
+              <div className="mb-8 text-white/70 text-sm sm:text-base leading-relaxed text-center">
                 {postAnxiety < preAnxiety && (
                   <span>Просто заметьте эту разницу.</span>
                 )}
